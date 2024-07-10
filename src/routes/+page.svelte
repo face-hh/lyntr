@@ -33,8 +33,8 @@
 <div>
 	{#if loading}
 		<LoadingSpinner />
-    <!-- {:else if noAccount}
-        <AccountCreator /> -->
+    {:else if noAccount}
+        <AccountCreator />
 	{:else if !session}
 		<Auth />
 	{:else}
