@@ -1,9 +1,10 @@
 <script lang="ts">
 	export let imageSrc = 'logo.svg'; // Replace with your image path
 	export let size = 'w-48 h-48'; // Default size using Tailwind classes
+	export let occupy_screen = true;
 </script>
 
-<div class="flex h-screen animate-pulse">
+<div class="flex {occupy_screen ? 'h-screen' : 'h-full'} animate-pulse">
 	<div class="m-auto">
 		<img src={imageSrc} alt="Loading" class={`${size} object-contain`} />
 	</div>
