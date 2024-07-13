@@ -1,8 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import type { AuthSession } from '@supabase/supabase-js';
-	import { supabase } from '@/supabase';
-
 	import { Label } from '$lib/components/ui/label';
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
@@ -12,53 +8,81 @@
 	import Navigation from './Navigation.svelte';
 	import PostButton from './PostButton.svelte';
 	import ProfileButton from './ProfileButton.svelte';
+	import { setMode } from 'mode-watcher';
+	import { onMount } from 'svelte';
+	import LoadingSpinner from './LoadingSpinner.svelte';
+
+	export let username: string;
+	export let handle: string;
+	export let created_at: string;
+	export let iq: number;
+	export let profile_picture: string;
 
 	let currentTab = 'foryou';
 	let comment: string;
+	let loadingFeed = true;
 
-	export let session: AuthSession;
+	interface FeedItem {
+		content: string;
+		repostCount: number;
+		viewsCount: number;
+		likeCount: number;
+		commentCount: number;
+		username: string;
+		handle: string;
+		iq: number;
+		created_at: number;
+		verified: boolean;
+		likedByUser: boolean;
+		repostedByUser: boolean;
+		id: string;
+	}
 
-	let loading = false;
-	let username: string | null = null;
-	let handle: string | null = null;
-	let avatarUrl: string | null = null;
+	let feed: FeedItem[] = [];
 
-	onMount(() => {
-		getProfile();
-	});
+	async function fetchFeed() {
+		const response = await fetch('api/feed', { method: 'GET' });
 
-	const getProfile = async () => {
-		try {
-			loading = true;
-			const { user } = session;
+		if (response.status !== 200) alert('Error generating feed! Please refresh the page');
 
-			const response = await fetch('/api/profile?id=' + user.id);
+		const res = await response.json();
 
-			if (response.status == 200) {
-				const res = await response.json();
-
-				username = res.username;
-				handle = res.handle;
-				avatarUrl = res.avatar_url;
-			} else throw "An error occured while gathering information about your account. Emptying your cookies might help.";
-
-		} catch (error) {
-			if (error instanceof Error) {
-				alert(error.message);
-			}
-		} finally {
-			loading = false;
+		for (const post of res) {
+			feed = [
+				...feed,
+				{
+					content: post.content,
+					repostCount: post.repostCount,
+					likeCount: post.likeCount,
+					viewsCount: post.views,
+					commentCount: post.commentCount,
+					username: post.username,
+					created_at: post.createdAt,
+					handle: post.handle,
+					iq: post.iq,
+					verified: post.verified,
+					likedByUser: post.likedByUser,
+					repostedByUser: post.repostedByUser,
+					id: post.id
+				}
+			];
 		}
-	};
+
+		loadingFeed = false
+	}
+	onMount(async () => {
+		fetchFeed();
+	});
 </script>
 
 <div class="flex h-screen justify-center gap-4 overflow-hidden">
 	<div class="static ml-5 mt-5 inline-flex w-auto flex-col items-start gap-2">
 		<img class="mb-5 size-20 cursor-pointer" src="logo.svg" alt="Logo" />
-
+		<button on:click={() => setMode('light')}>Set Light Mode</button>
+		<button on:click={() => setMode('dark')}>Set Dark Mode</button>
 		<Navigation />
 		<PostButton />
-		<ProfileButton src="https://github.com/face-hh.png" name="Face" handle="@facedevstuff" />
+		<ProfileButton src={profile_picture} name={username} handle="@{handle}" />
 	</div>
 	<Separator orientation="vertical" />
 
@@ -82,48 +106,27 @@
 
 		<!-- Feed -->
 		<div class="no-scrollbar flex flex-grow flex-col gap-4 overflow-y-auto">
-			<Lynt
-				username="Face"
-				handle="facedevstuff"
-				postedAt={new Date(1468959781804)}
-				verified={true}
-			/>
-			<Lynt
-				username="That one LONG username. haha"
-				handle="thatonelongusernamereal"
-				postedAt={new Date(1468959781804)}
-				verified={false}
-			/>
-			<Lynt username="." handle="a" postedAt={new Date(1468959781804)} verified={false} />
-			<Lynt username="ABC news" handle="abc" postedAt={new Date(1468959781804)} verified={true} />
-			<Lynt
-				username="Face"
-				handle="facedevstuff"
-				postedAt={new Date(1468959781804)}
-				verified={true}
-			/>
-			<Lynt
-				username="That one LONG username."
-				handle="thatonelongusername"
-				postedAt={new Date(1468959781804)}
-				verified={false}
-			/>
-			<Lynt username="." handle="a" postedAt={new Date(1468959781804)} verified={false} />
-			<Lynt username="ABC news" handle="abc" postedAt={new Date(1468959781804)} verified={true} />
-			<Lynt
-				username="Face"
-				handle="facedevstuff"
-				postedAt={new Date(1468959781804)}
-				verified={true}
-			/>
-			<Lynt
-				username="That one LONG username."
-				handle="thatonelongusername"
-				postedAt={new Date(1468959781804)}
-				verified={false}
-			/>
-			<Lynt username="." handle="a" postedAt={new Date(1468959781804)} verified={false} />
-			<Lynt username="ABC news" handle="abc" postedAt={new Date(1468959781804)} verified={true} />
+			{#if loadingFeed}
+				<LoadingSpinner />
+			{:else}
+				{#each feed as { id, content, username, handle, iq, verified, created_at, repostCount, commentCount, viewsCount, likeCount, likedByUser, repostedByUser }}
+					<Lynt
+						{id}
+						{username}
+						{handle}
+						postedAt={new Date(created_at)}
+						{verified}
+						{content}
+						{iq}
+						{repostCount}
+						{commentCount}
+						{viewsCount}
+						{likeCount}
+						{likedByUser}
+						{repostedByUser}
+					/>
+				{/each}
+			{/if}
 			<div class="mt-24"></div>
 		</div>
 	</div>
@@ -135,6 +138,8 @@
 			handle="facedevstuff"
 			postedAt={new Date(1468959781804)}
 			verified={true}
+			content={'placeholder'}
+			iq={43}
 		/>
 
 		<div class="inline-flex w-full items-center gap-2 rounded-xl bg-border p-3">
@@ -159,36 +164,48 @@
 				handle="facedevstuff"
 				postedAt={new Date(1468959781804)}
 				verified={true}
+				content={'placeholder'}
+				iq={4}
 			/>
 			<Lynt
 				username="Face"
 				handle="facedevstuff"
 				postedAt={new Date(1468959781804)}
 				verified={true}
+				content={'placeholder'}
+				iq={4}
 			/>
 			<Lynt
 				username="Face"
 				handle="facedevstuff"
 				postedAt={new Date(1468959781804)}
 				verified={true}
+				content={'placeholder'}
+				iq={4}
 			/>
 			<Lynt
 				username="Face"
 				handle="facedevstuff"
 				postedAt={new Date(1468959781804)}
 				verified={true}
+				content={'placeholder'}
+				iq={4}
 			/>
 			<Lynt
 				username="Face"
 				handle="facedevstuff"
 				postedAt={new Date(1468959781804)}
 				verified={true}
+				content={'placeholder'}
+				iq={4}
 			/>
 			<Lynt
 				username="Face"
 				handle="facedevstuff"
 				postedAt={new Date(1468959781804)}
 				verified={true}
+				content={'placeholder'}
+				iq={4}
 			/>
 		</div>
 	</div>

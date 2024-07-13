@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button } from '@/components/ui/button';
-	import type { ComponentType } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 	import { writable } from 'svelte/store';
 
 	import CatQuestion from './Questions/CatQuestion.svelte';
@@ -23,10 +23,14 @@
 	import Kubernete from './Questions/Kubernete.svelte';
 	import ReactionImage from './Questions/ReactionImage.svelte';
 	import GimmickAccount from './Questions/GimmickAccount.svelte';
-	import LoadingSpinner from './LoadingSpinner.svelte';
 
 	const isButtonDisabled = writable(false);
 	const submittedValue = writable('');
+
+	const dispatch = createEventDispatcher();
+    $: if (currentQuestion === questions.length) {
+        dispatch('questionsCompleted', true);
+    }
 
 	const components = {
 		AGI,
@@ -57,25 +61,25 @@
 
 	let questions: Question[] = [
 		{ id: 'AGI' },
-		{ id: 'CatQuestion' },
-		{ id: 'ShortFormContent' },
-		{ id: 'Chemistry' },
-		{ id: 'GPT' },
-		{ id: 'MathQuestion' },
-		{ id: 'ContentCreators' },
-		{ id: 'MathProblem' },
-		{ id: 'SequenceSymbol' },
-		{ id: 'SequenceNumber' },
-		{ id: 'Dexerto' },
-		{ id: 'MathProblemComplex' },
-		{ id: 'TypingTest' },
-		{ id: 'AudioRick' },
-		{ id: 'Degree' },
 		{ id: 'AudioAgeOfWar' },
+		{ id: 'AudioRick' },
 		{ id: 'British' },
+		{ id: 'CatQuestion' },
+		{ id: 'Chemistry' },
+		{ id: 'ContentCreators' },
+		{ id: 'Degree' },
+		{ id: 'Dexerto' },
+		{ id: 'GimmickAccount' },
+		{ id: 'GPT' },
 		{ id: 'Kubernete' },
+		{ id: 'MathProblem' },
+		{ id: 'MathProblemComplex' },
+		{ id: 'MathQuestion' },
 		{ id: 'ReactionImage' },
-		{ id: 'GimmickAccount' }
+		{ id: 'SequenceNumber' },
+		{ id: 'SequenceSymbol' },
+		{ id: 'ShortFormContent' },
+		{ id: 'TypingTest' }
 	];
 
 	function shuffleArray<T>(array: T[]): T[] {
@@ -88,56 +92,49 @@
 
 	const saved_questions = localStorage.getItem('iq_questions');
 	const saved_question = localStorage.getItem('current_question');
-	const saved_iq = localStorage.getItem('iq');
 	let currentQuestion = 0;
-	let iq = 90;
-    let loading = false;
 
 	if (saved_questions) {
 		questions = JSON.parse(saved_questions);
 	} else {
-		//questions = shuffleArray(questions);
+		questions = shuffleArray(questions);
 	}
 
 	if (saved_question) currentQuestion = parseInt(saved_question);
-	if (saved_iq) iq = parseInt(saved_iq);
 
 	localStorage.setItem('iq_questions', JSON.stringify(questions));
+
+	const props = {
+		isButtonDisabled,
+		submittedValue
+	} as const;
 </script>
 
 <div class="flex h-full flex-col gap-2">
 	<span class="self-center text-4xl font-bold">IQ test</span>
-	{#if loading}
-		<LoadingSpinner occupy_screen={false} />
-	{:else}
-		{#if currentQuestion < questions.length}
-			<svelte:component
-				this={components[questions[currentQuestion].id]}
-				{isButtonDisabled}
-				{submittedValue}
-			/>
-		{:else}
-			<div>All questions answered!</div>
-		{/if}
+	{#if currentQuestion < questions.length}
+		<svelte:component this={components[questions[currentQuestion].id]} {...props} />
 
 		<Button
 			on:click={async () => {
-				loading = true;
-                
-                const response = await fetch(`/question?q=${questions[currentQuestion].id}&answer=${submittedValue}`);
-				const res = await response.json()
-
-                loading = false;
-				currentQuestion++;
+				localStorage.setItem(questions[currentQuestion].id, $submittedValue);
+				if (currentQuestion !== 20) currentQuestion++
 				localStorage.setItem('current_question', String(currentQuestion));
+
+				if (currentQuestion === questions.length) {
+                    dispatch('questionsCompleted', true);
+                }
+
+				$submittedValue = '';
 			}}
 			disabled={$isButtonDisabled}>Next</Button
 		>
-
-		<div class="mt-auto flex justify-between">
-			<span>{currentQuestion + 1}/{questions.length}</span>
-			<span class="text-muted-foreground">Last round you got: -5 IQ</span>
-			<span>80 IQ</span>
-		</div>
+	{:else}
+		<div>All questions answered! Please click the continue button.</div>
 	{/if}
+
+	<div class="mt-auto flex justify-between">
+		<span>{Math.min(currentQuestion + 1, 20)}/{questions.length}</span>
+		<span>Results are shown at the end.</span>
+	</div>
 </div>

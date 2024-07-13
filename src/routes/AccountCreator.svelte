@@ -12,8 +12,61 @@
 	let loading = false;
 	let nickname = '';
 	let username = '';
+	let iqReport: string | null;
+	let totalIQ: number | null;
 
-	const handleSubmit = async () => {};
+	let allQuestionsCompleted = localStorage.getItem('current_question') === '20' ? true : false;
+
+	const handleQuestionsCompleted = (event: { detail: boolean }) => {
+		allQuestionsCompleted = event.detail;
+	};
+
+	const handleSubmit = async () => {
+		const questions = JSON.parse(localStorage.getItem('iq_questions') || '[]');
+		let obj: Record<string, string> = {};
+
+		for (const question of questions) {
+			if (question?.id) {
+				obj[question.id] = localStorage.getItem(question.id) || '';
+			}
+		}
+
+		try {
+			const { data, error } = await supabase.auth.getSession();
+
+			if (error) {
+				alert('Error fetching session:' + error.message);
+				location.reload();
+				return;
+			}
+
+			const response = await fetch('/api/profile', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${data.session?.access_token}`
+				},
+				body: JSON.stringify({
+					username: nickname,
+					handle: username,
+					...obj
+				})
+			});
+
+			if (response.status !== 201) {
+				throw new Error('Non-201 status code');
+			}
+
+			const res = await response.json();
+
+			iqReport = res.formattedText;
+			totalIQ = res.totalIQ
+		} catch (error) {
+			alert(
+				'Something went wrong. Please try again. If this persists, please report the issue here: https://github.com/face-hh/lyntr'
+			);
+		}
+	};
 </script>
 
 <div class="flex min-h-screen items-center justify-center">
@@ -52,29 +105,43 @@
 					<p class="text-sm text-muted-foreground">Enter your permanent username (max. 32 char.)</p>
 				</div>
 
+				{#if allQuestionsCompleted}
 				<AlertDialog.Root>
 					<AlertDialog.Trigger asChild let:builder>
-						<Button builders={[builder]} on:click={handleSubmit} disabled={loading}
-							>{loading ? 'Loading' : "Let's go!"}</Button
-						>
+						<Button builders={[builder]} on:click={handleSubmit} disabled={!nickname || !username}>
+							Let's go!
+						</Button>
 					</AlertDialog.Trigger>
 					<AlertDialog.Content>
 						<AlertDialog.Header>
-							<AlertDialog.Title>Check your email!</AlertDialog.Title>
+							<AlertDialog.Title class="text-2xl font-bold mb-2">Welcome to Lyntr!</AlertDialog.Title>
 							<AlertDialog.Description>
-								A one-time-password have been sent to your email.
+								<div class="space-y-4">
+									<p>
+										Make sure to read the <a href="tos">Terms of Service</a> and
+										<a href="privacy">Privacy Policy</a>.
+									</p>
+									<div>
+										<h3 class="font-semibold mb-2">IQ Report:</h3>
+										<pre class="whitespace-pre-wrap text-sm">{iqReport}</pre>
+									</div>
+									<p class="font-semibold text-right">Total IQ: {totalIQ}</p>
+								</div>
 							</AlertDialog.Description>
 						</AlertDialog.Header>
 						<AlertDialog.Footer>
-							<AlertDialog.Action>Continue</AlertDialog.Action>
+							<AlertDialog.Action on:click={() => location.reload()} >
+								Continue
+							</AlertDialog.Action>
 						</AlertDialog.Footer>
 					</AlertDialog.Content>
 				</AlertDialog.Root>
+			{/if}
 			</div>
 		</div>
 		<Separator orientation="vertical" class="h-auto" />
-		<div class="min-w-[400px] border-2 border-primary rounded-md p-4">
-			<IQTest />
+		<div class="min-w-[400px] max-w-[400px] rounded-md border-2 border-primary p-4">
+			<IQTest on:questionsCompleted={handleQuestionsCompleted} />
 		</div>
 	</div>
 </div>

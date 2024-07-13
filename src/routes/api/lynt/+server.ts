@@ -1,41 +1,56 @@
 import { json } from '@sveltejs/kit';
-import type { RequestHandler } from '@sveltejs/kit';
+import type { Cookies, RequestHandler } from '@sveltejs/kit';
 import { verifyAuthJWT } from '@/server/jwt';
 import { db } from '@/server/db';
 import { lynts, likes, users } from '@/server/schema';
 import { eq, sql } from 'drizzle-orm';
+import sanitizeHtml from 'sanitize-html';
+import { Snowflake } from 'nodejs-snowflake';
 
 // POST endpoint to create a new lynt
-export const POST: RequestHandler = async ({ request }: { request: Request }) => {
-    // Verify JWT
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return json({ error: 'Missing or invalid Authorization header' }, { status: 401 });
+export const POST: RequestHandler = async ({ request, cookies }: { request: Request, cookies: Cookies }) => {
+    const authCookie = cookies.get('_TOKEN__DO_NOT_SHARE');
+
+    if (!authCookie) {
+        return json({ error: 'Missing authentication' }, { status: 401 });
     }
 
-    const token = authHeader.split(' ')[1];
     let userId: string;
+
     try {
-        const payload = await verifyAuthJWT(token);
-        userId = payload.userId;
+        const jwtPayload = await verifyAuthJWT(authCookie);
+        
+        userId = jwtPayload.userId
+
+        if (!jwtPayload.userId) {
+            throw new Error('Invalid JWT token');
+        }
     } catch (error) {
-        return json({ error: 'Invalid token' }, { status: 401 });
+        console.error('Authentication error:', error);
+        return json({ error: 'Authentication failed' }, { status: 401 });
     }
 
-    // Parse request body
     const body = await request.json();
     const { content } = body;
-
+    
     if (!content || typeof content !== 'string' || content.length > 280) {
         return json({ error: 'Invalid content' }, { status: 400 });
     }
 
-    // Create new lynt
+    let cleanedContent = sanitizeHtml(content)
+
     try {
+        const lyntId = new Snowflake({
+            custom_epoch: new Date("2024-07-13T11:29:44.526Z").getTime(),
+        });
+
+        const uniqueLyntId = String(lyntId.getUniqueID())
+
         const [newLynt] = await db.insert(lynts).values({
-            id: userId,
-            content,
-            has_link: content.includes('http'),
+            id: uniqueLyntId,
+            user_id: userId,
+            content: cleanedContent,
+            has_link: cleanedContent.includes('http'),
         }).returning();
 
         return json(newLynt, { status: 201 });

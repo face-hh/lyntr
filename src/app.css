@@ -92,3 +92,12 @@
   overflow-wrap: anywhere;
   word-break: break-word;
 }
+
+a {
+  color: hsl(var(--primary));
+  font-weight: bold;
+}
+
+a:hover{
+  text-decoration:underline;
+}
