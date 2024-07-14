@@ -57,8 +57,8 @@
 
 {#if loading}
 	<LoadingSpinner />
-	<!-- {:else if !authenticated}
-	<Auth /> -->
+{:else if !authenticated}
+	<Auth />
 {:else if noAccount}
 	<AccountCreator />
 {:else}

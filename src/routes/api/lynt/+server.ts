@@ -7,7 +7,6 @@ import { eq, sql } from 'drizzle-orm';
 import sanitizeHtml from 'sanitize-html';
 import { Snowflake } from 'nodejs-snowflake';
 
-// POST endpoint to create a new lynt
 export const POST: RequestHandler = async ({ request, cookies }: { request: Request, cookies: Cookies }) => {
     const authCookie = cookies.get('_TOKEN__DO_NOT_SHARE');
 
@@ -22,7 +21,7 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
         
         userId = jwtPayload.userId
 
-        if (!jwtPayload.userId) {
+        if (!userId) {
             throw new Error('Invalid JWT token');
         }
     } catch (error) {
@@ -31,27 +30,45 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
     }
 
     const body = await request.json();
-    const { content } = body;
+    const { content, reposted } = body;
     
     if (!content || typeof content !== 'string' || content.length > 280) {
         return json({ error: 'Invalid content' }, { status: 400 });
     }
 
-    let cleanedContent = sanitizeHtml(content)
+    let cleanedContent = sanitizeHtml(content);
 
     try {
         const lyntId = new Snowflake({
             custom_epoch: new Date("2024-07-13T11:29:44.526Z").getTime(),
         });
 
-        const uniqueLyntId = String(lyntId.getUniqueID())
+        const uniqueLyntId = String(lyntId.getUniqueID());
 
-        const [newLynt] = await db.insert(lynts).values({
+        let lyntValues: any = {
             id: uniqueLyntId,
             user_id: userId,
             content: cleanedContent,
             has_link: cleanedContent.includes('http'),
-        }).returning();
+        };
+
+        // Check if reposted is provided and is a valid lynt ID
+        if (reposted) {
+            const [existingLynt] = await db
+                .select({ id: lynts.id })
+                .from(lynts)
+                .where(eq(lynts.id, reposted))
+                .limit(1);
+
+            if (existingLynt) {
+                lyntValues.reposted = true;
+                lyntValues.parent = reposted;
+            } else {
+                return json({ error: 'Invalid reposted lynt ID' }, { status: 400 });
+            }
+        }
+
+        const [newLynt] = await db.insert(lynts).values(lyntValues).returning();
 
         return json(newLynt, { status: 201 });
     } catch (error) {

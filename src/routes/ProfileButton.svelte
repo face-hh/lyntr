@@ -14,7 +14,7 @@
 		<span class="text-lg font-medium leading-none peer-enabled:cursor-pointer">
 			{name}
 		</span>
-		<span class="text-sm font-medium leading-none text-gray-600">
+		<span class="text-sm font-medium leading-none text-muted-foreground">
 			{handle}
 		</span>
 	</div>

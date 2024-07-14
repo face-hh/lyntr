@@ -28,6 +28,8 @@ export const GET: RequestHandler = async ({ request, cookies }) => {
                 userId: lynts.user_id,
                 createdAt: lynts.created_at,
                 views: lynts.views,
+                reposted: lynts.reposted,
+                parentId: lynts.parent,
                 likeCount: sql<number>`count(distinct ${likes.user_id})`,
                 likedByFollowed: sql<boolean>`exists(
                     select 1 from ${followers}
@@ -57,7 +59,50 @@ export const GET: RequestHandler = async ({ request, cookies }) => {
                 userCreatedAt: users.created_at,
                 username: users.username,
                 iq: users.iq,
-                verified: users.verified
+                verified: users.verified,
+                parentContent: sql<string>`(
+                    select content from ${lynts} as parent
+                    where parent.id = ${lynts.parent}
+                )`,
+                parentUserHandle: sql<string>`(
+                    select handle from ${users} as parent_user
+                    where parent_user.id = (
+                        select user_id from ${lynts} as parent
+                        where parent.id = ${lynts.parent}
+                    )
+                )`,
+                parentUserCreatedAt: sql<string>`(
+                    select created_at from ${users} as parent_user
+                    where parent_user.id = (
+                        select user_id from ${lynts} as parent
+                        where parent.id = ${lynts.parent}
+                    )
+                )`,
+                parentUserUsername: sql<string>`(
+                    select username from ${users} as parent_user
+                    where parent_user.id = (
+                        select user_id from ${lynts} as parent
+                        where parent.id = ${lynts.parent}
+                    )
+                )`,
+                parentUserVerified: sql<boolean>`(
+                    select verified from ${users} as parent_user
+                    where parent_user.id = (
+                        select user_id from ${lynts} as parent
+                        where parent.id = ${lynts.parent}
+                    )
+                )`,
+                parentUserIq: sql<number>`(
+                    select iq from ${users} as parent_user
+                    where parent_user.id = (
+                        select user_id from ${lynts} as parent
+                        where parent.id = ${lynts.parent}
+                    )
+                )`,
+                parentCreatedAt: sql<string>`(
+                    select created_at from ${lynts} as parent
+                    where parent.id = ${lynts.parent}
+                )`
             })
             .from(lynts)
             .leftJoin(likes, eq(likes.lynt_id, lynts.id))

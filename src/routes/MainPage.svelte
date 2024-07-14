@@ -3,6 +3,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import { Reply } from 'lucide-svelte';
+	import { fade } from 'svelte/transition';
 
 	import Lynt from './Lynt.svelte';
 	import Navigation from './Navigation.svelte';
@@ -21,24 +22,40 @@
 	let currentTab = 'foryou';
 	let comment: string;
 	let loadingFeed = true;
+	let lyntOpened: string | null = null;
 
 	interface FeedItem {
+		id: string;
 		content: string;
-		repostCount: number;
-		viewsCount: number;
+		userId: string;
+		createdAt: number;
+		views: number;
+		reposted: boolean;
 		likeCount: number;
+		likedByFollowed: boolean;
+
+		repostCount: number;
 		commentCount: number;
-		username: string;
-		handle: string;
-		iq: number;
-		created_at: number;
-		verified: boolean;
 		likedByUser: boolean;
 		repostedByUser: boolean;
-		id: string;
+		handle: string;
+		userCreatedAt: number;
+		username: string;
+		iq: number;
+		verified: boolean;
+
+		parentId: string | null;
+		parentContent: string | null;
+		parentUserHandle: string | null;
+		parentUserUsername: string | null;
+		parentUserVerified: boolean | null;
+		parentUserIq: number | null;
+		parentCreatedAt: number | null;
+		parentUserCreatedAt: number | null;
 	}
 
 	let feed: FeedItem[] = [];
+	let selectedLynt: FeedItem | null = null;
 
 	async function fetchFeed() {
 		const response = await fetch('api/feed', { method: 'GET' });
@@ -47,29 +64,16 @@
 
 		const res = await response.json();
 
-		for (const post of res) {
-			feed = [
-				...feed,
-				{
-					content: post.content,
-					repostCount: post.repostCount,
-					likeCount: post.likeCount,
-					viewsCount: post.views,
-					commentCount: post.commentCount,
-					username: post.username,
-					created_at: post.createdAt,
-					handle: post.handle,
-					iq: post.iq,
-					verified: post.verified,
-					likedByUser: post.likedByUser,
-					repostedByUser: post.repostedByUser,
-					id: post.id
-				}
-			];
-		}
+		feed = res.map((post: any) => ({ ...post }));
 
-		loadingFeed = false
+		loadingFeed = false;
 	}
+	function handleLyntClick(event: CustomEvent<{ id: string }>) {
+		lyntOpened = event.detail.id;
+		selectedLynt = feed.find((lynt) => lynt.id === lyntOpened) || null;
+		console.log('Clicked Lynt ID:', lyntOpened);
+	}
+
 	onMount(async () => {
 		fetchFeed();
 	});
@@ -109,22 +113,8 @@
 			{#if loadingFeed}
 				<LoadingSpinner />
 			{:else}
-				{#each feed as { id, content, username, handle, iq, verified, created_at, repostCount, commentCount, viewsCount, likeCount, likedByUser, repostedByUser }}
-					<Lynt
-						{id}
-						{username}
-						{handle}
-						postedAt={new Date(created_at)}
-						{verified}
-						{content}
-						{iq}
-						{repostCount}
-						{commentCount}
-						{viewsCount}
-						{likeCount}
-						{likedByUser}
-						{repostedByUser}
-					/>
+				{#each feed as lynt}
+					<Lynt {...lynt} on:lyntClick={handleLyntClick} />
 				{/each}
 			{/if}
 			<div class="mt-24"></div>
@@ -132,81 +122,29 @@
 	</div>
 	<Separator orientation="vertical" />
 
-	<div class="no-scrollbar mt-1 w-[500px] space-y-2 overflow-y-auto">
-		<Lynt
-			username="Face"
-			handle="facedevstuff"
-			postedAt={new Date(1468959781804)}
-			verified={true}
-			content={'placeholder'}
-			iq={43}
-		/>
+	<div class="no-scrollbar mt-1 w-[600px] space-y-2 overflow-y-auto">
+		{#if lyntOpened && selectedLynt}
+			<Lynt {...selectedLynt} />
 
-		<div class="inline-flex w-full items-center gap-2 rounded-xl bg-border p-3">
-			<Reply size={32} />
+			<div class="inline-flex w-full items-center gap-2 rounded-xl bg-border p-3">
+				<Reply size={32} />
 
-			<div
-				contenteditable="true"
-				role="textbox"
-				spellcheck="true"
-				tabindex="0"
-				bind:textContent={comment}
-				class="overflow-wrap-anywhere w-full text-lg outline-none"
-				placeholder="Reply..."
-			/>
+				<div
+					contenteditable="true"
+					role="textbox"
+					spellcheck="true"
+					tabindex="0"
+					bind:textContent={comment}
+					class="overflow-wrap-anywhere w-full text-lg outline-none"
+					placeholder="Reply..."
+				/>
 
-			<Button>Post</Button>
-		</div>
-		<Separator />
-		<div class="space-y-2">
-			<Lynt
-				username="Face"
-				handle="facedevstuff"
-				postedAt={new Date(1468959781804)}
-				verified={true}
-				content={'placeholder'}
-				iq={4}
-			/>
-			<Lynt
-				username="Face"
-				handle="facedevstuff"
-				postedAt={new Date(1468959781804)}
-				verified={true}
-				content={'placeholder'}
-				iq={4}
-			/>
-			<Lynt
-				username="Face"
-				handle="facedevstuff"
-				postedAt={new Date(1468959781804)}
-				verified={true}
-				content={'placeholder'}
-				iq={4}
-			/>
-			<Lynt
-				username="Face"
-				handle="facedevstuff"
-				postedAt={new Date(1468959781804)}
-				verified={true}
-				content={'placeholder'}
-				iq={4}
-			/>
-			<Lynt
-				username="Face"
-				handle="facedevstuff"
-				postedAt={new Date(1468959781804)}
-				verified={true}
-				content={'placeholder'}
-				iq={4}
-			/>
-			<Lynt
-				username="Face"
-				handle="facedevstuff"
-				postedAt={new Date(1468959781804)}
-				verified={true}
-				content={'placeholder'}
-				iq={4}
-			/>
-		</div>
+				<Button>Post</Button>
+			</div>
+			<Separator />
+			<div class="space-y-2">
+				<!-- comments -->
+			</div>
+		{/if}
 	</div>
 </div>

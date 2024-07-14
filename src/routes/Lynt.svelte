@@ -1,32 +1,16 @@
 <script lang="ts">
 	import { Separator } from '@/components/ui/separator';
-	import * as Tooltip from '@/components/ui/tooltip';
+	import { createEventDispatcher } from 'svelte';
+
 	import { BarChart2, Heart, MessageCircle, Repeat2, Share2 } from 'lucide-svelte';
-	import { Label } from '@/components/ui/label';
 	import * as Dialog from '@/components/ui/dialog/index';
 	import * as Form from '@/components/ui/form/index';
 
 	import Avatar from './Avatar.svelte';
 	import OutlineButton from './OutlineButton.svelte';
 	import { toast } from 'svelte-sonner';
+	import LyntContents from './LyntContents.svelte';
 
-	function getTimeElapsed(date: Date) {
-		const now = new Date();
-		const elapsed = now.getTime() - date.getTime();
-		const seconds = Math.floor(elapsed / 1000);
-		const minutes = Math.floor(seconds / 60);
-		const hours = Math.floor(minutes / 60);
-		const days = Math.floor(hours / 24);
-		const weeks = Math.floor(days / 7);
-		const years = Math.floor(days / 365);
-
-		if (years > 0) return `${years}y`;
-		if (weeks > 0) return `${weeks}w`;
-		if (days > 0) return `${days}d`;
-		if (hours > 0) return `${hours}h`;
-		if (minutes > 0) return `${minutes}m`;
-		return `${seconds}s`;
-	}
 	function formatNumber(num: number): string {
 		if (!num) return '0';
 
@@ -45,25 +29,39 @@
 	}
 
 	export let id: string;
-	export let postedAt: Date;
-	export let verified: boolean;
-	export let username: String;
-	export let handle: String;
-	export let content: String;
-	export let iq: number;
-	export let commentCount: number;
-	export let repostCount: number;
+	export let content: string;
+	export let userId: string;
+	export let createdAt: number;
+	export let views: number;
+	export let reposted: boolean;
 	export let likeCount: number;
-	export let viewsCount: number;
+	export let likedByFollowed: boolean;
+	export let repostCount: number;
+	export let commentCount: number;
 	export let likedByUser: boolean;
 	export let repostedByUser: boolean;
+	export let handle: string;
+	export let userCreatedAt: number;
+	export let username: string;
+	export let iq: number;
+	export let verified: boolean;
+	export let parentId: string | null;
+	export let parentContent: string | null;
+	export let parentUserHandle: string | null;
+	export let parentUserUsername: string | null;
+	export let parentUserVerified: boolean | null;
+	export let parentUserIq: number | null;
+	export let parentCreatedAt: number | null;
+	export let parentUserCreatedAt: number | null;
 
 	let openDialog = false;
 	let lynt = '';
 
+	const dispatch = createEventDispatcher();
+
 	async function handleRepost() {
 		if (repostedByUser) return;
-		openDialog = true
+		openDialog = true;
 		const response = await fetch('/api/likelynt', {
 			method: 'POST',
 			body: JSON.stringify({ lyntId: id })
@@ -71,19 +69,31 @@
 
 		if (response.status !== 200) {
 			toast(
-				`Oh no! Something went wrong while liking the tweet. Error: ${response.status} | ${response.statusText}`
+				`Oh no! Something went wrong while liking the lynt. Error: ${response.status} | ${response.statusText}`
 			);
 		}
 	}
 
-	async function handlePost(){
+	async function handlePost() {
+		const response = await fetch('api/lynt', {
+			method: 'POST',
+			body: JSON.stringify({
+				content: lynt,
+				reposted: id
+			})
+		});
 
+		if (response.status === 201) {
+			openDialog = false;
+			toast('Your lynt has been published!');
+		} else {
+			toast(`Something happened! Error: ${response.status} | ${response.statusText}`);
+		}
 	}
-	
+
 	async function handleLike() {
 		// i have no fucking idea whats happening here
 		likeCount = likedByUser ? likeCount - 1 : parseInt(likeCount) + 1;
-		console.log(likeCount);
 		likedByUser = !likedByUser;
 
 		const response = await fetch('/api/likelynt', {
@@ -93,96 +103,121 @@
 
 		if (response.status !== 200) {
 			toast(
-				`Oh no! Something went wrong while liking the tweet. Error: ${response.status} | ${response.statusText}`
+				`Oh no! Something went wrong while liking the lynt. Error: ${response.status} | ${response.statusText}`
 			);
 		}
 	}
+	async function openLynt(lyntid: string) {
+		dispatch('lyntClick', { id: lyntid });
+	}
+	function handleParentLyntClick(event: MouseEvent, parentId: string) {
+		event.stopPropagation(); // This prevents the event from bubbling up
+		openLynt(parentId);
+	}
+
+	
 </script>
 
-<div class="flex gap-3 rounded-xl bg-border p-3">
-	<Avatar size={10} src="https://github.com/face-hh.png" alt="A profile picture." />
+<button on:click={() => openLynt(id)} class="w-full text-left">
+	<div class="flex gap-3 rounded-xl bg-lynt-foreground p-3 hover:bg-border transition-colors">
+		<a href="/@{handle}" class="inline-block max-h-[40px] min-w-[40px]">
+			<Avatar size={10} src="https://github.com/face-hh.png" alt="A profile picture." />
+		</a>
 
-	<div class="flex w-full max-w-[530px] flex-col">
-		<div class="flex items-center gap-1">
-			<span class="max-w-[50%] truncate text-xl font-bold">{username}</span>
-			{#if verified}
-				<Tooltip.Root>
-					<Tooltip.Trigger
-						><img
-							class="h-7 w-7"
-							src="verified.png"
-							alt="This user is verified."
-						/></Tooltip.Trigger
-					>
-					<Tooltip.Content>
-						<p>This user is <span class="rounded-xl bg-border p-1">verified</span>.</p>
-					</Tooltip.Content>
-				</Tooltip.Root>
-			{/if}
-			<span
-				class="py-0.25 flex select-none items-center rounded-xl border border-transparent bg-primary px-1.5 text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-				>{iq}</span
-			>
-			<Label class="max-w-[30%] truncate text-lg text-gray-600">@{handle}</Label>
-			<Label class="text-lg text-gray-600">• {getTimeElapsed(postedAt)}</Label>
-		</div>
-
-		<span class="whitespace-pre-wrap break-words text-lg">{content}</span>
-
-		<div class="mt-2 flex items-center justify-between gap-2">
-			<div class="flex items-center gap-2">
-				<OutlineButton icon={MessageCircle} text={formatNumber(commentCount)} />
-
-				<Dialog.Root open={openDialog}>
-					<Dialog.Trigger let:builder>
-						<OutlineButton
-						{...builder}
-							on:click={handleRepost}
-							isActive={repostedByUser}
-							icon={Repeat2}
-							text={formatNumber(repostCount)}
+		<div class="flex w-full max-w-[530px] flex-col gap-2">
+			<LyntContents {username} {verified} {handle} {createdAt} {content} {iq} {userCreatedAt} />
+			<img
+				class="rounded-lg"
+				src="https://pbs.twimg.com/media/GSceuhPWsAAM60r?format=jpg&name=4096x4096"
+				alt="ok"
+			/>
+			{#if reposted && parentId}
+				<button on:click|stopPropagation={(event) => handleParentLyntClick(event, parentId)}>
+					<div class="rounded-lg border-2 border-primary p-4 drop-shadow">
+						<LyntContents
+							username={parentUserUsername}
+							verified={parentUserVerified}
+							handle={parentUserHandle}
+							createdAt={parentCreatedAt}
+							content={parentContent}
+							iq={parentUserIq}
+							userCreatedAt={parentUserCreatedAt}
+							includeAvatar={true}
 						/>
-					</Dialog.Trigger>
-					<Dialog.Content class="sm:max-w-[425px]">
-						<div class="flex items-start space-x-3">
-							<Avatar size={10} src="https://github.com/face-hh.png" alt="Your profile picture." />
+					</div>
+				</button>
+			{/if}
+			<div class="mt-2 flex items-center justify-between gap-2">
+				<div class="flex items-center gap-2">
+					<OutlineButton icon={MessageCircle} text={formatNumber(commentCount)} />
 
-							<div class="flex-grow">
-								<div
-									contenteditable="true"
-									role="textbox"
-									spellcheck="true"
-									tabindex="0"
-									bind:textContent={lynt}
-									class="overflow-wrap-anywhere min-h-[80px] w-full outline-none"
-									placeholder="What's happening?"
+					<Dialog.Root open={openDialog}>
+						<Dialog.Trigger let:builder>
+							<OutlineButton
+								{...builder}
+								on:click={handleRepost}
+								isActive={repostedByUser}
+								icon={Repeat2}
+								text={formatNumber(repostCount)}
+							/>
+						</Dialog.Trigger>
+						<Dialog.Content class="sm:max-w-[425px]">
+							<div class="flex items-start space-x-3">
+								<Avatar
+									size={10}
+									src="https://github.com/face-hh.png"
+									alt="Your profile picture."
 								/>
+
+								<div class="flex-grow">
+									<div
+										contenteditable="true"
+										role="textbox"
+										spellcheck="true"
+										tabindex="0"
+										bind:textContent={lynt}
+										class="overflow-wrap-anywhere min-h-[80px] w-full outline-none"
+										placeholder="What's happening?"
+									/>
+									<div class="rounded-md border-2 border-primary p-4">
+										<LyntContents
+											{username}
+											{verified}
+											{handle}
+											{createdAt}
+											{content}
+											{iq}
+											{userCreatedAt}
+											includeAvatar={true}
+										/>
+									</div>
+								</div>
 							</div>
-						</div>
 
-						<div class="flex justify-end">
-							<Form.Button on:click={handlePost}>Post</Form.Button>
-						</div>
-					</Dialog.Content>
-				</Dialog.Root>
+							<div class="flex justify-end">
+								<Form.Button on:click={handlePost}>Post</Form.Button>
+							</div>
+						</Dialog.Content>
+					</Dialog.Root>
 
-				<OutlineButton
-					on:click={handleLike}
-					isActive={likedByUser}
-					icon={Heart}
-					text={formatNumber(likeCount)}
-					colorOnClick={true}
-				/>
-			</div>
-			<div class="ml-auto flex items-center gap-2">
-				<OutlineButton
-					icon={BarChart2}
-					popover={"The times this post has been shown in someone's feed."}
-					text={formatNumber(viewsCount)}
-				/>
-				<OutlineButton icon={Share2} />
+					<OutlineButton
+						on:click={handleLike}
+						isActive={likedByUser}
+						icon={Heart}
+						text={formatNumber(likeCount)}
+						colorOnClick={true}
+					/>
+				</div>
+				<div class="ml-auto flex items-center gap-2">
+					<OutlineButton
+						icon={BarChart2}
+						popover={"The times this post has been shown in someone's feed."}
+						text={formatNumber(views)}
+					/>
+					<OutlineButton icon={Share2} />
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
+</button>
 <Separator />

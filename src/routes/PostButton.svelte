@@ -15,7 +15,7 @@
 
 		if (response.status === 201){
 			opened = false
-			toast("Your tweet has been published!")
+			toast("Your lynt has been published!")
 		} else {
 			toast(`Something happened! Error: ${response.status} | ${response.statusText}`)
 		}

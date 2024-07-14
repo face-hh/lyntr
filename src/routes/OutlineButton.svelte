@@ -38,7 +38,7 @@
 				{...builder}
 				class:active={isActive}
 				on:click={handleClick}
-				class="shit inline-flex items-center justify-center rounded-xl border-4 border-solid border-primary p-1 font-bold text-primary {className}"
+				class="shit inline-flex items-center justify-center rounded-xl p-2 font-bold text-primary {className}"
 			>
 				<svelte:component this={icon} {strokeWidth} class="h-6 w-6 {text ? 'mr-1' : ''}" />
 				{#if text}
@@ -57,7 +57,7 @@
 	<button
 		class:active={isActive}
 		on:click={handleClick}
-		class="shit inline-flex items-center justify-center rounded-xl border-4 border-solid border-primary p-1 font-bold text-primary {className}"
+		class="shit inline-flex items-center justify-center rounded-xl p-2 font-bold text-primary {className}"
 	>
 		<svelte:component this={icon} {strokeWidth} class="h-6 w-6 {text ? 'mr-1' : ''}" />
 		{#if text}
@@ -77,12 +77,12 @@
 	}
 
 	.shit:hover {
-		filter: drop-shadow(0 0px 20px rgba(38, 14, 0, 0.5));
+		filter: drop-shadow(0 0px 20px hsl(var(--primary) / 0.8));
 		transform: rotate(3deg);
 	}
 
 	.shit.active {
-		background-color: hsl(22 100% 15%);
+		background-color: hsl(var(--primary));
 		color: hsl(var(--background) / var(--tw-text-opacity));
 		transform: rotate(0deg);
 	}
