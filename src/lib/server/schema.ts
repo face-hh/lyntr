@@ -1,4 +1,4 @@
-import { boolean, date, pgTable, serial, timestamp, varchar, integer, type AnyPgColumn, primaryKey, text } from 'drizzle-orm/pg-core';
+import { boolean, date, pgTable, serial, timestamp, varchar, integer, type AnyPgColumn, primaryKey, text, uuid } from 'drizzle-orm/pg-core';
 import { drizzle } from 'drizzle-orm/node-postgres';
 
 export const users = pgTable('users', {
@@ -42,12 +42,15 @@ export const likes = pgTable('likes', {
     }
 });
 
-const notifications = pgTable('notifications', {
-    id: text('id').primaryKey(),
-    user_id: text('user_id').references(() => users.id),
-    content: text('content').notNull(),
-    created_at: timestamp('created_at').defaultNow()
-});
+export const notifications = pgTable('notifications', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: text('user_id').notNull().references(() => users.id),
+    type: text('type').notNull(), // e.g., 'like', 'comment', 'follow'
+    sourceUserId: text('source_user_id').references(() => users.id),
+    lyntId: text('lynt_id').references(() => lynts.id),
+    read: boolean('read').default(false),
+    createdAt: timestamp('created_at').defaultNow()
+  });
 
 export const history = pgTable('history', {
     id: text('id').primaryKey(),

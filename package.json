@@ -49,6 +49,7 @@
 		"pg": "^8.12.0",
 		"postgres": "^3.4.4",
 		"sanitize-html": "^2.13.0",
+		"svelte-routing": "^2.13.0",
 		"svelte-sonner": "^0.3.26",
 		"sveltekit-superforms": "^2.15.2",
 		"tailwind-merge": "^2.3.0",

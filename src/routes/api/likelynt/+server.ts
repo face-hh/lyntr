@@ -4,6 +4,7 @@ import { verifyAuthJWT } from '@/server/jwt';
 import { db } from '@/server/db';
 import { lynts, likes } from '@/server/schema';
 import { eq, and } from 'drizzle-orm';
+import { createNotification } from '@/server/notifications';
 
 // POST endpoint to like a lynt
 export const POST: RequestHandler = async ({ request, cookies }: { request: Request, cookies: Cookies }) => {
@@ -56,6 +57,11 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
                 lynt_id: lyntId,
                 user_id: userId,
             });
+
+            if (/** userId !== lynt.user_id && */ lynt.user_id) {
+                await createNotification(lynt.user_id, 'like', userId, lyntId);
+            }
+            
             return json({ message: 'Lynt liked successfully' });
         }
     } catch (error) {

@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { verifyAuthJWT } from '@/server/jwt';
 import { db } from '@/server/db';
-import { lynts, likes, users } from '@/server/schema';
+import { lynts, likes, users, followers } from '@/server/schema';
 import { sql, desc, and, eq, not, exists } from 'drizzle-orm';
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
@@ -26,19 +26,49 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 
         const userId = jwtPayload.userId;
 
+        const selectFields = {
+            id: lynts.id,
+            content: lynts.content,
+            userId: lynts.user_id,
+            createdAt: lynts.created_at,
+            views: lynts.views,
+            reposted: lynts.reposted,
+            parentId: lynts.parent,
+            likeCount: sql<number>`count(distinct ${likes.user_id})`,
+            likedByFollowed: sql<boolean>`exists(
+                select 1 from ${followers}
+                where ${followers.user_id} = ${userId}
+                and ${followers.follower_id} = ${lynts.user_id}
+            )`,
+            repostCount: sql<number>`(
+                select count(*) from ${lynts} as reposts
+                where reposts.parent = ${lynts.id} and reposts.reposted = true
+            )`,
+            commentCount: sql<number>`(
+                select count(*) from ${lynts} as comments
+                where comments.parent = ${lynts.id} and comments.reposted = false
+            )`,
+            likedByUser: sql<boolean>`exists(
+                select 1 from ${likes}
+                where ${likes.lynt_id} = ${lynts.id}
+                and ${likes.user_id} = ${userId}
+            )`,
+            repostedByUser: sql<boolean>`exists(
+                select 1 from ${lynts} as reposts
+                where reposts.parent = ${lynts.id}
+                and reposts.reposted = true
+                and reposts.user_id = ${userId}
+            )`,
+            handle: users.handle,
+            userCreatedAt: users.created_at,
+            username: users.username,
+            iq: users.iq,
+            verified: users.verified,
+        };
+
         // First, get the comments that the user has replied to
         const userReplies = await db
-            .select({
-                id: lynts.id,
-                content: lynts.content,
-                userId: lynts.user_id,
-                createdAt: lynts.created_at,
-                likeCount: sql<number>`count(distinct ${likes.user_id})`,
-                handle: users.handle,
-                username: users.username,
-                iq: users.iq,
-                verified: users.verified,
-            })
+            .select(selectFields)
             .from(lynts)
             .leftJoin(likes, eq(likes.lynt_id, lynts.id))
             .leftJoin(users, eq(lynts.user_id, users.id))
@@ -55,39 +85,57 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
                 )
             ))
             .groupBy(lynts.id, users.id)
-            .orderBy(desc(lynts.created_at));
+            .orderBy(desc(lynts.created_at))
+            .execute();
 
         // Then, get the most liked comments
-        const mostLikedComments = await db
-            .select({
-                id: lynts.id,
-                content: lynts.content,
-                userId: lynts.user_id,
-                createdAt: lynts.created_at,
-                likeCount: sql<number>`count(distinct ${likes.user_id})`,
-                handle: users.handle,
-                username: users.username,
-                iq: users.iq,
-                verified: users.verified,
-            })
-            .from(lynts)
-            .leftJoin(likes, eq(likes.lynt_id, lynts.id))
-            .leftJoin(users, eq(lynts.user_id, users.id))
-            .where(and(
-                eq(lynts.parent, lyntId),
-                eq(lynts.reposted, false),
-                not(eq(lynts.id, sql`ANY(${sql`ARRAY[${sql.join(userReplies.map(reply => reply.id))}]`})`))
-            ))
-            .groupBy(lynts.id, users.id)
-            .orderBy(desc(sql`count(distinct ${likes.user_id})`), desc(lynts.created_at))
-            .limit(50 - userReplies.length);
+        let mostLikedComments = [];
+        if (userReplies.length < 50) {
+            const notInClause = userReplies.length > 0
+                ? not(eq(lynts.id, sql`ANY(${sql`ARRAY[${sql.join(userReplies.map(reply => reply.id))}]`})`))
+                : sql`TRUE`;
+
+            mostLikedComments = await db
+                .select(selectFields)
+                .from(lynts)
+                .leftJoin(likes, eq(likes.lynt_id, lynts.id))
+                .leftJoin(users, eq(lynts.user_id, users.id))
+                .where(and(
+                    eq(lynts.parent, lyntId),
+                    eq(lynts.reposted, false),
+                    notInClause
+                ))
+                .groupBy(lynts.id, users.id)
+                .orderBy(desc(sql`count(distinct ${likes.user_id})`), desc(lynts.created_at))
+                .limit(50 - userReplies.length)
+                .execute();
+        }
 
         const comments = [...userReplies, ...mostLikedComments];
+
+        // Increment view counts in the background
+        incrementViewCounts(comments.map(comment => comment.id));
 
         return json(comments, { status: 200 });
 
     } catch (error) {
         console.error('Error fetching comments:', error);
+        if (error instanceof Error) {
+            console.error('Error message:', error.message);
+            console.error('Error stack:', error.stack);
+        }
         return json({ error: 'Failed to fetch comments' }, { status: 500 });
     }
 };
+
+async function incrementViewCounts(lyntIds: string[]) {
+    try {
+        await db.transaction(async (tx) => {
+            await Promise.all(lyntIds.map(id => 
+                tx.execute(sql`UPDATE ${lynts} SET views = views + 1 WHERE id = ${id}`)
+            ));
+        });
+    } catch (error) {
+        console.error('Error incrementing view counts:', error);
+    }
+}

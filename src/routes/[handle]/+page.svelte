@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { ModeWatcher } from 'mode-watcher';
 
-	import '../app.css';
+	import '../../app.css';
 
 	import { onMount } from 'svelte';
 	import { Toaster } from '$lib/components/ui/sonner';
-	import LoadingSpinner from './LoadingSpinner.svelte';
-	import Auth from './Auth.svelte';
-	import AccountCreator from './AccountCreator.svelte';
+	import LoadingSpinner from '../LoadingSpinner.svelte';
+	import Auth from '../Auth.svelte';
+	import AccountCreator from '../AccountCreator.svelte';
 	import { supabase } from '@/supabase';
 	import { page } from '$app/stores';
-	import MainPage from './MainPage.svelte';
+	import MainPage from '../MainPage.svelte';
 
 	let authenticated: boolean = false;
 	let loading: boolean = true;
@@ -56,7 +56,7 @@
 		checkAuthAndProfileStatus();
 	});
 
-	$: lyntOpened = $page.url.searchParams.get('id');
+	$: handle = $page.params.handle.replace(/^@/, '');
 </script>
 
 <ModeWatcher defaultMode={'light'} />
@@ -70,5 +70,5 @@
 {:else if noAccount}
 	<AccountCreator />
 {:else}
-	<MainPage {...userData} {lyntOpened} />
+	<MainPage {...userData} profileOpened={handle} />
 {/if}

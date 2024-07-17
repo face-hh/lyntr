@@ -61,7 +61,9 @@
 
 	async function handleRepost() {
 		if (repostedByUser) return;
-		openDialog = true;
+		openDialog = !openDialog;
+		console.log(openDialog);
+
 		const response = await fetch('/api/likelynt', {
 			method: 'POST',
 			body: JSON.stringify({ lyntId: id })
@@ -115,22 +117,44 @@
 		openLynt(parentId);
 	}
 
-	
+	let copied = false;
+	let timeoutId: ReturnType<typeof setTimeout>;
+
+	function handleShare() {
+		const url = `${window.location.origin}?id=${id}`;
+		toast('Link copied to clipboard!' + url);
+
+		navigator.clipboard
+			.writeText(url)
+			.then(() => {
+				copied = true;
+				clearTimeout(timeoutId);
+				timeoutId = setTimeout(() => {
+					copied = false;
+				}, 300);
+			})
+			.catch((err) => {
+				console.error('Failed to copy: ', err);
+				dispatch('error', 'Failed to copy to clipboard');
+			});
+	}
 </script>
 
 <button on:click={() => openLynt(id)} class="w-full text-left">
-	<div class="flex gap-3 rounded-xl bg-lynt-foreground p-3 hover:bg-border transition-colors">
+	<div
+		class="flex min-w-[570px] gap-3 rounded-xl bg-lynt-foreground p-3 transition-colors hover:bg-border"
+	>
 		<a href="/@{handle}" class="inline-block max-h-[40px] min-w-[40px]">
 			<Avatar size={10} src="https://github.com/face-hh.png" alt="A profile picture." />
 		</a>
 
 		<div class="flex w-full max-w-[530px] flex-col gap-2">
 			<LyntContents {username} {verified} {handle} {createdAt} {content} {iq} {userCreatedAt} />
-			<img
+			<!-- <img
 				class="rounded-lg"
 				src="https://pbs.twimg.com/media/GSceuhPWsAAM60r?format=jpg&name=4096x4096"
 				alt="ok"
-			/>
+			/> -->
 			{#if reposted && parentId}
 				<button on:click|stopPropagation={(event) => handleParentLyntClick(event, parentId)}>
 					<div class="rounded-lg border-2 border-primary p-4 drop-shadow">
@@ -149,9 +173,13 @@
 			{/if}
 			<div class="mt-2 flex items-center justify-between gap-2">
 				<div class="flex items-center gap-2">
-					<OutlineButton icon={MessageCircle} text={formatNumber(commentCount)} />
+					<OutlineButton
+						icon={MessageCircle}
+						text={formatNumber(commentCount)}
+						on:click={() => openLynt(id)}
+					/>
 
-					<Dialog.Root open={openDialog}>
+					<Dialog.Root bind:open={openDialog}>
 						<Dialog.Trigger let:builder>
 							<OutlineButton
 								{...builder}
@@ -159,6 +187,7 @@
 								isActive={repostedByUser}
 								icon={Repeat2}
 								text={formatNumber(repostCount)}
+								outline={true}
 							/>
 						</Dialog.Trigger>
 						<Dialog.Content class="sm:max-w-[425px]">
@@ -189,6 +218,7 @@
 											{iq}
 											{userCreatedAt}
 											includeAvatar={true}
+											smaller={true}
 										/>
 									</div>
 								</div>
@@ -206,6 +236,7 @@
 						icon={Heart}
 						text={formatNumber(likeCount)}
 						colorOnClick={true}
+						outline={true}
 					/>
 				</div>
 				<div class="ml-auto flex items-center gap-2">
@@ -213,8 +244,9 @@
 						icon={BarChart2}
 						popover={"The times this post has been shown in someone's feed."}
 						text={formatNumber(views)}
+						outline={true}
 					/>
-					<OutlineButton icon={Share2} />
+					<OutlineButton icon={Share2} on:click={handleShare} animate={copied} />
 				</div>
 			</div>
 		</div>

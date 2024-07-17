@@ -5,7 +5,7 @@ import { Snowflake } from 'nodejs-snowflake';
 
 import { verifyAuthJWT, createAuthJWT } from '@/server/jwt';
 import { db } from '@/server/db';
-import { users } from '@/server/schema';
+import { followers, users } from '@/server/schema';
 import { sql } from 'drizzle-orm';
 import { supabase } from '@/supabase'
 
@@ -118,11 +118,18 @@ export const GET: RequestHandler = async ({ url }) => {
     }
 
     try {
-        // fuck you and your types annoying language
         const query = sql`
-            SELECT id, handle, created_at, username, iq, verified
-            FROM ${users}
-            WHERE ${userHandle ? sql`handle = ${userHandle}` : sql`id = ${userId}`}
+            SELECT 
+                u.id, 
+                u.handle, 
+                u.created_at, 
+                u.username, 
+                u.iq, 
+                u.verified,
+                (SELECT COUNT(*) FROM ${followers} WHERE user_id = u.id) AS followers_count,
+                (SELECT COUNT(*) FROM ${followers} WHERE follower_id = u.id) AS following_count
+            FROM ${users} u
+            WHERE ${userHandle ? sql`u.handle = ${userHandle}` : sql`u.id = ${userId}`}
             LIMIT 1
         `;
 
@@ -133,20 +140,22 @@ export const GET: RequestHandler = async ({ url }) => {
             return json({ error: 'User not found' }, { status: 404 });
         }
 
-        return json(user);
+        return json({
+            id: user.id,
+            handle: user.handle,
+            created_at: user.created_at,
+            username: user.username,
+            iq: user.iq,
+            verified: user.verified,
+            followers: parseInt(String(user.followers_count)),
+            following: parseInt(String(user.following_count))
+        });
     } catch (error) {
         console.error('Error fetching user:', error);
         return json({ error: 'Failed to fetch user' }, { status: 500 });
     }
 };
 
-// logout
-/**
- *     headers: {
-      "set-cookie": 'token=""; path=/; HttpOnly; expires=Thu, 01 Jan 1970 00:00:00 GMT',
-    },
- * 
- */
 function santize(input: string) {
     return input.toLowerCase().replace(/\s/g, '');
 }
