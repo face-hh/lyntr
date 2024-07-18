@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Separator } from '@/components/ui/separator';
-	import { createEventDispatcher } from 'svelte';
 
 	import { BarChart2, Heart, MessageCircle, Repeat2, Share2 } from 'lucide-svelte';
 	import * as Dialog from '@/components/ui/dialog/index';
@@ -27,7 +26,7 @@
 		}
 		return num.toString();
 	}
-
+	export let lyntClick: Function;
 	export let id: string;
 	export let content: string;
 	export let userId: string;
@@ -57,12 +56,10 @@
 	let openDialog = false;
 	let lynt = '';
 
-	const dispatch = createEventDispatcher();
 
 	async function handleRepost() {
 		if (repostedByUser) return;
 		openDialog = !openDialog;
-		console.log(openDialog);
 
 		const response = await fetch('/api/likelynt', {
 			method: 'POST',
@@ -110,11 +107,8 @@
 		}
 	}
 	async function openLynt(lyntid: string) {
-		dispatch('lyntClick', { id: lyntid });
-	}
-	function handleParentLyntClick(event: MouseEvent, parentId: string) {
-		event.stopPropagation(); // This prevents the event from bubbling up
-		openLynt(parentId);
+		console.log(lyntid)
+		lyntClick(lyntid);
 	}
 
 	let copied = false;
@@ -135,7 +129,6 @@
 			})
 			.catch((err) => {
 				console.error('Failed to copy: ', err);
-				dispatch('error', 'Failed to copy to clipboard');
 			});
 	}
 </script>
@@ -156,7 +149,7 @@
 				alt="ok"
 			/> -->
 			{#if reposted && parentId}
-				<button on:click|stopPropagation={(event) => handleParentLyntClick(event, parentId)}>
+				<button on:click|stopPropagation={() => openLynt(parentId)}>
 					<div class="rounded-lg border-2 border-primary p-4 drop-shadow">
 						<LyntContents
 							username={parentUserUsername}

@@ -81,6 +81,27 @@
   }
 }
 
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: hsl(var(--primary-foreground));
+  border-radius: 12px
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary));
+  border-radius: 12px
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary));
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }

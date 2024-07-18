@@ -98,12 +98,15 @@
 
 		loadingFeed = false;
 	}
-	async function handleLyntClick(event: CustomEvent<{ id: string }>) {
-		lyntOpened = event.detail.id;
-		selectedLynt = feed.find((lynt) => lynt.id === lyntOpened) || null;
 
+	async function handleLyntClick(id: string) {
+		console.log('received lynt with id: ', id)
+		lyntOpened = id;
+		selectedLynt = feed.find((lynt) => lynt.id === lyntOpened) || await getLynt(lyntOpened);
+		console.log(selectedLynt)
 		comments = await getComments(lyntOpened);
 	}
+	
 
 	async function getComments(id: string) {
 		const response = await fetch('api/comments?id=' + id, {
@@ -155,7 +158,7 @@
 		{:else if page === 'notifications'}
 			<Notifications />
 		{:else if page.startsWith('profile')}
-			<ProfilePage profileHandle={page.replace('profile', '')} />
+			<ProfilePage profileHandle={page.replace('profile', '')} {handleLyntClick} />
 		{:else if page === 'home'}
 			<div class="flex justify-center gap-20">
 				<div>
@@ -171,6 +174,13 @@
 						<div class="mt-1 h-2 w-auto rounded-b-lg bg-primary"></div>
 					{/if}
 				</div>
+
+				<div>
+					<Label class="cursor-pointer select-none text-xl">Live</Label>
+					{#if currentTab === 'live'}
+						<div class="mt-1 h-2 w-auto rounded-b-lg bg-primary"></div>
+					{/if}
+				</div>
 			</div>
 			<Separator class="mt-4" />
 
@@ -180,7 +190,7 @@
 					<LoadingSpinner />
 				{:else}
 					{#each feed as lynt}
-						<Lynt {...lynt} on:lyntClick={handleLyntClick} />
+						<Lynt {...lynt} lyntClick={handleLyntClick} />
 					{/each}
 				{/if}
 				<div class="mt-24"></div>
@@ -191,7 +201,7 @@
 
 	<div class="no-scrollbar mt-1 w-[600px] space-y-2 overflow-y-auto">
 		{#if lyntOpened && selectedLynt}
-			<Lynt {...selectedLynt} />
+			<Lynt {...selectedLynt} lyntClick={handleLyntClick} />
 
 			<div class="inline-flex w-full items-center gap-2 rounded-xl bg-border p-3">
 				<Reply size={32} />
@@ -214,7 +224,7 @@
 					<Label class="flex justify-center text-lg">This lynt has no comments.</Label>
 				{:else}
 					{#each comments as lynt}
-						<Lynt {...lynt} on:lyntClick={handleLyntClick} />
+						<Lynt {...lynt} lyntClick={handleLyntClick} />
 					{/each}
 				{/if}
 			</div>

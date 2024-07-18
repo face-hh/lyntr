@@ -73,7 +73,7 @@
 			<HoverCard.Root>
 				<HoverCard.Trigger
 					rel="noreferrer noopener"
-					class="max-w-[50%] truncate rounded-sm text-xl font-bold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-black"
+					class="max-w-[60%] truncate rounded-sm text-xl font-bold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-black"
 					href="/@{handle}"
 				>
 					{username}

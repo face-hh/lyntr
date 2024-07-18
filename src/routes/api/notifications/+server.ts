@@ -1,5 +1,3 @@
-// @/routes/api/notifications/+server.ts
-
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { verifyAuthJWT } from '@/server/jwt';

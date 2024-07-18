@@ -97,6 +97,7 @@ export const GET: RequestHandler = async ({ url, request }: { url: URL, request:
                 userId: lynts.user_id,
                 username: users.username,
                 handle: users.handle,
+                iq: users.iq,
                 profilePicture: users.profile_picture,
                 verified: users.verified,
                 likeCount: sql<number>`(SELECT COUNT(*) FROM ${likes} WHERE ${likes.lynt_id} = ${lynts.id})`.as('likeCount'),

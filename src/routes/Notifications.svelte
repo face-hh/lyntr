@@ -115,7 +115,7 @@
 				<div class="pr-4">
 					<!-- Add right padding for scrollbar -->
 					{#if notifications.length === 0}
-						<p class="py-4 text-center text-gray-500">No notifications yet.</p>
+						<p class="py-4 text-center text-muted-foreground">No notifications yet.</p>
 					{:else}
 						<ul class="space-y-4">
 							{#each reactiveNotifications as notification (notification.id)}
@@ -168,7 +168,7 @@
 										{#if notification.lyntContent}
 											<p class="mt-1 text-sm text-muted-foreground">"{notification.lyntContent}"</p>
 										{/if}
-										<p class="mt-1 text-xs text-gray-400">
+										<p class="mt-1 text-xs text-muted-foreground">
 											{formatTimeAgo(notification.createdAt)}
 										</p>
 									</div>
