@@ -9,19 +9,20 @@
 	import PostButton from './PostButton.svelte';
 	import ProfileButton from './ProfileButton.svelte';
 	import { setMode } from 'mode-watcher';
-	import { onMount } from 'svelte';
+	import { afterUpdate, onMount } from 'svelte';
 	import LoadingSpinner from './LoadingSpinner.svelte';
 	import { toast } from 'svelte-sonner';
 	import { currentPage } from './stores';
 	import Search from './Search.svelte';
 	import Notifications from './Notifications.svelte';
 	import ProfilePage from './ProfilePage.svelte';
+	import { goto } from '$app/navigation';
 
 	export let username: string;
 	export let handle: string;
 	export let created_at: string;
 	export let iq: number;
-	export let profile_picture: string;
+	export let id: string;
 	export let lyntOpened: string | null = null;
 	export let profileOpened: string | null = null;
 
@@ -51,13 +52,17 @@
 		userCreatedAt: number;
 		username: string;
 		iq: number;
+		bio: string;
 		verified: boolean;
+		has_image: boolean;
 
 		parentId: string | null;
 		parentContent: string | null;
 		parentUserHandle: string | null;
 		parentUserUsername: string | null;
 		parentUserVerified: boolean | null;
+		parentHasImage: boolean;
+		parentUserBio: string,
 		parentUserIq: number | null;
 		parentCreatedAt: number | null;
 		parentUserCreatedAt: number | null;
@@ -66,15 +71,17 @@
 	let feed: FeedItem[] = [];
 	let comments: FeedItem[] = [];
 	let selectedLynt: FeedItem | null = null;
+	let referencedLynts: FeedItem[] = [];
+	let loadingComments = false;
 
 	if (lyntOpened !== null && lyntOpened !== '') {
 		(async () => {
 			selectedLynt = await getLynt(lyntOpened);
-	
+
 			comments = await getComments(lyntOpened);
 		})();
-	} else if(profileOpened !== null){
-		page = `profile${profileOpened}`
+	} else if (profileOpened !== null) {
+		page = `profile${profileOpened}`;
 	}
 
 	async function getLynt(lyntOpened: string) {
@@ -83,6 +90,8 @@
 		if (response.status !== 200) alert('Error loading lynt!');
 
 		const res = await response.json();
+
+		referencedLynts = res.referencedLynts || [];
 
 		return res as FeedItem;
 	}
@@ -99,14 +108,21 @@
 		loadingFeed = false;
 	}
 
-	async function handleLyntClick(id: string) {
-		console.log('received lynt with id: ', id)
-		lyntOpened = id;
-		selectedLynt = feed.find((lynt) => lynt.id === lyntOpened) || await getLynt(lyntOpened);
-		console.log(selectedLynt)
-		comments = await getComments(lyntOpened);
+	function updateURL(newPath: string) {
+		goto(newPath, { replaceState: true, noScroll: true });
 	}
-	
+
+	async function handleLyntClick(id: string) {
+		loadingComments = true;
+
+		lyntOpened = id;
+		referencedLynts = [];
+		selectedLynt = feed.find((lynt) => lynt.id === lyntOpened) || (await getLynt(lyntOpened));
+
+		comments = await getComments(lyntOpened);
+		loadingComments = false;
+		if (!page.startsWith('profile')) updateURL(`/?id=${id}`);
+	}
 
 	async function getComments(id: string) {
 		const response = await fetch('api/comments?id=' + id, {
@@ -147,8 +163,12 @@
 		<button on:click={() => setMode('light')}>Set Light Mode</button>
 		<button on:click={() => setMode('dark')}>Set Dark Mode</button>
 		<Navigation />
-		<PostButton />
-		<ProfileButton src={profile_picture} name={username} handle="@{handle}" />
+		<PostButton userId={id} />
+		<ProfileButton
+			src={`http://localhost:9000/lyntr/${id}_medium.webp`}
+			name={username}
+			handle="@{handle}"
+		/>
 	</div>
 	<Separator orientation="vertical" />
 
@@ -199,35 +219,49 @@
 	</div>
 	<Separator orientation="vertical" />
 
-	<div class="no-scrollbar mt-1 w-[600px] space-y-2 overflow-y-auto">
-		{#if lyntOpened && selectedLynt}
-			<Lynt {...selectedLynt} lyntClick={handleLyntClick} />
-
-			<div class="inline-flex w-full items-center gap-2 rounded-xl bg-border p-3">
-				<Reply size={32} />
-
-				<div
-					contenteditable="true"
-					role="textbox"
-					spellcheck="true"
-					tabindex="0"
-					bind:textContent={comment}
-					class="overflow-wrap-anywhere w-full text-lg outline-none"
-					placeholder="Reply..."
-				/>
-
-				<Button on:click={postComment}>Post</Button>
-			</div>
-			<Separator />
-			<div class="space-y-2">
-				{#if comments.length === 0}
-					<Label class="flex justify-center text-lg">This lynt has no comments.</Label>
-				{:else}
-					{#each comments as lynt}
-						<Lynt {...lynt} lyntClick={handleLyntClick} />
+	<div class="relative mt-2 flex w-[600px] flex-col">
+		<div class="no-scrollbar absolute inset-0 overflow-y-auto" id="lynt-container">
+			{#if lyntOpened && selectedLynt}
+				<!-- Referenced Lynts -->
+				<div>
+					{#each referencedLynts as lynt (lynt.id)}
+						<Lynt {...lynt} lyntClick={handleLyntClick} connect={true} />
 					{/each}
-				{/if}
-			</div>
-		{/if}
+				</div>
+
+				<!-- Selected Lynt -->
+				<div id="selected-lynt">
+					<Lynt {...selectedLynt} lyntClick={handleLyntClick} />
+				</div>
+
+				<div class="mb-2 mt-2 inline-flex w-full items-center gap-2 rounded-xl bg-border p-3">
+					<Reply size={32} />
+
+					<div
+						contenteditable="true"
+						role="textbox"
+						spellcheck="true"
+						tabindex="0"
+						bind:textContent={comment}
+						class="overflow-wrap-anywhere w-full text-lg outline-none"
+						placeholder="Reply..."
+					/>
+
+					<Button on:click={postComment}>Post</Button>
+				</div>
+				<Separator />
+				<div class="space-y-2">
+					{#if loadingComments}
+						<LoadingSpinner occupy_screen={false} />
+					{:else if comments.length === 0}
+						<Label class="flex justify-center text-lg">This lynt has no comments.</Label>
+					{:else}
+						{#each comments as lynt}
+							<Lynt {...lynt} lyntClick={handleLyntClick} />
+						{/each}
+					{/if}
+				</div>
+			{/if}
+		</div>
 	</div>
 </div>

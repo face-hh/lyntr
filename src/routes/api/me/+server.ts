@@ -25,7 +25,6 @@ export const GET: RequestHandler = async ({ request, cookies }) => {
             handle: users.handle,
             created_at: users.created_at,
             iq: users.iq,
-            profile_picture: users.profile_picture
         })
         .from(users)
         .where(eq(users.id, jwtPayload.userId))
@@ -41,7 +40,6 @@ export const GET: RequestHandler = async ({ request, cookies }) => {
             handle: user[0].handle,
             created_at: user[0].created_at,
             iq: user[0].iq,
-            profile_picture: user[0].profile_picture
         }, { status: 200 });
 
     } catch (error) {

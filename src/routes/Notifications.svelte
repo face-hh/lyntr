@@ -34,7 +34,7 @@
 		}
 	});
 
-	function formatTimeAgo(dateString: string): string {
+	function formatTimeAgo(dateString: string) {
 		const date = new Date(dateString);
 		const now = new Date();
 		const secondsPast = (now.getTime() - date.getTime()) / 1000;
@@ -142,7 +142,7 @@
 													<div class="flex justify-between space-x-4">
 														<Avatar
 															size={10}
-															src="/@{notification.sourceUserHandle}"
+															src={`http://localhost:9000/lyntr/${notification.sourceUserId}_small.webp`}
 															alt="Profile picture."
 														/>
 
@@ -151,7 +151,7 @@
 															<h4 class="text-sm font-semibold">
 																@{notification.sourceUserHandle}
 															</h4>
-															<p class="text-sm">Cybernetically enhanced web apps.</p>
+															<p class="text-sm">{notification.sourceUserBio}</p>
 															<div class="flex items-center pt-2">
 																<CalendarDays class="mr-2 h-4 w-4 opacity-70" />
 																<span class="text-xs text-muted-foreground">

@@ -10,6 +10,7 @@
 	import { Brain, Calendar } from 'lucide-svelte';
 	import { Separator } from '@/components/ui/separator';
 	import FollowListPopup from './FollowListPopup.svelte';
+	import ProfileSettings from './ProfileSettings.svelte';
 
 	export let profileHandle: string;
 	export let handleLyntClick;
@@ -22,6 +23,7 @@
 		id: string;
 		following: number;
 		followers: number;
+		bio: string,
 	};
 	let userLynts: any[] = [];
 	let loading = true;
@@ -107,7 +109,7 @@
 				isFollowing = result.isFollowing;
 				isFollowedBy = result.isFollowedBy;
 			} else if (response.status === 409) {
-				isSelf = true
+				isSelf = true;
 			} else {
 				const error = await response.json();
 				toast(error.error);
@@ -140,11 +142,12 @@
 			toast('Failed to fetch follow counts');
 		}
 	}
-
+	let avatar: string;
 	onMount(async () => {
 		await fetchProfile();
 		await Promise.all([fetchUserLynts(), checkFollowStatus(), fetchFollowCounts()]);
 		loading = false;
+		avatar = `http://localhost:9000/lyntr/${profile.id}_big.webp`;
 	});
 </script>
 
@@ -155,18 +158,13 @@
 		<div class="mr-[-17px] h-full overflow-y-auto overflow-x-hidden pr-[17px]">
 			<div class="mt-2">
 				<div class="flex items-center gap-4">
-					<Avatar
-						size={40}
-						src="https://github.com/face-hh.png"
-						alt={profile.username}
-						border={true}
-					/>
+					<Avatar size={40} src={avatar} alt={profile.username} border={true} />
 					<div class="flex flex-col gap-2">
 						<Label class="text-2xl font-bold text-primary">{profile.username}</Label>
 						<p class="text-xl text-muted-foreground">@{profile.handle}</p>
 						<div class="w-24">
 							{#if isSelf}
-								<Button class="w-full" disabled>Follow</Button>
+								<ProfileSettings userId={profile.id} username={profile.username} bio={profile.bio} />
 							{:else}
 								<Button class="w-full" on:click={toggleFollow}>
 									{isFollowing ? 'Unfollow' : 'Follow'}
@@ -213,7 +211,7 @@
 				>
 					<Label class="text-lg font-bold text-primary">About me</Label>
 					<p>
-						Lorem ipsum this is a fucking test i have no idea how lorem ipsums are written so yeah
+						{profile.bio}
 					</p>
 
 					<div class="flex items-center justify-between">

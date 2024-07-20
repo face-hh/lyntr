@@ -5,6 +5,8 @@ import { db } from '@/server/db';
 import { lynts, likes, users, followers } from '@/server/schema';
 import { sql, desc, and, eq, not, exists } from 'drizzle-orm';
 
+import { lyntObj } from '../util';
+
 export const GET: RequestHandler = async ({ url, cookies }) => {
     const lyntId = url.searchParams.get('id');
     const authCookie = cookies.get('_TOKEN__DO_NOT_SHARE');
@@ -19,56 +21,16 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 
     try {
         const jwtPayload = await verifyAuthJWT(authCookie);
-        
+
         if (!jwtPayload.userId) {
             throw new Error('Invalid JWT token');
         }
 
         const userId = jwtPayload.userId;
 
-        const selectFields = {
-            id: lynts.id,
-            content: lynts.content,
-            userId: lynts.user_id,
-            createdAt: lynts.created_at,
-            views: lynts.views,
-            reposted: lynts.reposted,
-            parentId: lynts.parent,
-            likeCount: sql<number>`count(distinct ${likes.user_id})`,
-            likedByFollowed: sql<boolean>`exists(
-                select 1 from ${followers}
-                where ${followers.user_id} = ${userId}
-                and ${followers.follower_id} = ${lynts.user_id}
-            )`,
-            repostCount: sql<number>`(
-                select count(*) from ${lynts} as reposts
-                where reposts.parent = ${lynts.id} and reposts.reposted = true
-            )`,
-            commentCount: sql<number>`(
-                select count(*) from ${lynts} as comments
-                where comments.parent = ${lynts.id} and comments.reposted = false
-            )`,
-            likedByUser: sql<boolean>`exists(
-                select 1 from ${likes}
-                where ${likes.lynt_id} = ${lynts.id}
-                and ${likes.user_id} = ${userId}
-            )`,
-            repostedByUser: sql<boolean>`exists(
-                select 1 from ${lynts} as reposts
-                where reposts.parent = ${lynts.id}
-                and reposts.reposted = true
-                and reposts.user_id = ${userId}
-            )`,
-            handle: users.handle,
-            userCreatedAt: users.created_at,
-            username: users.username,
-            iq: users.iq,
-            verified: users.verified,
-        };
-
         // First, get the comments that the user has replied to
         const userReplies = await db
-            .select(selectFields)
+            .select(lyntObj(userId))
             .from(lynts)
             .leftJoin(likes, eq(likes.lynt_id, lynts.id))
             .leftJoin(users, eq(lynts.user_id, users.id))
@@ -89,14 +51,14 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
             .execute();
 
         // Then, get the most liked comments
-        let mostLikedComments = [];
+        let mostLikedComments: { id: string; content: string; userId: string | null; createdAt: Date | null; views: number | null; reposted: boolean | null; parentId: string | null; likeCount: number; likedByFollowed: boolean; repostCount: number; commentCount: number; likedByUser: boolean; repostedByUser: boolean; handle: string | null; userCreatedAt: Date | null; username: string | null; iq: number | null; verified: boolean | null; }[] = [];
         if (userReplies.length < 50) {
             const notInClause = userReplies.length > 0
                 ? not(eq(lynts.id, sql`ANY(${sql`ARRAY[${sql.join(userReplies.map(reply => reply.id))}]`})`))
                 : sql`TRUE`;
 
             mostLikedComments = await db
-                .select(selectFields)
+                .select(lyntObj(userId))
                 .from(lynts)
                 .leftJoin(likes, eq(likes.lynt_id, lynts.id))
                 .leftJoin(users, eq(lynts.user_id, users.id))
@@ -110,8 +72,8 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
                 .limit(50 - userReplies.length)
                 .execute();
         }
-
         const comments = [...userReplies, ...mostLikedComments];
+        console.log(comments)
 
         // Increment view counts in the background
         incrementViewCounts(comments.map(comment => comment.id));
@@ -131,7 +93,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 async function incrementViewCounts(lyntIds: string[]) {
     try {
         await db.transaction(async (tx) => {
-            await Promise.all(lyntIds.map(id => 
+            await Promise.all(lyntIds.map(id =>
                 tx.execute(sql`UPDATE ${lynts} SET views = views + 1 WHERE id = ${id}`)
             ));
         });

@@ -9,7 +9,7 @@
 <div
 	class="absolute bottom-2 flex w-[250px] max-w-md cursor-pointer items-center gap-4 rounded-full bg-border p-4"
 >
-	<Avatar size={10} {src} alt="Your profile picture." />
+	<Avatar size={12} {src} alt="Your profile picture." />
 	<div class="flex flex-col gap-3 overflow-hidden">
 		<span class="text-lg font-medium leading-none peer-enabled:cursor-pointer">
 			{name}

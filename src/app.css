@@ -90,7 +90,7 @@
   background: hsl(var(--primary-foreground));
   border-radius: 12px
 }
- 
+
 /* Handle */
 ::-webkit-scrollbar-thumb {
   background: hsl(var(--primary));
@@ -134,4 +134,11 @@ a:hover {
 
 .drop-shadow:hover {
   filter: drop-shadow(0 0px 10px rgba(38, 14, 0, 0.3));
+}
+
+.avatar {
+  height: 100%;
+  width: 100%;
+  border-radius: 12px;
+  filter: drop-shadow(0 0px 10px rgba(38, 14, 0, 0.1));
 }

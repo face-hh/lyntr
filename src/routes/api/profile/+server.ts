@@ -6,8 +6,11 @@ import { Snowflake } from 'nodejs-snowflake';
 import { verifyAuthJWT, createAuthJWT } from '@/server/jwt';
 import { db } from '@/server/db';
 import { followers, users } from '@/server/schema';
-import { sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { supabase } from '@/supabase'
+import { minioClient } from '@/server/minio';
+import { uploadAvatar } from '../util';
+import { readFileSync } from 'fs';
 
 interface Question {
     id: string;
@@ -36,6 +39,8 @@ let questions: Question[] = [
     { id: 'ReactionImage', condition: (input: any) => { return Boolean(input) ? -10 : 5 } },
     { id: 'GimmickAccount', condition: (input: any) => { return Boolean(input) ? -5 : 5 } }
 ];
+
+const inputBuffer = readFileSync('static/default.png')
 
 export const POST: RequestHandler = async ({ request, cookies }: { request: Request, cookies: Cookies }) => {
     const supabaseToken = request.headers.get('Authorization')?.split('Bearer ')[1];
@@ -85,6 +90,8 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
             'username': body.username
         }).returning();
 
+        uploadAvatar(inputBuffer, uniqueUserId, minioClient)
+
         const iqObject = {
             totalIQ: totalIQ,
             formattedText: formattedText.trim()
@@ -126,6 +133,7 @@ export const GET: RequestHandler = async ({ url }) => {
                 u.username, 
                 u.iq, 
                 u.verified,
+                u.bio,
                 (SELECT COUNT(*) FROM ${followers} WHERE user_id = u.id) AS followers_count,
                 (SELECT COUNT(*) FROM ${followers} WHERE follower_id = u.id) AS following_count
             FROM ${users} u
@@ -148,11 +156,71 @@ export const GET: RequestHandler = async ({ url }) => {
             iq: user.iq,
             verified: user.verified,
             followers: parseInt(String(user.followers_count)),
-            following: parseInt(String(user.following_count))
+            following: parseInt(String(user.following_count)),
+            bio: user.bio,
         });
     } catch (error) {
         console.error('Error fetching user:', error);
         return json({ error: 'Failed to fetch user' }, { status: 500 });
+    }
+};
+
+export const PATCH: RequestHandler = async ({ request, cookies }) => {
+    const authToken = cookies.get('_TOKEN__DO_NOT_SHARE');
+    if (!authToken) {
+        return json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    let userId;
+    try {
+        const decodedToken = await verifyAuthJWT(authToken);
+        userId = decodedToken.userId;
+    } catch (error) {
+        return json({ error: 'Invalid token' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { bio, username } = body;
+
+    const updateData: Partial<typeof users.$inferInsert> = {};
+
+    if (bio) {
+        if (typeof bio !== 'string' || bio.length > 256) {
+            return json({ error: 'Bio must be a string of 256 characters or less' }, { status: 400 });
+        }
+        updateData.bio = bio;
+    }
+
+    if (username) {
+        if (typeof username !== 'string' || username.length > 60) {
+            return json({ error: 'Username must be a string of 60 characters or less' }, { status: 400 });
+        }
+        updateData.username = username;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+        return json({ message: 'No updates provided' }, { status: 400 });
+    }
+
+    try {
+        const [updatedUser] = await db
+            .update(users)
+            .set(updateData)
+            .where(eq(users.id, userId))
+            .returning();
+
+        return json({
+            message: 'User updated successfully',
+            user: {
+                id: updatedUser.id,
+                handle: updatedUser.handle,
+                username: updatedUser.username,
+                bio: updatedUser.bio,
+            }
+        }, { status: 200 });
+    } catch (error) {
+        console.error('Error updating user:', error);
+        return json({ error: 'Failed to update user' }, { status: 500 });
     }
 };
 

@@ -31,6 +31,7 @@ export const GET: RequestHandler = async ({ cookies }) => {
                 sourceUserIq: users.iq,
                 sourceUserVerified: users.verified,
                 sourceUserCreatedAt: users.created_at,
+                sourceUserBio: users.bio,
                 lyntContent: lynts.content,
                 read: notifications.read,
                 createdAt: notifications.createdAt

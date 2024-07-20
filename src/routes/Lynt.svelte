@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Separator } from '@/components/ui/separator';
 
-	import { BarChart2, Heart, MessageCircle, Repeat2, Share2 } from 'lucide-svelte';
+	import { BarChart2, Heart, ImageUp, MessageCircle, Repeat2, Share2 } from 'lucide-svelte';
 	import * as Dialog from '@/components/ui/dialog/index';
 	import * as Form from '@/components/ui/form/index';
 
@@ -32,6 +32,7 @@
 	export let userId: string;
 	export let createdAt: number;
 	export let views: number;
+	export let bio: string;
 	export let reposted: boolean;
 	export let likeCount: number;
 	export let likedByFollowed: boolean;
@@ -43,19 +44,22 @@
 	export let userCreatedAt: number;
 	export let username: string;
 	export let iq: number;
+	export let has_image: boolean;
 	export let verified: boolean;
 	export let parentId: string | null;
 	export let parentContent: string | null;
+	export let parentUserBio: string;
+	export let parentHasImage: boolean;
 	export let parentUserHandle: string | null;
 	export let parentUserUsername: string | null;
 	export let parentUserVerified: boolean | null;
 	export let parentUserIq: number | null;
 	export let parentCreatedAt: number | null;
 	export let parentUserCreatedAt: number | null;
+	export let connect = false;
 
 	let openDialog = false;
 	let lynt = '';
-
 
 	async function handleRepost() {
 		if (repostedByUser) return;
@@ -73,26 +77,9 @@
 		}
 	}
 
-	async function handlePost() {
-		const response = await fetch('api/lynt', {
-			method: 'POST',
-			body: JSON.stringify({
-				content: lynt,
-				reposted: id
-			})
-		});
-
-		if (response.status === 201) {
-			openDialog = false;
-			toast('Your lynt has been published!');
-		} else {
-			toast(`Something happened! Error: ${response.status} | ${response.statusText}`);
-		}
-	}
-
 	async function handleLike() {
 		// i have no fucking idea whats happening here
-		likeCount = likedByUser ? likeCount - 1 : parseInt(likeCount) + 1;
+		likeCount = likedByUser ? likeCount - 1 : Number(likeCount) + 1;
 		likedByUser = !likedByUser;
 
 		const response = await fetch('/api/likelynt', {
@@ -107,7 +94,7 @@
 		}
 	}
 	async function openLynt(lyntid: string) {
-		console.log(lyntid)
+		console.log(lyntid);
 		lyntClick(lyntid);
 	}
 
@@ -131,36 +118,92 @@
 				console.error('Failed to copy: ', err);
 			});
 	}
+	let image: File | null = null;
+	let imagePreview: string | null = null;
+	let fileinput: HTMLInputElement;
+
+	const onFileSelected = (e: Event) => {
+		const target = e.target as HTMLInputElement;
+		if (target.files && target.files[0]) {
+			image = target.files[0];
+			let reader = new FileReader();
+			reader.readAsDataURL(image);
+			reader.onload = (e) => {
+				imagePreview = e.target?.result as string;
+			};
+		}
+	};
+	async function handlePost() {
+		const formData = new FormData();
+		formData.append('content', lynt);
+		formData.append('reposted', id);
+
+		if (image) {
+			formData.append('image', image, image.name);
+		}
+
+		const response = await fetch('api/lynt', {
+			method: 'POST',
+			body: formData
+		});
+
+		if (response.status === 201) {
+			openDialog = false;
+			toast('Your lynt has been published!');
+		} else {
+			toast(`Something happened! Error: ${response.status} | ${response.statusText}`);
+		}
+	}
 </script>
 
-<button on:click={() => openLynt(id)} class="w-full text-left">
+<button on:click|stopPropagation={() => openLynt(id)} class="w-full text-left">
 	<div
 		class="flex min-w-[570px] gap-3 rounded-xl bg-lynt-foreground p-3 transition-colors hover:bg-border"
 	>
 		<a href="/@{handle}" class="inline-block max-h-[40px] min-w-[40px]">
-			<Avatar size={10} src="https://github.com/face-hh.png" alt="A profile picture." />
+			<Avatar
+				size={10}
+				src={`http://localhost:9000/lyntr/${userId}_small.webp`}
+				alt="A profile picture."
+			/>
 		</a>
 
 		<div class="flex w-full max-w-[530px] flex-col gap-2">
-			<LyntContents {username} {verified} {handle} {createdAt} {content} {iq} {userCreatedAt} />
-			<!-- <img
-				class="rounded-lg"
-				src="https://pbs.twimg.com/media/GSceuhPWsAAM60r?format=jpg&name=4096x4096"
-				alt="ok"
-			/> -->
+			<!-- Lynt that actually gets displayed. Main lynt -->
+			<LyntContents
+				postId={id}
+				{bio}
+				{has_image}
+				{username}
+				{userId}
+				{verified}
+				{handle}
+				{createdAt}
+				{content}
+				{iq}
+				{userCreatedAt}
+			/>
+
 			{#if reposted && parentId}
 				<button on:click|stopPropagation={() => openLynt(parentId)}>
 					<div class="rounded-lg border-2 border-primary p-4 drop-shadow">
-						<LyntContents
-							username={parentUserUsername}
-							verified={parentUserVerified}
-							handle={parentUserHandle}
-							createdAt={parentCreatedAt}
-							content={parentContent}
-							iq={parentUserIq}
-							userCreatedAt={parentUserCreatedAt}
-							includeAvatar={true}
-						/>
+						{#if parentUserHandle}
+							<!-- reposted lynt -->
+							<LyntContents
+								{userId}
+								bio={parentUserBio}
+								postId={parentId}
+								has_image={parentHasImage}
+								username={parentUserUsername}
+								verified={parentUserVerified}
+								handle={parentUserHandle}
+								createdAt={parentCreatedAt}
+								content={parentContent}
+								iq={parentUserIq}
+								userCreatedAt={parentUserCreatedAt}
+								includeAvatar={true}
+							/>
+						{/if}
 					</div>
 				</button>
 			{/if}
@@ -187,7 +230,7 @@
 							<div class="flex items-start space-x-3">
 								<Avatar
 									size={10}
-									src="https://github.com/face-hh.png"
+									src={`http://localhost:9000/lyntr/${userId}_small.webp`}
 									alt="Your profile picture."
 								/>
 
@@ -201,14 +244,36 @@
 										class="overflow-wrap-anywhere min-h-[80px] w-full outline-none"
 										placeholder="What's happening?"
 									/>
+									{#if imagePreview}
+										<img class="avatar" src={imagePreview} alt="Preview" />
+									{/if}
+									<button
+										on:click={() => {
+											fileinput.click();
+										}}
+									>
+										<ImageUp class="upload" />
+									</button>
+
+									<input
+										style="display:none"
+										type="file"
+										accept=".jpg, .jpeg, .png"
+										on:change={onFileSelected}
+										bind:this={fileinput}
+									/>
 									<div class="rounded-md border-2 border-primary p-4">
 										<LyntContents
+											postId={id}
+											{bio}
+											{has_image}
 											{username}
 											{verified}
 											{handle}
 											{createdAt}
 											{content}
 											{iq}
+											{userId}
 											{userCreatedAt}
 											includeAvatar={true}
 											smaller={true}
@@ -245,4 +310,8 @@
 		</div>
 	</div>
 </button>
-<Separator />
+{#if connect}
+	<div class="relative left-6 h-4 w-0.5 bg-border" />
+{:else}
+	<Separator />
+{/if}

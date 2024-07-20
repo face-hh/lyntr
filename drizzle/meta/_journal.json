@@ -15,6 +15,20 @@
       "when": 1721061108457,
       "tag": "0001_keen_rockslide",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1721457490371,
+      "tag": "0002_brown_lester",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1721474589334,
+      "tag": "0003_furry_rhino",
+      "breakpoints": true
     }
   ]
 }

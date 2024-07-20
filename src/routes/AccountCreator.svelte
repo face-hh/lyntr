@@ -60,7 +60,7 @@
 			const res = await response.json();
 
 			iqReport = res.formattedText;
-			totalIQ = res.totalIQ
+			totalIQ = res.totalIQ;
 		} catch (error) {
 			alert(
 				'Something went wrong. Please try again. If this persists, please report the issue here: https://github.com/face-hh/lyntr'
@@ -106,37 +106,43 @@
 				</div>
 
 				{#if allQuestionsCompleted}
-				<AlertDialog.Root>
-					<AlertDialog.Trigger asChild let:builder>
-						<Button builders={[builder]} on:click={handleSubmit} disabled={!nickname || !username}>
-							Let's go!
-						</Button>
-					</AlertDialog.Trigger>
-					<AlertDialog.Content>
-						<AlertDialog.Header>
-							<AlertDialog.Title class="text-2xl font-bold mb-2">Welcome to Lyntr!</AlertDialog.Title>
-							<AlertDialog.Description>
-								<div class="space-y-4">
-									<p>
-										Make sure to read the <a href="tos">Terms of Service</a> and
-										<a href="privacy">Privacy Policy</a>.
-									</p>
-									<div>
-										<h3 class="font-semibold mb-2">IQ Report:</h3>
-										<pre class="whitespace-pre-wrap text-sm">{iqReport}</pre>
+					<AlertDialog.Root>
+						<AlertDialog.Trigger asChild let:builder>
+							<Button
+								builders={[builder]}
+								on:click={handleSubmit}
+								disabled={!nickname || !username}
+							>
+								Let's go!
+							</Button>
+						</AlertDialog.Trigger>
+						<AlertDialog.Content>
+							<AlertDialog.Header>
+								<AlertDialog.Title class="mb-2 text-2xl font-bold"
+									>Welcome to Lyntr!</AlertDialog.Title
+								>
+								<AlertDialog.Description>
+									<div class="space-y-4">
+										<p>
+											Make sure to read the <a href="tos">Terms of Service</a> and
+											<a href="privacy">Privacy Policy</a>.
+										</p>
+										{#if iqReport}
+											<div>
+												<h3 class="mb-2 font-semibold">IQ Report:</h3>
+												<pre class="whitespace-pre-wrap text-sm">{iqReport}</pre>
+											</div>
+											<p class="text-right font-semibold">Total IQ: {totalIQ}</p>
+										{/if}
 									</div>
-									<p class="font-semibold text-right">Total IQ: {totalIQ}</p>
-								</div>
-							</AlertDialog.Description>
-						</AlertDialog.Header>
-						<AlertDialog.Footer>
-							<AlertDialog.Action on:click={() => location.reload()} >
-								Continue
-							</AlertDialog.Action>
-						</AlertDialog.Footer>
-					</AlertDialog.Content>
-				</AlertDialog.Root>
-			{/if}
+								</AlertDialog.Description>
+							</AlertDialog.Header>
+							<AlertDialog.Footer>
+								<AlertDialog.Action on:click={() => location.reload()}>Continue</AlertDialog.Action>
+							</AlertDialog.Footer>
+						</AlertDialog.Content>
+					</AlertDialog.Root>
+				{/if}
 			</div>
 		</div>
 		<Separator orientation="vertical" class="h-auto" />

@@ -1,6 +1,6 @@
-<script>
+<script lang="ts">
     import { Button } from '@/components/ui/button/index';
-    import { House, Search, Bell } from 'lucide-svelte';
+    import { House, Search, Bell, User } from 'lucide-svelte';
     import OutlineButton from './OutlineButton.svelte';
     import { currentPage } from './stores';
 	import { goto } from '$app/navigation';
@@ -8,10 +8,11 @@
     export let navItems = [
         { icon: House, label: 'Home', page: 'home' },
         { icon: Search, label: 'Search', page: 'search' },
-        { icon: Bell, label: 'Notifications', page: 'notifications' }
+        { icon: Bell, label: 'Notifications', page: 'notifications' },
+        { icon: User, label: 'Profile', page: 'profile' }
     ];
 
-    function handleNavClick(page) {
+    function handleNavClick(page: string) {
         currentPage.set(page);
         if (page === 'home'){
             goto('/')

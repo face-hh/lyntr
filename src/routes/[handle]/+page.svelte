@@ -20,7 +20,7 @@
 		handle: '',
 		created_at: '',
 		iq: 90,
-		profile_picture: ''
+		id: ''
 	};
 
 	async function checkAuthAndProfileStatus() {
@@ -39,7 +39,7 @@
 					handle: res.handle,
 					created_at: res.created_at,
 					iq: res.iq,
-					profile_picture: res.profile_picture
+					id: res.id
 				};
 
 				noAccount = false;
@@ -65,8 +65,8 @@
 
 {#if loading}
 	<LoadingSpinner />
-{:else if !authenticated}
-	<Auth />
+<!-- {:else if !authenticated}
+	<Auth /> -->
 {:else if noAccount}
 	<AccountCreator />
 {:else}

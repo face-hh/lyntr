@@ -4,7 +4,6 @@
 	import { Input } from '@/components/ui/input';
 	import { Button } from '@/components/ui/button';
 	import Avatar from './Avatar.svelte';
-	import { Search } from 'lucide-svelte';
 
 	export let userId: string;
 	export let type: 'followers' | 'following';
@@ -94,7 +93,7 @@
 						>
 							<Avatar
 								size={12}
-								src={`https://api.dicebear.com/6.x/initials/svg?seed=${user.username}`}
+								src={`http://localhost:9000/lyntr/${user.id}_medium.webp`}
 								alt={user.username}
 							/>
 							<div>

@@ -5,9 +5,9 @@ export const users = pgTable('users', {
     id: text('id').primaryKey(),
     username: varchar('username', { length: 60 }).notNull(),
     handle: varchar('handle', { length: 32 }).notNull().unique(),
+    bio: varchar('bio', { length: 256 }).default('Nothing here yet...'),
     created_at: timestamp('created_at').defaultNow(),
     iq: integer('iq').notNull(),
-    profile_picture: text('profile_picture').default("default"),
     verified: boolean('verified').default(false)
 });
 
@@ -18,8 +18,8 @@ export const lynts = pgTable('lynts', {
     views: integer('views').default(0),
     shares: integer('shares').default(0),
     has_link: boolean('has_link').default(false),
+    has_image: boolean('has_image').default(false),
     created_at: timestamp('created_at').defaultNow(),
-    // todo: if you want quotes, render content and parent id if reposted
     reposted: boolean('reposted').default(false),
     parent: text('parent').references((): AnyPgColumn => lynts.id)
 });
@@ -50,7 +50,7 @@ export const notifications = pgTable('notifications', {
     lyntId: text('lynt_id').references(() => lynts.id),
     read: boolean('read').default(false),
     createdAt: timestamp('created_at').defaultNow()
-  });
+});
 
 export const history = pgTable('history', {
     id: text('id').primaryKey(),
