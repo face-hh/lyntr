@@ -11,6 +11,7 @@ import { supabase } from '@/supabase'
 import { minioClient } from '@/server/minio';
 import { uploadAvatar } from '../util';
 import { readFileSync } from 'fs';
+import sanitizeHtml from 'sanitize-html';
 
 interface Question {
     id: string;
@@ -81,13 +82,13 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
         });
         const uniqueUserId = String(userId.getUniqueID())
 
-        const cleanedHandle = body.handle.replace(/[^0-9a-z_-]/gi, '');
+        const cleanedHandle = sanitizeHtml(body.handle).replace(/[^0-9a-z_-]/gi, '');
 
         const [newLynt] = await db.insert(users).values({
             'id': uniqueUserId,
             'handle': cleanedHandle,
             'iq': totalIQ,
-            'username': body.username
+            'username': sanitizeHtml(body.username.replace("\n", " "))
         }).returning();
 
         uploadAvatar(inputBuffer, uniqueUserId, minioClient)
@@ -180,7 +181,10 @@ export const PATCH: RequestHandler = async ({ request, cookies }) => {
     }
 
     const body = await request.json();
-    const { bio, username } = body;
+    let { bio, username } = body;
+
+    bio = sanitizeHtml(bio)
+    username = sanitizeHtml(username)
 
     const updateData: Partial<typeof users.$inferInsert> = {};
 

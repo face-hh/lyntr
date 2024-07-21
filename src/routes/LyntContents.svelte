@@ -7,7 +7,8 @@
 	import CalendarDays from 'lucide-svelte/icons/calendar-days';
 	import * as Popover from '@/components/ui/popover';
 	import { Button } from '@/components/ui/button';
-	import { Ellipsis } from 'lucide-svelte';
+	import { Ellipsis, Flag, Trash } from 'lucide-svelte';
+	import { Input } from '@/components/ui/input';
 
 	function getTimeElapsed(date: Date | string) {
 		if (typeof date === 'string') date = new Date(date);
@@ -49,6 +50,8 @@
 		return `${date.toLocaleTimeString('en-US', options)}`;
 	}
 
+	let popoverOpened = false;
+
 	export let username;
 	export let userId;
 	export let verified;
@@ -77,11 +80,9 @@
 		</a>
 	{/if}
 
-	<div class="flex flex-col text-left">
-		<div
-			class="flex items-center justify-between gap-1 {smaller ? 'max-w-[250px]' : 'max-w-[490px]'}"
-		>
-			<div class="flex items-center gap-2">
+	<div class="flex w-full flex-col text-left">
+		<div class="flex w-full items-center gap-1">
+			<div class="flex flex-grow items-center gap-1 overflow-hidden">
 				<HoverCard.Root>
 					<HoverCard.Trigger
 						rel="noreferrer noopener"
@@ -162,7 +163,6 @@
 					</HoverCard.Content>
 				</HoverCard.Root>
 				<Label class="text-muted-foreground">•</Label>
-
 				<Tooltip.Root>
 					<Tooltip.Trigger>
 						<Label class="cursor-pointer text-lg text-muted-foreground hover:underline "
@@ -170,41 +170,21 @@
 						>
 					</Tooltip.Trigger>
 					<Tooltip.Content>
-						<p>
-							{formattedDate}
-						</p>
+						<p>{formattedDate}</p>
 					</Tooltip.Content>
 				</Tooltip.Root>
 			</div>
-			<div class="ml-auto flex items-center gap-2">
-				<Popover.Root>
-					<Popover.Trigger>
-						<Ellipsis />
+			<div class="flex-shrink-0">
+				<Popover.Root bind:open={popoverOpened}>
+					<Popover.Trigger asChild let:builder>
+						<button {...builder} on:click|stopPropagation={() => (popoverOpened = !popoverOpened)}>
+							<Ellipsis />
+						</button>
 					</Popover.Trigger>
-					<Popover.Content>
-						<div class="grid gap-4">
-							<div class="space-y-2">
-								<h4 class="font-medium leading-none">Dimensions</h4>
-								<p class="text-sm text-muted-foreground">Set the dimensions for the layer.</p>
-							</div>
-							<div class="grid gap-2">
-								<div class="grid grid-cols-3 items-center gap-4">
-									<Button>Report</Button>
-								</div>
-								<div class="grid grid-cols-3 items-center gap-4">
-									<Label for="maxWidth">Max. width</Label>
-									<Input id="maxWidth" value="300px" class="col-span-2 h-8" />
-								</div>
-								<div class="grid grid-cols-3 items-center gap-4">
-									<Label for="height">Height</Label>
-									<Input id="height" value="25px" class="col-span-2 h-8" />
-								</div>
-								<div class="grid grid-cols-3 items-center gap-4">
-									<Label for="maxHeight">Max. height</Label>
-									<Input id="maxHeight" value="none" class="col-span-2 h-8" />
-								</div>
-							</div>
-						</div>
+					<Popover.Content class="flex w-50 flex-col gap-2">
+							<Button variant="outline"><Flag class="mr-2 h-4 w-4" />Report user</Button>
+							<Button variant="outline"><Flag class="mr-2 h-4 w-4" />Report post</Button>
+							<Button variant="outline"><Trash class="mr-2 h-4 w-4" />Delete</Button>
 					</Popover.Content>
 				</Popover.Root>
 			</div>
