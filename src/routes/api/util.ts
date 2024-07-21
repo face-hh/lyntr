@@ -36,9 +36,9 @@ export const lyntObj = (userId: string) => {
         and reposts.reposted = true
         and reposts.user_id = ${userId}
     )`.as('reposted_by_user'),
-    handle: users.handle,
-    bio: users.bio,
-    userCreatedAt: users.created_at,
+        handle: users.handle,
+        bio: users.bio,
+        userCreatedAt: users.created_at,
         username: users.username,
         iq: users.iq,
         verified: users.verified,
@@ -57,14 +57,14 @@ export const lyntObj = (userId: string) => {
             where parent.id = ${lynts.parent}
         )
     )`.as('parent_user_handle'),
-    parentUserCreatedAt: sql<string>`(
+        parentUserCreatedAt: sql<string>`(
         select created_at from ${users} as parent_user
         where parent_user.id = (
             select user_id from ${lynts} as parent
             where parent.id = ${lynts.parent}
         )
     )`.as('parent_user_created_at'),
-    parentUserBio: sql<string>`(
+        parentUserBio: sql<string>`(
         select bio from ${users} as parent_user
         where parent_user.id = (
             select user_id from ${lynts} as parent
@@ -92,6 +92,13 @@ export const lyntObj = (userId: string) => {
             where parent.id = ${lynts.parent}
         )
     )`.as('parent_user_iq'),
+        parentUserId: sql<number>`(
+        select id from ${users} as parent_user
+        where parent_user.id = (
+            select user_id from ${lynts} as parent
+            where parent.id = ${lynts.parent}
+        )
+    )`.as('parent_user_id'),
         parentCreatedAt: sql<string>`(
         select created_at from ${lynts} as parent
         where parent.id = ${lynts.parent}

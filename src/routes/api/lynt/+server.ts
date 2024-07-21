@@ -2,8 +2,8 @@ import { json } from '@sveltejs/kit';
 import type { Cookies, RequestHandler } from '@sveltejs/kit';
 import { verifyAuthJWT } from '@/server/jwt';
 import { db } from '@/server/db';
-import { likes, lynts, users } from '@/server/schema';
-import { eq, sql, and } from 'drizzle-orm';
+import { lynts, likes, notifications, history, users } from '@/server/schema';
+import { eq, sql, and, or, inArray } from 'drizzle-orm';
 import sanitizeHtml from 'sanitize-html';
 import { Snowflake } from 'nodejs-snowflake';
 import sharp from 'sharp';
@@ -189,3 +189,91 @@ async function fetchReferencedLynts(userId: string, parentId: string | null): Pr
 
     return referencedLynts;
 }
+
+export const DELETE: RequestHandler = async ({ url, cookies }: { url: URL, cookies: Cookies }) => {
+    const authCookie = cookies.get('_TOKEN__DO_NOT_SHARE');
+
+    if (!authCookie) {
+        return json({ error: 'Missing authentication' }, { status: 401 });
+    }
+
+    let userId: string;
+
+    try {
+        const jwtPayload = await verifyAuthJWT(authCookie);
+        userId = jwtPayload.userId;
+
+        if (!userId) {
+            throw new Error('Invalid JWT token');
+        }
+    } catch (error) {
+        console.error('Authentication error:', error);
+        return json({ error: 'Authentication failed' }, { status: 401 });
+    }
+
+    const lyntId = url.searchParams.get('id');
+
+    if (!lyntId) {
+        return json({ error: 'Missing lynt ID' }, { status: 400 });
+    }
+
+    try {
+        // Check if the lynt exists and belongs to the authenticated user
+        const [lynt] = await db
+            .select({ id: lynts.id, user_id: lynts.user_id })
+            .from(lynts)
+            .where(eq(lynts.id, lyntId))
+            .limit(1);
+
+        if (!lynt) {
+            return json({ error: 'Lynt not found' }, { status: 404 });
+        }
+
+        if (lynt.user_id !== userId) {
+            return json({ error: 'Unauthorized to delete this lynt' }, { status: 403 });
+        }
+
+        await db.transaction(async (trx) => {
+            // Get all comments under this lynt
+            const comments = await trx
+                .select({ id: lynts.id })
+                .from(lynts)
+                .where(eq(lynts.parent, lyntId));
+
+            const commentIds = comments.map(comment => comment.id);
+            const allIds = [lyntId, ...commentIds];
+
+            // Delete likes associated with the comments and the original lynt
+            await trx.delete(likes)
+                .where(inArray(likes.lynt_id, allIds));
+
+            // Delete notifications associated with the comments and the original lynt
+            await trx.delete(notifications)
+                .where(inArray(notifications.lyntId, allIds));
+
+            // Delete history entries associated with the comments and the original lynt
+            await trx.delete(history)
+                .where(inArray(history.lynt_id, allIds));
+
+            // Delete all comments under this lynt
+            await trx.delete(lynts)
+                .where(and(eq(lynts.parent, lyntId), eq(lynts.reposted, false)));
+
+            // Update reposts of this lynt
+            await trx.update(lynts)
+                .set({ 
+                    content: sql`${lynts.content} || '\nThe Lynt this user is reposting has been since deleted.'`,
+                    parent: null
+                })
+                .where(and(eq(lynts.parent, lyntId), eq(lynts.reposted, true)));
+
+            // Delete the original lynt
+            await trx.delete(lynts).where(eq(lynts.id, lyntId));
+        });
+
+        return json({ message: 'Lynt and related data deleted successfully' }, { status: 200 });
+    } catch (error) {
+        console.error('Error deleting lynt:', error);
+        return json({ error: 'Failed to delete lynt' }, { status: 500 });
+    }
+};

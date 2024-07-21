@@ -9,6 +9,7 @@
 	import { Button } from '@/components/ui/button';
 	import { Ellipsis, Flag, Trash } from 'lucide-svelte';
 	import { Input } from '@/components/ui/input';
+	import { toast } from 'svelte-sonner';
 
 	function getTimeElapsed(date: Date | string) {
 		if (typeof date === 'string') date = new Date(date);
@@ -59,14 +60,27 @@
 	export let createdAt;
 	export let content;
 	export let iq;
-	export let bio: string;
+	export let bio: string | null
+	export let smaller = false;
 	export let userCreatedAt;
 	export let includeAvatar = false;
-	export let smaller = false;
-	export let has_image: boolean;
+	export let isAuthor: boolean;
+	export let has_image: boolean | null;
 	export let postId: string;
 
 	const formattedDate = formatDateTooltip(createdAt);
+
+	async function handleDelete() {
+		const response = await fetch('api/lynt?id=' + postId, { method: 'DELETE' });
+
+		if (response.status === 200) {
+			toast(`Your post has been permanently deleted.`);
+		} else if (response.status === 403) {
+			toast(`Missing access - frontend may be desynchronised.`);
+		} else {
+			toast(`Unknown error occured while deleting: ${response.status} | ${response.statusText}`);
+		}
+	}
 </script>
 
 <div class={`${$$props.class} flex items-start gap-2`}>
@@ -81,7 +95,7 @@
 	{/if}
 
 	<div class="flex w-full flex-col text-left">
-		<div class="flex w-full items-center gap-1">
+		<div class="flex w-full items-center gap-1 {smaller ? 'max-w-[250px]' : 'max-w-[490px]'}">
 			<div class="flex flex-grow items-center gap-1 overflow-hidden">
 				<HoverCard.Root>
 					<HoverCard.Trigger
@@ -135,7 +149,7 @@
 				<HoverCard.Root>
 					<HoverCard.Trigger
 						rel="noreferrer noopener"
-						class="truncate rounded-sm text-lg text-muted-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-black"
+						class="text-clip overflow-hidden rounded-sm text-lg text-muted-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-black"
 						href="/@{handle}"
 					>
 						@{handle}
@@ -181,10 +195,29 @@
 							<Ellipsis />
 						</button>
 					</Popover.Trigger>
-					<Popover.Content class="flex w-50 flex-col gap-2">
-							<Button variant="outline"><Flag class="mr-2 h-4 w-4" />Report user</Button>
-							<Button variant="outline"><Flag class="mr-2 h-4 w-4" />Report post</Button>
-							<Button variant="outline"><Trash class="mr-2 h-4 w-4" />Delete</Button>
+					<Popover.Content class="flex w-auto flex-col rounded-lg p-2 shadow-lg">
+						{#if isAuthor}
+							<button
+								on:click={handleDelete}
+								class="flex items-center gap-3 rounded-lg p-3 text-sm hover:bg-lynt-foreground"
+							>
+								<Trash class="h-5 w-5 text-muted-foreground" />
+								<span>Delete</span>
+							</button>
+						{:else}
+							<button
+								class="flex items-center gap-3 rounded-lg p-3 text-sm hover:bg-lynt-foreground"
+							>
+								<Flag class="h-5 w-5 text-muted-foreground" />
+								<span>Report user</span>
+							</button>
+							<button
+								class="flex items-center gap-3 rounded-lg p-3 text-sm hover:bg-lynt-foreground"
+							>
+								<Flag class="h-5 w-5 text-muted-foreground" />
+								<span>Report post</span>
+							</button>
+						{/if}
 					</Popover.Content>
 				</Popover.Root>
 			</div>

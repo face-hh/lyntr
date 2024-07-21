@@ -26,7 +26,8 @@
 		}
 		return num.toString();
 	}
-	export let lyntClick: Function;
+	export let myId: string;
+	export let lyntClick: (id: string) => Promise<void>;
 	export let id: string;
 	export let content: string;
 	export let userId: string;
@@ -48,8 +49,9 @@
 	export let verified: boolean;
 	export let parentId: string | null;
 	export let parentContent: string | null;
-	export let parentUserBio: string;
-	export let parentHasImage: boolean;
+	export let parentUserBio: string | null;
+	export let parentHasImage: boolean | null;
+	export let parentUserId: string | null;
 	export let parentUserHandle: string | null;
 	export let parentUserUsername: string | null;
 	export let parentUserVerified: boolean | null;
@@ -173,6 +175,7 @@
 			<LyntContents
 				postId={id}
 				{bio}
+				isAuthor={userId === myId}
 				{has_image}
 				{username}
 				{userId}
@@ -190,7 +193,8 @@
 						{#if parentUserHandle}
 							<!-- reposted lynt -->
 							<LyntContents
-								{userId}
+								userId={parentUserId}
+								isAuthor={parentUserId === myId}
 								bio={parentUserBio}
 								postId={parentId}
 								has_image={parentHasImage}

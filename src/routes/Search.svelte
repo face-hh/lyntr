@@ -13,6 +13,7 @@
     let hasSearched = false;
 
     export let handleLyntClick;
+    export let userId;
     
     async function performSearch() {
         if (!searchQuery.trim()) return;
@@ -67,7 +68,7 @@
                 {#if searchResults.length > 0}
                     <div class="flex flex-col gap-4">
                         {#each searchResults as lynt}
-                            <Lynt {...lynt} on:lyntClick={handleLyntClick} />
+                            <Lynt {...lynt} myId={userId} on:lyntClick={handleLyntClick} />
                         {/each}
                     </div>
                 {:else}

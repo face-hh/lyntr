@@ -61,9 +61,10 @@
 		parentUserHandle: string | null;
 		parentUserUsername: string | null;
 		parentUserVerified: boolean | null;
-		parentHasImage: boolean;
-		parentUserBio: string,
+		parentHasImage: boolean | null;
+		parentUserBio: string | null,
 		parentUserIq: number | null;
+		parentUserId: string | null;
 		parentCreatedAt: number | null;
 		parentUserCreatedAt: number | null;
 	}
@@ -174,7 +175,7 @@
 
 	<div class="flex w-[600px] flex-col overflow-hidden">
 		{#if page === 'search'}
-			<Search {handleLyntClick} />
+			<Search userId={id} {handleLyntClick} />
 		{:else if page === 'notifications'}
 			<Notifications />
 		{:else if page.startsWith('profile')}
@@ -210,7 +211,7 @@
 					<LoadingSpinner />
 				{:else}
 					{#each feed as lynt}
-						<Lynt {...lynt} lyntClick={handleLyntClick} />
+						<Lynt {...lynt} myId={id} lyntClick={handleLyntClick} />
 					{/each}
 				{/if}
 				<div class="mt-24"></div>
@@ -225,13 +226,13 @@
 				<!-- Referenced Lynts -->
 				<div>
 					{#each referencedLynts as lynt (lynt.id)}
-						<Lynt {...lynt} lyntClick={handleLyntClick} connect={true} />
+						<Lynt {...lynt} myId={id} lyntClick={handleLyntClick} connect={true} />
 					{/each}
 				</div>
 
 				<!-- Selected Lynt -->
 				<div id="selected-lynt">
-					<Lynt {...selectedLynt} lyntClick={handleLyntClick} />
+					<Lynt {...selectedLynt} myId={id} lyntClick={handleLyntClick} />
 				</div>
 
 				<div class="mb-2 mt-2 inline-flex w-full items-center gap-2 rounded-xl bg-border p-3">
@@ -257,7 +258,7 @@
 						<Label class="flex justify-center text-lg">This lynt has no comments.</Label>
 					{:else}
 						{#each comments as lynt}
-							<Lynt {...lynt} lyntClick={handleLyntClick} />
+							<Lynt {...lynt} myId={id} lyntClick={handleLyntClick} />
 						{/each}
 					{/if}
 				</div>

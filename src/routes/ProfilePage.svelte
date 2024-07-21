@@ -237,7 +237,7 @@
 					<p>No lynts yet.</p>
 				{:else}
 					{#each userLynts.lynts as lynt}
-						<Lynt {...lynt} lyntClick={handleLyntClick} />
+						<Lynt {...lynt} myId={profile.id} lyntClick={handleLyntClick} />
 					{/each}
 				{/if}
 			</div>
