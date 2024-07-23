@@ -23,18 +23,32 @@ CREATE TABLE IF NOT EXISTS "lynts" (
 	"views" integer DEFAULT 0,
 	"shares" integer DEFAULT 0,
 	"has_link" boolean DEFAULT false,
+	"has_image" boolean DEFAULT false,
 	"created_at" timestamp DEFAULT now(),
 	"reposted" boolean DEFAULT false,
 	"parent" text
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "notifications" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" text NOT NULL,
+	"type" text NOT NULL,
+	"source_user_id" text,
+	"lynt_id" text,
+	"read" boolean DEFAULT false,
+	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
 	"id" text PRIMARY KEY NOT NULL,
 	"username" varchar(60) NOT NULL,
 	"handle" varchar(32) NOT NULL,
+	"bio" varchar(256) DEFAULT 'Nothing here yet...',
 	"created_at" timestamp DEFAULT now(),
+	"banned" boolean DEFAULT false,
 	"iq" integer NOT NULL,
-	"profile_picture" text DEFAULT 'default',
+	"token" text DEFAULT 'a',
+	"email" text NOT NULL,
 	"verified" boolean DEFAULT false,
 	CONSTRAINT "users_handle_unique" UNIQUE("handle")
 );
@@ -83,6 +97,24 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "lynts" ADD CONSTRAINT "lynts_parent_lynts_id_fk" FOREIGN KEY ("parent") REFERENCES "public"."lynts"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "notifications" ADD CONSTRAINT "notifications_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "notifications" ADD CONSTRAINT "notifications_source_user_id_users_id_fk" FOREIGN KEY ("source_user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "notifications" ADD CONSTRAINT "notifications_lynt_id_lynts_id_fk" FOREIGN KEY ("lynt_id") REFERENCES "public"."lynts"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

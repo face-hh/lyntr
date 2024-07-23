@@ -10,6 +10,7 @@
 	import { Ellipsis, Flag, Trash } from 'lucide-svelte';
 	import { Input } from '@/components/ui/input';
 	import { toast } from 'svelte-sonner';
+	import Report from './Report.svelte';
 
 	function getTimeElapsed(date: Date | string) {
 		if (typeof date === 'string') date = new Date(date);
@@ -60,7 +61,7 @@
 	export let createdAt;
 	export let content;
 	export let iq;
-	export let bio: string | null
+	export let bio: string | null;
 	export let smaller = false;
 	export let userCreatedAt;
 	export let includeAvatar = false;
@@ -105,7 +106,7 @@
 					>
 						{username}
 					</HoverCard.Trigger>
-					<HoverCard.Content class="w-80">
+					<HoverCard.Content class="flex flex-row gap-2 items-center w-80">
 						<div class="flex justify-between space-x-4">
 							<Avatar
 								size={10}
@@ -149,7 +150,7 @@
 				<HoverCard.Root>
 					<HoverCard.Trigger
 						rel="noreferrer noopener"
-						class="text-clip overflow-hidden rounded-sm text-lg text-muted-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-black"
+						class="overflow-hidden text-clip rounded-sm text-lg text-muted-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-black"
 						href="/@{handle}"
 					>
 						@{handle}
@@ -205,18 +206,8 @@
 								<span>Delete</span>
 							</button>
 						{:else}
-							<button
-								class="flex items-center gap-3 rounded-lg p-3 text-sm hover:bg-lynt-foreground"
-							>
-								<Flag class="h-5 w-5 text-muted-foreground" />
-								<span>Report user</span>
-							</button>
-							<button
-								class="flex items-center gap-3 rounded-lg p-3 text-sm hover:bg-lynt-foreground"
-							>
-								<Flag class="h-5 w-5 text-muted-foreground" />
-								<span>Report post</span>
-							</button>
+							<Report profile={true} {userId} lyntId={postId} />
+							<Report profile={false} {userId} lyntId={postId} />
 						{/if}
 					</Popover.Content>
 				</Popover.Root>

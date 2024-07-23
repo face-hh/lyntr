@@ -7,7 +7,10 @@ export const users = pgTable('users', {
     handle: varchar('handle', { length: 32 }).notNull().unique(),
     bio: varchar('bio', { length: 256 }).default('Nothing here yet...'),
     created_at: timestamp('created_at').defaultNow(),
+    banned: boolean('banned').default(false),
     iq: integer('iq').notNull(),
+    token: text('token').default("a"),
+    email: text('email').notNull(),
     verified: boolean('verified').default(false)
 });
 

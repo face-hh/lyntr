@@ -48,18 +48,24 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
 
     const { data, error } = await supabase.auth.getUser(supabaseToken);
 
-    // if (error || !data.user || !supabaseToken) {
-    //     throw new Error('Invalid Supabase token');
-    // }
+    if (error || !data.user || !supabaseToken) {
+        throw new Error('Invalid Supabase token');
+    }
 
     const body = await request.json();
 
-    if (!body.handle || !body.username) {
+    if (!body.handle || !body.username || !data.user.email) {
         return json({ error: 'Invalid request - missing fields.' }, { status: 400 });
     }
 
     if (body.handle.length > 32 || body.username.length > 60) {
         return json({ error: 'Handle (32) or username (60) are over the character limit.' }, { status: 400 });
+    }
+
+    const existingUser = await db.select().from(users).where(eq(users.email, data.user.email)).limit(1);
+    
+    if (existingUser.length > 0) {
+        return json({ error: 'Email already in use' }, { status: 409 });
     }
 
     let totalIQ = 80; // Start with default 80 IQ
@@ -84,10 +90,16 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
 
         const cleanedHandle = sanitizeHtml(body.handle).replace(/[^0-9a-z_-]/gi, '');
 
+        const jwt = await createAuthJWT({
+            userId: uniqueUserId
+        })
+
         const [newLynt] = await db.insert(users).values({
             'id': uniqueUserId,
             'handle': cleanedHandle,
             'iq': totalIQ,
+            'token': jwt,
+            'email': data.user?.email,
             'username': sanitizeHtml(body.username.replace("\n", " "))
         }).returning();
 
@@ -97,10 +109,6 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
             totalIQ: totalIQ,
             formattedText: formattedText.trim()
         }
-
-        const jwt = await createAuthJWT({
-            userId: uniqueUserId
-        })
 
         cookies.set('_TOKEN__DO_NOT_SHARE', jwt, {
             path: '/',

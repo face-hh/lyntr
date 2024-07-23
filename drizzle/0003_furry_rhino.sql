@@ -1,1 +1,0 @@
-ALTER TABLE "users" ADD COLUMN "bio" varchar(256) DEFAULT 'Nothing here yet...';

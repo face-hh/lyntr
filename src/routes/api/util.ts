@@ -1,5 +1,7 @@
+import { db } from '@/server/db';
+import { verifyAuthJWT } from '@/server/jwt';
 import { lynts, likes, followers, users } from '@/server/schema';
-import { sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import sharp from 'sharp';
 
 export const lyntObj = (userId: string) => {
@@ -134,4 +136,10 @@ export async function uploadAvatar(inputBuffer: Buffer, fileName: string, minioC
             'Content-Type': 'image/webp',
         });
     }
+}
+
+interface AuthResult {
+    userId: string;
+    error?: string;
+    status?: number;
 }
