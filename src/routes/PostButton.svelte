@@ -29,6 +29,7 @@
 
 	async function handlePost() {
 		const formData = new FormData();
+
 		formData.append('content', lynt);
 
 		if (image) {
@@ -68,7 +69,7 @@
 					role="textbox"
 					spellcheck="true"
 					tabindex="0"
-					bind:textContent={lynt}
+					bind:innerText={lynt}
 					class="overflow-wrap-anywhere min-h-[40px] w-full outline-none"
 					placeholder="What's happening?"
 				/>
