@@ -10,8 +10,8 @@
 	class="absolute bottom-2 flex w-[250px] max-w-md cursor-pointer items-center gap-4 rounded-full bg-border p-4"
 >
 	<Avatar size={12} {src} alt="Your profile picture." />
-	<div class="flex flex-col gap-3 overflow-hidden">
-		<span class="text-lg font-medium leading-none peer-enabled:cursor-pointer">
+	<div class="flex flex-col gap-2 overflow-hidden">
+		<span class="truncate text-lg font-medium leading-none peer-enabled:cursor-pointer">
 			{name}
 		</span>
 		<span class="text-sm font-medium leading-none text-muted-foreground">

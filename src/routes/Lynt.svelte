@@ -230,7 +230,7 @@
 								outline={true}
 							/>
 						</Dialog.Trigger>
-						<Dialog.Content class="sm:max-w-[425px]">
+						<Dialog.Content class="min-w-[20%]">
 							<div class="flex items-start space-x-3">
 								<Avatar
 									size={10}
@@ -268,6 +268,7 @@
 									/>
 									<div class="rounded-md border-2 border-primary p-4">
 										<LyntContents
+											isAuthor={userId === myId}
 											postId={id}
 											{bio}
 											{has_image}

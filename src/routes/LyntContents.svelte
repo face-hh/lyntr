@@ -96,12 +96,12 @@
 	{/if}
 
 	<div class="flex w-full flex-col text-left">
-		<div class="flex w-full items-center gap-1 {smaller ? 'max-w-[250px]' : 'max-w-[490px]'}">
+		<div class="flex w-full justify-between items-center gap-1 {smaller ? 'max-w-[300px]' : ''}">
 			<div class="flex flex-grow items-center gap-1 overflow-hidden">
 				<HoverCard.Root>
 					<HoverCard.Trigger
 						rel="noreferrer noopener"
-						class="rounded-sm text-xl font-bold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-black"
+						class="truncate {smaller ? 'max-w-[30%]' : 'max-w-[60%]'} rounded-sm text-xl font-bold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-black"
 						href="/@{handle}"
 					>
 						{username}
