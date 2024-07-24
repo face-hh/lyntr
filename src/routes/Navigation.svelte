@@ -5,6 +5,7 @@
     import { currentPage } from './stores';
 	import { goto } from '$app/navigation';
 
+    export let handle: string;
     export let navItems = [
         { icon: House, label: 'Home', page: 'home' },
         { icon: Search, label: 'Search', page: 'search' },
@@ -16,6 +17,9 @@
         currentPage.set(page);
         if (page === 'home'){
             goto('/')
+        }
+        if (page === 'profile'){
+            goto(`/@${handle}`)
         }
     }
 </script>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { v } from "./stores"
 	import { Separator } from '@/components/ui/separator';
 
 	import { BarChart2, Heart, ImageUp, MessageCircle, Repeat2, Share2 } from 'lucide-svelte';
@@ -27,6 +28,7 @@
 		return num.toString();
 	}
 	export let myId: string;
+	export let truncateContent: boolean = true;
 	export let lyntClick: (id: string) => Promise<void>;
 	export let id: string;
 	export let content: string;
@@ -36,7 +38,7 @@
 	export let bio: string;
 	export let reposted: boolean;
 	export let likeCount: number;
-	export let likedByFollowed: boolean;
+	// export let likedByFollowed: boolean;
 	export let repostCount: number;
 	export let commentCount: number;
 	export let likedByUser: boolean;
@@ -63,6 +65,7 @@
 	let openDialog = false;
 	let lynt = '';
 
+	console.log(parentContent);
 	async function handleRepost() {
 		if (repostedByUser) return;
 		openDialog = !openDialog;
@@ -165,7 +168,7 @@
 		<a href="/@{handle}" class="inline-block max-h-[40px] min-w-[40px]">
 			<Avatar
 				size={10}
-				src={`http://localhost:9000/lyntr/${userId}_small.webp`}
+				src={`http://localhost:9000/lyntr/${userId}_small.webp?v=${$v}`}
 				alt="A profile picture."
 			/>
 		</a>
@@ -173,6 +176,7 @@
 		<div class="flex w-full max-w-[530px] flex-col gap-2">
 			<!-- Lynt that actually gets displayed. Main lynt -->
 			<LyntContents
+				{truncateContent}
 				postId={id}
 				{bio}
 				isAuthor={userId === myId}
@@ -193,6 +197,8 @@
 						{#if parentUserHandle}
 							<!-- reposted lynt -->
 							<LyntContents
+								truncateContent={true}
+								content={parentContent}
 								userId={parentUserId}
 								isAuthor={parentUserId === myId}
 								bio={parentUserBio}
@@ -202,7 +208,6 @@
 								verified={parentUserVerified}
 								handle={parentUserHandle}
 								createdAt={parentCreatedAt}
-								content={parentContent}
 								iq={parentUserIq}
 								userCreatedAt={parentUserCreatedAt}
 								includeAvatar={true}
@@ -234,7 +239,7 @@
 							<div class="flex items-start space-x-3">
 								<Avatar
 									size={10}
-									src={`http://localhost:9000/lyntr/${userId}_small.webp`}
+									src={`http://localhost:9000/lyntr/${userId}_small.webp?v=${$v}`}
 									alt="Your profile picture."
 								/>
 
@@ -268,6 +273,8 @@
 									/>
 									<div class="rounded-md border-2 border-primary p-4">
 										<LyntContents
+											truncateContent={true}
+											{content}
 											isAuthor={userId === myId}
 											postId={id}
 											{bio}
@@ -276,7 +283,6 @@
 											{verified}
 											{handle}
 											{createdAt}
-											{content}
 											{iq}
 											{userId}
 											{userCreatedAt}

@@ -3,12 +3,11 @@
 	import { Label } from '@/components/ui/label';
 	import * as HoverCard from '@/components/ui/hover-card/index.js';
 	import Avatar from './Avatar.svelte';
+	import { v } from './stores';
 
 	import CalendarDays from 'lucide-svelte/icons/calendar-days';
 	import * as Popover from '@/components/ui/popover';
-	import { Button } from '@/components/ui/button';
-	import { Ellipsis, Flag, Trash } from 'lucide-svelte';
-	import { Input } from '@/components/ui/input';
+	import { Ellipsis, Trash } from 'lucide-svelte';
 	import { toast } from 'svelte-sonner';
 	import Report from './Report.svelte';
 
@@ -54,6 +53,7 @@
 
 	let popoverOpened = false;
 
+	export let truncateContent: boolean = false;
 	export let username;
 	export let userId;
 	export let verified;
@@ -82,6 +82,23 @@
 			toast(`Unknown error occured while deleting: ${response.status} | ${response.statusText}`);
 		}
 	}
+
+	function truncateContentFunc(
+		content: string,
+		maxLines: number = 5
+	): { truncated: string; needsReadMore: boolean } {
+		const lines = content.split('\n');
+
+		if (lines.length <= maxLines || !truncateContent) {
+			return { truncated: content, needsReadMore: false };
+		}
+		return {
+			truncated: lines.slice(0, maxLines).join('\n'),
+			needsReadMore: true
+		};
+	}
+
+	$: ({ truncated, needsReadMore } = truncateContentFunc(content));
 </script>
 
 <div class={`${$$props.class} flex items-start gap-2`}>
@@ -89,28 +106,30 @@
 		<a href="/@{handle}" class="inline-block max-h-[40px] min-w-[40px]">
 			<Avatar
 				size={10}
-				src={`http://localhost:9000/lyntr/${userId}_small.webp`}
+				src={`http://localhost:9000/lyntr/${userId}_small.webp?v=${$v}`}
 				alt="A profile picture."
 			/>
 		</a>
 	{/if}
 
 	<div class="flex w-full flex-col text-left">
-		<div class="flex w-full justify-between items-center gap-1 {smaller ? 'max-w-[300px]' : ''}">
+		<div class="flex w-full items-center justify-between gap-1 {smaller ? 'max-w-[300px]' : ''}">
 			<div class="flex flex-grow items-center gap-1 overflow-hidden">
 				<HoverCard.Root>
 					<HoverCard.Trigger
 						rel="noreferrer noopener"
-						class="truncate {smaller ? 'max-w-[30%]' : 'max-w-[60%]'} rounded-sm text-xl font-bold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-black"
+						class="truncate {smaller
+							? 'max-w-[30%]'
+							: 'max-w-[60%]'} rounded-sm text-xl font-bold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-black"
 						href="/@{handle}"
 					>
 						{username}
 					</HoverCard.Trigger>
-					<HoverCard.Content class="flex flex-row gap-2 items-center w-80">
+					<HoverCard.Content class="flex w-80 flex-row items-center gap-2">
 						<div class="flex justify-between space-x-4">
 							<Avatar
 								size={10}
-								src={`http://localhost:9000/lyntr/${userId}_small.webp`}
+								src={`http://localhost:9000/lyntr/${userId}_small.webp?v=${$v}`}
 								alt="Profile picture."
 							/>
 
@@ -159,7 +178,7 @@
 						<div class="flex justify-between space-x-4">
 							<Avatar
 								size={10}
-								src={`http://localhost:9000/lyntr/${userId}_small.webp`}
+								src={`http://localhost:9000/lyntr/${userId}_small.webp?v=${$v}`}
 								alt="Profile picture."
 							/>
 
@@ -214,9 +233,13 @@
 			</div>
 		</div>
 
-		<span class="max-w-[490px] whitespace-pre-wrap break-words text-lg">{content}</span>
+		<span class="max-w-[490px] whitespace-pre-wrap break-words text-lg">{truncated}</span>
+
+		{#if needsReadMore}
+			<span class="mt-2 text-sm text-muted-foreground hover:underline">Click to Read more...</span>
+		{/if}
 	</div>
 </div>
 {#if has_image}
-	<img class="avatar mt-2" src="http://localhost:9000/lyntr/{postId}.webp" alt="ok" />
+	<img class="avatar mt-2" src="http://localhost:9000/lyntr/{postId}.webp?v=${$v}" alt="ok" />
 {/if}

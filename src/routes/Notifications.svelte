@@ -142,7 +142,7 @@
 													<div class="flex justify-between space-x-4">
 														<Avatar
 															size={10}
-															src={`http://localhost:9000/lyntr/${notification.sourceUserId}_small.webp`}
+															src={`http://localhost:9000/lyntr/${notification.sourceUserId}_small.webp?v=${Math.random()}`}
 															alt="Profile picture."
 														/>
 

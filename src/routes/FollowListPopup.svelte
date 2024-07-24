@@ -3,6 +3,8 @@
 	import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 	import { Input } from '@/components/ui/input';
 	import { Button } from '@/components/ui/button';
+	import { v } from "./stores"
+
 	import Avatar from './Avatar.svelte';
 
 	export let userId: string;
@@ -93,7 +95,7 @@
 						>
 							<Avatar
 								size={12}
-								src={`http://localhost:9000/lyntr/${user.id}_medium.webp`}
+								src={`http://localhost:9000/lyntr/${user.id}_medium.webp?v=${$v}`}
 								alt={user.username}
 							/>
 							<div>

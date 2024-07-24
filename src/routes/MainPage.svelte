@@ -3,6 +3,8 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import { Reply } from 'lucide-svelte';
+	
+	import { v } from './stores';
 
 	import Lynt from './Lynt.svelte';
 	import Navigation from './Navigation.svelte';
@@ -17,16 +19,16 @@
 	import Notifications from './Notifications.svelte';
 	import ProfilePage from './ProfilePage.svelte';
 	import { goto } from '$app/navigation';
+	import TopTab from './TopTab.svelte';
 
 	export let username: string;
 	export let handle: string;
-	export let created_at: string;
-	export let iq: number;
+	// export let created_at: string;
+	// export let iq: number;
 	export let id: string;
 	export let lyntOpened: string | null = null;
 	export let profileOpened: string | null = null;
 
-	let currentTab = 'foryou';
 	let comment: string;
 	let loadingFeed = true;
 
@@ -62,7 +64,7 @@
 		parentUserUsername: string | null;
 		parentUserVerified: boolean | null;
 		parentHasImage: boolean | null;
-		parentUserBio: string | null,
+		parentUserBio: string | null;
 		parentUserIq: number | null;
 		parentUserId: string | null;
 		parentCreatedAt: number | null;
@@ -74,6 +76,14 @@
 	let selectedLynt: FeedItem | null = null;
 	let referencedLynts: FeedItem[] = [];
 	let loadingComments = false;
+
+	let currentTab = 'For you';
+	const tabs = ['For you', 'Following', 'Live'];
+
+	function handleTabChange(tab: string) {
+		currentTab = tab;
+		fetchFeed();
+	}
 
 	if (lyntOpened !== null && lyntOpened !== '') {
 		(async () => {
@@ -98,7 +108,7 @@
 	}
 
 	async function fetchFeed() {
-		const response = await fetch('api/feed', { method: 'GET' });
+		const response = await fetch(`api/feed?type=${currentTab}`, { method: 'GET' });
 
 		if (response.status !== 200) alert('Error generating feed! Please refresh the page');
 
@@ -163,10 +173,10 @@
 		<img class="mb-5 size-20 cursor-pointer" src="logo.svg" alt="Logo" />
 		<button on:click={() => setMode('light')}>Set Light Mode</button>
 		<button on:click={() => setMode('dark')}>Set Dark Mode</button>
-		<Navigation />
+		<Navigation {handle} />
 		<PostButton userId={id} />
 		<ProfileButton
-			src={`http://localhost:9000/lyntr/${id}_medium.webp`}
+			src={`http://localhost:9000/lyntr/${id}_medium.webp?v=${$v}`}
 			name={username}
 			handle="@{handle}"
 		/>
@@ -181,28 +191,7 @@
 		{:else if page.startsWith('profile')}
 			<ProfilePage profileHandle={page.replace('profile', '')} {handleLyntClick} />
 		{:else if page === 'home'}
-			<div class="flex justify-center gap-20">
-				<div>
-					<Label class="cursor-pointer select-none text-xl">For you</Label>
-					{#if currentTab === 'foryou'}
-						<div class="mt-1 h-2 w-auto rounded-b-lg bg-primary"></div>
-					{/if}
-				</div>
-
-				<div>
-					<Label class="cursor-pointer select-none text-xl">Following</Label>
-					{#if currentTab === 'following'}
-						<div class="mt-1 h-2 w-auto rounded-b-lg bg-primary"></div>
-					{/if}
-				</div>
-
-				<div>
-					<Label class="cursor-pointer select-none text-xl">Live</Label>
-					{#if currentTab === 'live'}
-						<div class="mt-1 h-2 w-auto rounded-b-lg bg-primary"></div>
-					{/if}
-				</div>
-			</div>
+			<TopTab {tabs} {currentTab} onTabChange={handleTabChange} />
 			<Separator class="mt-4" />
 
 			<!-- Feed -->
@@ -232,7 +221,7 @@
 
 				<!-- Selected Lynt -->
 				<div id="selected-lynt">
-					<Lynt {...selectedLynt} myId={id} lyntClick={handleLyntClick} />
+					<Lynt {...selectedLynt} myId={id} truncateContent={false} lyntClick={handleLyntClick} />
 				</div>
 
 				<div class="mb-2 mt-2 inline-flex w-full items-center gap-2 rounded-xl bg-border p-3">

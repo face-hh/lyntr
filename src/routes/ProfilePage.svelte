@@ -23,7 +23,7 @@
 		id: string;
 		following: number;
 		followers: number;
-		bio: string,
+		bio: string;
 	};
 	let userLynts: any[] = [];
 	let loading = true;
@@ -87,10 +87,10 @@
 			});
 
 			if (response.ok) {
-				const result = await response.json();
-				toast(result.message);
 				isFollowing = !isFollowing;
 				followersCount += isFollowing ? 1 : -1;
+			} else if (response.status === 409) {
+				isSelf = true;
 			} else {
 				const error = await response.json();
 				toast(error.error);
@@ -147,7 +147,7 @@
 		await fetchProfile();
 		await Promise.all([fetchUserLynts(), checkFollowStatus(), fetchFollowCounts()]);
 		loading = false;
-		avatar = `http://localhost:9000/lyntr/${profile.id}_big.webp`;
+		avatar = `http://localhost:9000/lyntr/${profile.id}_big.webp?v=${Math.random()}`;
 	});
 </script>
 
@@ -164,7 +164,11 @@
 						<p class="text-xl text-muted-foreground">@{profile.handle}</p>
 						<div class="w-24">
 							{#if isSelf}
-								<ProfileSettings userId={profile.id} username={profile.username} bio={profile.bio} />
+								<ProfileSettings
+									userId={profile.id}
+									username={profile.username}
+									bio={profile.bio}
+								/>
 							{:else}
 								<Button class="w-full" on:click={toggleFollow}>
 									{isFollowing ? 'Unfollow' : 'Follow'}
