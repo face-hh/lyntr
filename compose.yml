@@ -11,3 +11,11 @@ services:
       - MINIO_ROOT_USER=${MINIO_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_PASS}
     command: server --console-address :9001 /data
+  website:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      - PUBLIC_SERVER_HOST=http://localhost:5999
+    network_mode: host
