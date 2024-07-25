@@ -1,3 +1,7 @@
+secrets:
+  serverEnv:
+    file: ./.env
+
 services:
   minio:
     image: minio/minio
@@ -19,3 +23,6 @@ services:
     environment:
       - PUBLIC_SERVER_HOST=http://localhost:5999
     network_mode: host
+    secrets:
+      serverEnv:
+        file: ./.env
