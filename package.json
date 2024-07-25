@@ -43,6 +43,7 @@
 		"@neondatabase/serverless": "^0.9.4",
 		"@supabase/ssr": "^0.4.0",
 		"@supabase/supabase-js": "^2.44.3",
+		"@sveltejs/adapter-node": "^5.2.0",
 		"@tailwindcss/line-clamp": "^0.4.4",
 		"@types/ws": "^8.5.11",
 		"bits-ui": "^0.21.12",
