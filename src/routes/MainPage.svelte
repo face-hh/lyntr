@@ -2,16 +2,16 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
-	import { Reply } from 'lucide-svelte';
+	import { Moon, Reply, Sun } from 'lucide-svelte';
 
-	import { v } from './stores';
+	import { cdnUrl, v } from './stores';
 	import { source } from 'sveltekit-sse';
 
 	import Lynt from './Lynt.svelte';
 	import Navigation from './Navigation.svelte';
 	import PostButton from './PostButton.svelte';
 	import ProfileButton from './ProfileButton.svelte';
-	import { setMode } from 'mode-watcher';
+	import { toggleMode } from 'mode-watcher';
 	import { onDestroy, onMount } from 'svelte';
 	import LoadingSpinner from './LoadingSpinner.svelte';
 	import { toast } from 'svelte-sonner';
@@ -95,6 +95,24 @@
 		}
 	}
 
+	let feedContainer: HTMLDivElement;
+
+	let loadingBottomFeed = false;
+
+	function handleScroll() {
+		if (feedContainer) {
+			const { scrollTop, scrollHeight, clientHeight } = feedContainer;
+
+			if (scrollTop + clientHeight >= scrollHeight - 5 && !loadingBottomFeed) {
+				loadingBottomFeed = true;
+
+				fetchFeed(true);
+
+				loadingBottomFeed = false;
+			}
+		}
+	}
+
 	if (lyntOpened !== null && lyntOpened !== '') {
 		(async () => {
 			selectedLynt = await getLynt(lyntOpened);
@@ -117,14 +135,30 @@
 		return res as FeedItem;
 	}
 
-	async function fetchFeed() {
+	async function fetchFeed(append = false) {
 		const response = await fetch(`api/feed?type=${currentTab}`, { method: 'GET' });
 
-		if (response.status !== 200) alert('Error generating feed! Please refresh the page');
+		if (response.status !== 200) {
+			alert('Error generating feed! Please refresh the page');
+			return;
+		}
 
 		const res = await response.json();
+		const newPosts = res.lynts.map((post: any) => ({ ...post }));
 
-		feed = res.lynts.map((post: any) => ({ ...post }));
+		if (append) {
+			const uniqueNewPosts = newPosts.filter(
+				(newPost: any) => !feed.some((existingPost: any) => existingPost.id === newPost.id)
+			);
+
+			feed = feed.concat(uniqueNewPosts);
+
+			if (feed.length > 250) {
+				feed = feed.slice(50);
+			}
+		} else {
+			feed = newPosts;
+		}
 
 		loadingFeed = false;
 	}
@@ -176,6 +210,16 @@
 
 	onMount(async () => {
 		fetchFeed();
+
+		if (feedContainer) {
+			feedContainer.addEventListener('scroll', handleScroll);
+		}
+	});
+
+	onDestroy(() => {
+		if (feedContainer) {
+			feedContainer.removeEventListener('scroll', handleScroll);
+		}
 	});
 
 	async function renderLyntAtTop(lyntId: string) {
@@ -186,16 +230,10 @@
 
 <div class="flex h-screen justify-center gap-4 overflow-hidden">
 	<div class="static ml-5 mt-5 inline-flex w-auto flex-col items-start gap-2">
-		<img class="mb-5 size-20 cursor-pointer" src="logo.svg" alt="Logo" />
-		<button on:click={() => setMode('light')}>Set Light Mode</button>
-		<button on:click={() => setMode('dark')}>Set Dark Mode</button>
+		<img class="mb-5 size-20 cursor-pointer" src="logo.svg" alt="Logo" on:click={toggleMode} />
 		<Navigation {handle} />
 		<PostButton userId={id} />
-		<ProfileButton
-			src={`http://localhost:9000/lyntr/${id}_medium.webp?v=${$v}`}
-			name={username}
-			handle="@{handle}"
-		/>
+		<ProfileButton src={cdnUrl(id, 'medium')} name={username} handle="@{handle}" />
 	</div>
 	<Separator orientation="vertical" />
 
@@ -211,7 +249,10 @@
 			<Separator class="mt-4" />
 
 			<!-- Feed -->
-			<div class="no-scrollbar flex flex-grow flex-col gap-4 overflow-y-auto">
+			<div
+				class="no-scrollbar flex flex-grow flex-col gap-4 overflow-y-auto"
+				bind:this={feedContainer}
+			>
 				{#if loadingFeed}
 					<LoadingSpinner />
 				{:else}

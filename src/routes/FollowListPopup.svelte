@@ -3,7 +3,7 @@
 	import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 	import { Input } from '@/components/ui/input';
 	import { Button } from '@/components/ui/button';
-	import { v } from "./stores"
+	import { cdnUrl } from "./stores"
 
 	import Avatar from './Avatar.svelte';
 
@@ -93,9 +93,9 @@
 						<div
 							class="flex items-center gap-2 rounded-md bg-border p-2"
 						>
-							<Avatar
+						<Avatar
 								size={12}
-								src={`http://localhost:9000/lyntr/${user.id}_medium.webp?v=${$v}`}
+								src={cdnUrl(user.id, "medium")}
 								alt={user.username}
 							/>
 							<div>

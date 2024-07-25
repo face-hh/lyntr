@@ -29,7 +29,8 @@ export async function followingFeed(userId: string) {
             )
         )
         .groupBy(lynts.id, users.id)
-        .orderBy(desc(lynts.created_at));
+        .orderBy(desc(lynts.created_at))
+        .limit(100);
 
     return feed
 }

@@ -3,7 +3,7 @@ import type { RequestHandler } from '@sveltejs/kit';
 import { verifyAuthJWT } from '@/server/jwt';
 import { db } from '@/server/db';
 import { users, lynts, history } from '@/server/schema';
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { handleFeed } from './handle';
 import { followingFeed } from './following';
 import { newFeed } from './new';
@@ -15,13 +15,23 @@ async function updateViewsAndHistory(userId: string, lyntIds: string[]) {
             await trx.update(lynts)
                 .set({ views: sql`${lynts.views} + 1` })
                 .where(eq(lynts.id, lyntId));
-            await trx.insert(history)
-                .values({
-                    id: sql`uuid_generate_v4()`,
-                    user_id: userId,
-                    lynt_id: lyntId
-                })
-                .onConflictDoNothing();
+            
+            const existingEntry = await trx.select()
+                .from(history)
+                .where(and(
+                    eq(history.user_id, userId),
+                    eq(history.lynt_id, lyntId)
+                ))
+                .limit(1);
+
+            if (existingEntry.length === 0) {
+                await trx.insert(history)
+                    .values({
+                        id: sql`uuid_generate_v4()`,
+                        user_id: userId,
+                        lynt_id: lyntId
+                    });
+            }
         });
     }
 }

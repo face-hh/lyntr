@@ -3,7 +3,8 @@
 	import { Label } from '@/components/ui/label';
 	import * as HoverCard from '@/components/ui/hover-card/index.js';
 	import Avatar from './Avatar.svelte';
-	import { v } from './stores';
+	import { mode } from 'mode-watcher';
+	import { cdnUrl } from "./stores"
 
 	import CalendarDays from 'lucide-svelte/icons/calendar-days';
 	import * as Popover from '@/components/ui/popover';
@@ -106,7 +107,7 @@
 		<a href="/@{handle}" class="inline-block max-h-[40px] min-w-[40px]">
 			<Avatar
 				size={10}
-				src={`http://localhost:9000/lyntr/${userId}_small.webp?v=${$v}`}
+				src={cdnUrl(userId, "small")}
 				alt="A profile picture."
 			/>
 		</a>
@@ -129,7 +130,7 @@
 						<div class="flex justify-between space-x-4">
 							<Avatar
 								size={10}
-								src={`http://localhost:9000/lyntr/${userId}_small.webp?v=${$v}`}
+								src={cdnUrl(userId, "small")}
 								alt="Profile picture."
 							/>
 
@@ -150,13 +151,13 @@
 
 				{#if verified}
 					<Tooltip.Root>
-						<Tooltip.Trigger
-							><img
+						<Tooltip.Trigger>
+							<img
 								class="h-7 w-7"
-								src="verified.png"
+								src={$mode !== 'light' ? 'white_mode_verified.png' : 'verified.png'}
 								alt="This user is verified."
-							/></Tooltip.Trigger
-						>
+							/>
+						</Tooltip.Trigger>
 						<Tooltip.Content>
 							<p>This user is <span class="rounded-xl bg-border p-1">verified</span>.</p>
 						</Tooltip.Content>
@@ -178,7 +179,7 @@
 						<div class="flex justify-between space-x-4">
 							<Avatar
 								size={10}
-								src={`http://localhost:9000/lyntr/${userId}_small.webp?v=${$v}`}
+								src={cdnUrl(userId, "small")}
 								alt="Profile picture."
 							/>
 
@@ -241,5 +242,5 @@
 	</div>
 </div>
 {#if has_image}
-	<img class="avatar mt-2" src="http://localhost:9000/lyntr/{postId}.webp?v=${$v}" alt="ok" />
+	<img class="avatar mt-2" src={cdnUrl(userId)} alt="ok" />
 {/if}

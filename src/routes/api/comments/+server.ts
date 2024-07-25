@@ -69,7 +69,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
                 ))
                 .groupBy(lynts.id, users.id)
                 .orderBy(desc(sql`count(distinct ${likes.user_id})`), desc(lynts.created_at))
-                .limit(50 - userReplies.length)
+                // .limit(50 - userReplies.length)
                 .execute();
         }
         const comments = [...userReplies, ...mostLikedComments];

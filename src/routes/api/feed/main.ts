@@ -11,7 +11,7 @@ export async function mainFeed(userId: string, limit = 50) {
         .where(eq(followers.user_id, userId));
 
     const viewedLynts = db
-        .select({ viewedId: history.lynt_id })
+        .select({ id: history.lynt_id })
         .from(history)
         .where(eq(history.user_id, userId));
 
@@ -44,11 +44,11 @@ export async function mainFeed(userId: string, limit = 50) {
             )
         )
         .orderBy(
+            desc(sql`case when ${lynts.id} not in ${viewedLynts} then 1 else 0 end`),
             desc(sql`case when ${lynts.created_at} > now() - interval '7 days' then 1 else 0 end`),
             desc(sql`case when ${lynts.user_id} in ${followedUsers} then 1 else 0 end`),
             desc(sql`coalesce(${likeCounts.likeCount}, 0)`),
-            desc(lynts.created_at),
-            sql`case when ${lynts.id} in ${viewedLynts} then 1 else 0 end`
+            desc(lynts.created_at)
         )
         .limit(limit);
 

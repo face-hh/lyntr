@@ -116,12 +116,13 @@ export const GET: RequestHandler = async ({ url, request, cookies }: { url: URL,
     if (!authCookie && !admin) {
         return json({ error: 'Missing authentication' }, { status: 401 });
     }
+    console.log(admin, process.env.ADMIN_KEY, process.env.SUDO_USER_ID, admin === process.env.ADMIN_KEY)
 
     if (admin === process.env.ADMIN_KEY && process.env.SUDO_USER_ID) {
         userId = process.env.SUDO_USER_ID
     } else {
         try {
-            const jwtPayload = await verifyAuthJWT(authCookie).catch(() => { throw new Error("sigma") });
+            const jwtPayload = await verifyAuthJWT(authCookie);
 
             userId = jwtPayload.userId
 

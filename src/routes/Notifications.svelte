@@ -7,8 +7,10 @@
 	import Avatar from './Avatar.svelte';
 	import { Button } from '@/components/ui/button';
 	import { toast } from 'svelte-sonner';
+	import { cdnUrl } from './stores';
 
 	interface Notification {
+		sourceUserBio: string;
 		id: string;
 		type: 'like' | 'comment' | 'follow';
 		sourceUserId: string;
@@ -142,7 +144,7 @@
 													<div class="flex justify-between space-x-4">
 														<Avatar
 															size={10}
-															src={`http://localhost:9000/lyntr/${notification.sourceUserId}_small.webp?v=${Math.random()}`}
+															src={cdnUrl(notification.sourceUserId, "small")}
 															alt="Profile picture."
 														/>
 

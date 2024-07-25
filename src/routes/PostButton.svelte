@@ -5,7 +5,7 @@
 	import Avatar from './Avatar.svelte';
 	import { toast } from 'svelte-sonner';
 	import { ImageUp } from 'lucide-svelte';
-	import { v } from './stores';
+	import { cdnUrl } from './stores';
 
 	export let userId: string;
 
@@ -60,7 +60,7 @@
 		<div class="flex items-start space-x-3">
 			<Avatar
 				size={10}
-				src={`http://localhost:9000/lyntr/${userId}_small.webp?v=${v}`}
+				src={cdnUrl(userId, "small")}
 				alt="Your profile picture."
 			/>
 

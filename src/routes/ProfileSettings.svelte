@@ -6,7 +6,7 @@
 	import { toast } from 'svelte-sonner';
 	import { Label } from '@/components/ui/label';
 	import { Input } from '@/components/ui/input';
-	import { v } from './stores';
+	import { cdnUrl } from './stores';
 
 	export let userId: string;
 	export let username: string;
@@ -64,7 +64,7 @@
 		<div class="flex items-start space-x-3">
 			<Avatar
 				size={40}
-				src={`http://localhost:9000/lyntr/${userId}_small.webp?v=${v}`}
+				src={cdnUrl(userId, "small")}
 				alt="Your profile picture."
 				border={true}
 				editable={true}

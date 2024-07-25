@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { v } from "./stores"
+	import { cdnUrl } from "./stores"
 	import { Separator } from '@/components/ui/separator';
 
 	import { BarChart2, Heart, ImageUp, MessageCircle, Repeat2, Share2 } from 'lucide-svelte';
@@ -106,7 +106,7 @@
 
 	function handleShare() {
 		const url = `${window.location.origin}?id=${id}`;
-		toast('Link copied to clipboard!' + url);
+		toast('Link copied to clipboard!');
 
 		navigator.clipboard
 			.writeText(url)
@@ -166,7 +166,7 @@
 		<a href="/@{handle}" class="inline-block max-h-[40px] min-w-[40px]">
 			<Avatar
 				size={10}
-				src={`http://localhost:9000/lyntr/${userId}_small.webp?v=${$v}`}
+				src={cdnUrl(userId, "small")}
 				alt="A profile picture."
 			/>
 		</a>
@@ -237,7 +237,7 @@
 							<div class="flex items-start space-x-3">
 								<Avatar
 									size={10}
-									src={`http://localhost:9000/lyntr/${userId}_small.webp?v=${$v}`}
+									src={cdnUrl(userId, "small")}
 									alt="Your profile picture."
 								/>
 

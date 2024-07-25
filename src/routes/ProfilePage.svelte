@@ -11,6 +11,9 @@
 	import { Separator } from '@/components/ui/separator';
 	import FollowListPopup from './FollowListPopup.svelte';
 	import ProfileSettings from './ProfileSettings.svelte';
+	import * as Tooltip from '@/components/ui/tooltip';
+	import { mode } from 'mode-watcher';
+	import { cdnUrl } from './stores';
 
 	export let profileHandle: string;
 	export let handleLyntClick;
@@ -24,6 +27,7 @@
 		following: number;
 		followers: number;
 		bio: string;
+		verified: boolean;
 	};
 	let userLynts: any[] = [];
 	let loading = true;
@@ -146,7 +150,7 @@
 		await fetchProfile();
 		await Promise.all([fetchUserLynts(), checkFollowStatus(), fetchFollowCounts()]);
 		loading = false;
-		avatar = `http://localhost:9000/lyntr/${profile.id}_big.webp?v=${Math.random()}`;
+		avatar = cdnUrl(profile.id, "big");
 	});
 </script>
 
@@ -159,7 +163,23 @@
 				<div class="flex items-center gap-4">
 					<Avatar size={40} src={avatar} alt={profile.username} border={true} />
 					<div class="flex flex-col gap-2">
-						<Label class="text-2xl font-bold text-primary">{profile.username}</Label>
+						<div class="inline-flex gap-2 items-center">
+							<Label class="text-2xl font-bold text-primary">{profile.username}</Label>
+							{#if profile.verified}
+								<Tooltip.Root>
+									<Tooltip.Trigger>
+										<img
+											class="h-7 w-7"
+											src={$mode !== 'light' ? 'white_mode_verified.png' : 'verified.png'}
+											alt="This user is verified."
+										/>
+									</Tooltip.Trigger>
+									<Tooltip.Content>
+										<p>This user is <span class="rounded-xl bg-border p-1">verified</span>.</p>
+									</Tooltip.Content>
+								</Tooltip.Root>
+							{/if}
+						</div>
 						<p class="text-xl text-muted-foreground">@{profile.handle}</p>
 						<div class="w-24">
 							{#if isSelf}
