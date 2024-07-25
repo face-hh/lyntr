@@ -18,7 +18,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
     try {
         const { text, userId, lyntId } = await request.json();
-        console.log({ text, userId, lyntId })
+
         // Validate input
         if (!text || !userId || !lyntId) {
             return json({ error: 'Missing required fields' }, { status: 400 });

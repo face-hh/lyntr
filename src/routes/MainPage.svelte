@@ -3,15 +3,16 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import { Reply } from 'lucide-svelte';
-	
+
 	import { v } from './stores';
+	import { source } from 'sveltekit-sse';
 
 	import Lynt from './Lynt.svelte';
 	import Navigation from './Navigation.svelte';
 	import PostButton from './PostButton.svelte';
 	import ProfileButton from './ProfileButton.svelte';
 	import { setMode } from 'mode-watcher';
-	import { afterUpdate, onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import LoadingSpinner from './LoadingSpinner.svelte';
 	import { toast } from 'svelte-sonner';
 	import { currentPage } from './stores';
@@ -78,11 +79,20 @@
 	let loadingComments = false;
 
 	let currentTab = 'For you';
-	const tabs = ['For you', 'Following', 'Live'];
+	const tabs = ['For you', 'Following', 'New'];
 
 	function handleTabChange(tab: string) {
 		currentTab = tab;
 		fetchFeed();
+
+		if (currentTab === tabs[2]) {
+			const eventSource = new EventSource('/api/sse');
+			eventSource.onmessage = async (event) => {
+				const newLyntId = JSON.parse(event.data);
+
+				await renderLyntAtTop(newLyntId);
+			};
+		}
 	}
 
 	if (lyntOpened !== null && lyntOpened !== '') {
@@ -163,9 +173,15 @@
 			toast('Your reply has been posted!');
 		}
 	}
+
 	onMount(async () => {
 		fetchFeed();
 	});
+
+	async function renderLyntAtTop(lyntId: string) {
+		const lyntData = await getLynt(lyntId);
+		feed = [lyntData].concat(feed);
+	}
 </script>
 
 <div class="flex h-screen justify-center gap-4 overflow-hidden">

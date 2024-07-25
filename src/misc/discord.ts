@@ -43,7 +43,6 @@ function startBot() {
         const args = message.content.split(' ')
 
         if (args[0] === '!verify' && args[1]) {
-            console.log(args)
             const response = await fetch(`${API_BASE_URL}/api/verify?handle=${args[1]}`, {
                 method: "POST",
                 headers: {

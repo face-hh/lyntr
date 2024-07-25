@@ -74,7 +74,7 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
     for (const question of questions) {
         if (body[question.id] !== undefined) {
             const iqChange = question.condition(body[question.id]);
-            console.log(totalIQ, iqChange)
+
             totalIQ += iqChange;
             formattedText += `${question.id} = ${iqChange > 0 ? '+' : ''}${iqChange} IQ\n`;
         } else {

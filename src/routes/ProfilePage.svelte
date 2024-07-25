@@ -37,7 +37,6 @@
 	let showFollowingPopup = false;
 
 	function toggleFollowersPopup() {
-		console.log(followersCount);
 		showFollowersPopup = !showFollowersPopup;
 	}
 

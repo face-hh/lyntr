@@ -73,7 +73,6 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
                 .execute();
         }
         const comments = [...userReplies, ...mostLikedComments];
-        console.log(comments)
 
         // Increment view counts in the background
         incrementViewCounts(comments.map(comment => comment.id));

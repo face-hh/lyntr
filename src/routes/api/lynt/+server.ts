@@ -9,6 +9,7 @@ import { Snowflake } from 'nodejs-snowflake';
 import sharp from 'sharp';
 import { minioClient } from '@/server/minio';
 import { lyntObj } from '../util';
+import { sendMessage } from '@/sse';
 
 export const POST: RequestHandler = async ({ request, cookies }: { request: Request, cookies: Cookies }) => {
     const authCookie = cookies.get('_TOKEN__DO_NOT_SHARE');
@@ -58,7 +59,7 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
             content: cleanedContent,
             has_link: cleanedContent.includes('http'),
         };
-        console.log(reposted)
+
         if (reposted) {
             const [existingLynt] = await db
                 .select({ id: lynts.id })
@@ -96,6 +97,8 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
         }
 
         const [newLynt] = await db.insert(lynts).values(lyntValues).returning();
+
+        sendMessage(uniqueLyntId);
 
         return json(newLynt, { status: 201 });
     } catch (error) {

@@ -9,11 +9,10 @@
 	let email = '';
 
 	const handleLogin = async () => {
-		console.log('got called');
 		try {
 			loading = true;
 			const { error } = await supabase.auth.signInWithOtp({ email });
-			console.log(error);
+
 			if (error) throw error;
 		} catch (error) {
 			if (error instanceof Error) {

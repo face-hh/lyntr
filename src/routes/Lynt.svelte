@@ -65,7 +65,6 @@
 	let openDialog = false;
 	let lynt = '';
 
-	console.log(parentContent);
 	async function handleRepost() {
 		if (repostedByUser) return;
 		openDialog = !openDialog;
@@ -99,7 +98,6 @@
 		}
 	}
 	async function openLynt(lyntid: string) {
-		console.log(lyntid);
 		lyntClick(lyntid);
 	}
 
