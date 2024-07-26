@@ -51,7 +51,7 @@
 		testStarted = true;
 		unusedPhrases = [...phrases];
 		currentPhrase = getNextPhrase();
-		timer = 1;
+		timer = 60;
 		wordsTyped = 0;
 		userInput = "";
 		
