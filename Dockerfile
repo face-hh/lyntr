@@ -12,4 +12,4 @@ EXPOSE 5999/tcp
 ENV HOST=0.0.0.0
 ENV PORT=5999
 
-CMD [ "node", "build/index.js" ]
+CMD [ "BODY_SIZE_LIMIT=8000", "node", "build/index.js" ]
