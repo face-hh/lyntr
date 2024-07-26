@@ -56,8 +56,6 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
         return json({ error: 'Invalid content' }, { status: 400 });
     }
 
-    let cleanedContent = sanitizeHtml(content);
-
     try {
         const lyntId = new Snowflake({
             custom_epoch: new Date("2024-07-13T11:29:44.526Z").getTime(),
@@ -68,8 +66,8 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
         let lyntValues: any = {
             id: uniqueLyntId,
             user_id: userId,
-            content: cleanedContent,
-            has_link: cleanedContent.includes('http'),
+            content: content,
+            has_link: content.includes('http'),
         };
 
         if (reposted) {

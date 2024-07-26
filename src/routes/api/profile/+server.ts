@@ -63,7 +63,7 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
     }
 
     const existingUser = await db.select().from(users).where(eq(users.email, data.user.email)).limit(1);
-    
+
     if (existingUser.length > 0) {
         return json({ error: 'Email already in use' }, { status: 409 });
     }
@@ -88,7 +88,7 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
         });
         const uniqueUserId = String(userId.getUniqueID())
 
-        const cleanedHandle = sanitizeHtml(body.handle).replace(/[^0-9a-z_-]/gi, '');
+        const cleanedHandle = body.handle.replace(/[^0-9a-z_-]/gi, '');
 
         const jwt = await createAuthJWT({
             userId: uniqueUserId
@@ -100,7 +100,7 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
             'iq': totalIQ,
             'token': jwt,
             'email': data.user?.email,
-            'username': sanitizeHtml(body.username.replace("\n", " "))
+            'username': content
         }).returning();
 
         uploadAvatar(inputBuffer, uniqueUserId, minioClient)
@@ -190,9 +190,6 @@ export const PATCH: RequestHandler = async ({ request, cookies }) => {
 
     const body = await request.json();
     let { bio, username } = body;
-
-    bio = sanitizeHtml(bio)
-    username = sanitizeHtml(username)
 
     const updateData: Partial<typeof users.$inferInsert> = {};
 
