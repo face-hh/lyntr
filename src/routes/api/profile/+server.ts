@@ -100,7 +100,7 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
             'iq': totalIQ,
             'token': jwt,
             'email': data.user?.email,
-            'username': content
+            'username': body.username.replace("\n", " ")
         }).returning();
 
         uploadAvatar(inputBuffer, uniqueUserId, minioClient)
