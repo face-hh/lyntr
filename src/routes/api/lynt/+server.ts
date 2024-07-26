@@ -96,7 +96,7 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
                     fit: sharp.fit.contain,
                     width: 800
                 })
-                .webp({ quality: 50 })
+                .webp({ quality: 70 })
                 .toBuffer();
 
             const fileName = `${uniqueLyntId}.webp`;
