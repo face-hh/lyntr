@@ -1,0 +1,18 @@
+{
+    "apps": [
+      {
+        "name": "discord-bot",
+        "script": "bun",
+        "args": "discord.ts",
+        "watch": ["discord.ts"],
+        "ignore_watch": ["node_modules"],
+        "exec_mode": "fork",
+        "instances": 1,
+        "autorestart": true,
+        "max_memory_restart": "1G",
+        "env": {
+          "NODE_ENV": "production"
+        }
+      }
+    ]
+  }
