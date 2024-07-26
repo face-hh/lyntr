@@ -226,6 +226,11 @@
 		const lyntData = await getLynt(lyntId);
 		feed = [lyntData].concat(feed);
 	}
+	function handlePaste(event: ClipboardEvent) {
+		event.preventDefault();
+		const text = event.clipboardData?.getData('text/plain') || '';
+		document.execCommand('insertText', false, text);
+	}
 </script>
 
 <div class="flex h-screen justify-center gap-4 overflow-hidden">
@@ -294,6 +299,7 @@
 						bind:textContent={comment}
 						class="overflow-wrap-anywhere w-full text-lg outline-none"
 						placeholder="Reply..."
+						on:paste={handlePaste}
 					/>
 
 					<Button on:click={postComment}>Post</Button>

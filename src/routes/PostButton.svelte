@@ -6,6 +6,7 @@
 	import { toast } from 'svelte-sonner';
 	import { ImageUp } from 'lucide-svelte';
 	import { cdnUrl } from './stores';
+	import DivInput from './DivInput.svelte';
 
 	export let userId: string;
 
@@ -49,6 +50,11 @@
 			toast(`Something happened! Error: ${response.status} | ${response.statusText}`);
 		}
 	}
+	function handlePaste(event) {
+		event.preventDefault();
+		const text = event.clipboardData.getData('text/plain');
+		document.execCommand('insertText', false, text);
+	}
 </script>
 
 <Dialog.Root bind:open={opened}>
@@ -58,22 +64,11 @@
 	>
 	<Dialog.Content class="sm:max-w-[500px]">
 		<div class="flex items-start space-x-3">
-			<Avatar
-				size={10}
-				src={cdnUrl(userId, "small")}
-				alt="Your profile picture."
-			/>
+			<Avatar size={10} src={cdnUrl(userId, 'small')} alt="Your profile picture." />
 
 			<div class="flex flex-grow flex-col gap-2">
-				<div
-					contenteditable="true"
-					role="textbox"
-					spellcheck="true"
-					tabindex="0"
-					bind:innerText={lynt}
-					class="overflow-wrap-anywhere min-h-[40px] w-full outline-none"
-					placeholder="What's happening?"
-				/>
+				<DivInput bind:lynt />
+				
 				{#if imagePreview}
 					<img class="avatar" src={imagePreview} alt="Preview" />
 				{/if}

@@ -8,6 +8,7 @@
 	import { supabase } from '@/supabase';
 
 	import IQTest from './IQTest.svelte';
+	import { toast } from 'svelte-sonner';
 
 	let loading = false;
 	let nickname = '';
@@ -62,8 +63,8 @@
 			iqReport = res.formattedText;
 			totalIQ = res.totalIQ;
 		} catch (error) {
-			alert(
-				'Something went wrong. Please try again. If this persists, please report the issue here: https://github.com/face-hh/lyntr'
+			toast(
+				'Something went wrong. This can include: your @handle being already taken; your @handle not being alphabetic ("-" is allowed); the server having an issue. Please try again later.'
 			);
 		}
 	};

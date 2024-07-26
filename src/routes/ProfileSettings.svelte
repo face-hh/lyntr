@@ -50,7 +50,7 @@
 		if (pfpRes.status === 200) {
 			opened = false;
 		} else {
-			toast(`Something happened! Error: ${pfpRes.status} | ${pfpRes.statusText}`);
+			toast(`Uploading photo failed. Common cause is file size being over 8MB. Error code: ${pfpRes.status} | ${pfpRes.statusText}`);
 		}
 	}
 </script>

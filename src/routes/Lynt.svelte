@@ -10,6 +10,7 @@
 	import OutlineButton from './OutlineButton.svelte';
 	import { toast } from 'svelte-sonner';
 	import LyntContents from './LyntContents.svelte';
+	import DivInput from "./DivInput.svelte";
 
 	function formatNumber(num: number): string {
 		if (!num) return '0';
@@ -237,20 +238,13 @@
 							<div class="flex items-start space-x-3">
 								<Avatar
 									size={10}
-									src={cdnUrl(userId, "small")}
+									src={cdnUrl(myId, "small")}
 									alt="Your profile picture."
 								/>
 
 								<div class="flex-grow">
-									<div
-										contenteditable="true"
-										role="textbox"
-										spellcheck="true"
-										tabindex="0"
-										bind:textContent={lynt}
-										class="overflow-wrap-anywhere min-h-[80px] w-full outline-none"
-										placeholder="What's happening?"
-									/>
+									<DivInput bind:lynt />
+
 									{#if imagePreview}
 										<img class="avatar" src={imagePreview} alt="Preview" />
 									{/if}
