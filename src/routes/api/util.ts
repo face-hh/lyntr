@@ -1,7 +1,5 @@
-import { db } from '@/server/db';
-import { verifyAuthJWT } from '@/server/jwt';
 import { lynts, likes, followers, users } from '@/server/schema';
-import { eq, sql } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 import sharp from 'sharp';
 
 export const lyntObj = (userId: string) => {

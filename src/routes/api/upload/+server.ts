@@ -8,6 +8,8 @@ import { uploadAvatar } from '../util';
 
 config();
 
+const ratelimits = new Map();
+
 export const POST: RequestHandler = async ({ request, cookies }) => {
     const authCookie = cookies.get('_TOKEN__DO_NOT_SHARE');
 
@@ -21,7 +23,14 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
         if (!jwtPayload.userId) {
             throw new Error('Invalid JWT token');
         }
+        const { userId } = jwtPayload;
+        const ratelimit = ratelimits.get(userId);
 
+        if (!ratelimit) {
+            ratelimits.set(userId, Date.now())
+        } else if (Math.round((Date.now() - ratelimit) / 1000) < 5000) {
+            return json({ error: "You are ratelimited." }, { status: 429 })
+        }
 
         const formData = await request.formData();
 

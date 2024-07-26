@@ -230,7 +230,9 @@
 
 <div class="flex h-screen justify-center gap-4 overflow-hidden">
 	<div class="static ml-5 mt-5 inline-flex w-auto flex-col items-start gap-2">
-		<img class="mb-5 size-20 cursor-pointer" src="logo.svg" alt="Logo" on:click={toggleMode} />
+		<button on:click={toggleMode}>
+			<img class="mb-5 size-20 cursor-pointer" src="logo.svg" alt="Logo" />
+		</button>
 		<Navigation {handle} />
 		<PostButton userId={id} />
 		<ProfileButton src={cdnUrl(id, 'medium')} name={username} handle="@{handle}" />

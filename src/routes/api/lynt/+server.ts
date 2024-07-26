@@ -11,6 +11,8 @@ import { minioClient } from '@/server/minio';
 import { lyntObj } from '../util';
 import { sendMessage } from '@/sse';
 
+const ratelimits = new Map();
+
 export const POST: RequestHandler = async ({ request, cookies }: { request: Request, cookies: Cookies }) => {
     const authCookie = cookies.get('_TOKEN__DO_NOT_SHARE');
 
@@ -30,6 +32,14 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
     } catch (error) {
         console.error('Authentication error:', error);
         return json({ error: 'Authentication failed' }, { status: 401 });
+    }
+
+    const ratelimit = ratelimits.get(userId);
+
+    if (!ratelimit) {
+        ratelimits.set(userId, Date.now())
+    } else if (Math.round((Date.now() - ratelimit) / 1000) < 5000) {
+        return json({ error: "You are ratelimited." }, { status: 429 })
     }
 
     const formData = await request.formData();
@@ -116,7 +126,6 @@ export const GET: RequestHandler = async ({ url, request, cookies }: { url: URL,
     if (!authCookie && !admin) {
         return json({ error: 'Missing authentication' }, { status: 401 });
     }
-    console.log(admin, process.env.ADMIN_KEY, process.env.SUDO_USER_ID, admin === process.env.ADMIN_KEY)
 
     if (admin === process.env.ADMIN_KEY && process.env.SUDO_USER_ID) {
         userId = process.env.SUDO_USER_ID

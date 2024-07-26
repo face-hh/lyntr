@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS "followers" (
 CREATE TABLE IF NOT EXISTS "history" (
 	"id" text PRIMARY KEY NOT NULL,
 	"user_id" text,
-	"lynt_id" text
+	"lynt_id" text,
+	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "likes" (

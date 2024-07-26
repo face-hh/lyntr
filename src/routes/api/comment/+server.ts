@@ -7,6 +7,8 @@ import { eq, sql } from 'drizzle-orm';
 import sanitizeHtml from 'sanitize-html';
 import { Snowflake } from 'nodejs-snowflake';
 
+const ratelimits = new Map();
+
 export const POST: RequestHandler = async ({ request, cookies }: { request: Request, cookies: Cookies }) => {
     const authCookie = cookies.get('_TOKEN__DO_NOT_SHARE');
 
@@ -27,6 +29,13 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
     } catch (error) {
         console.error('Authentication error:', error);
         return json({ error: 'Authentication failed' }, { status: 401 });
+    }
+    const ratelimit = ratelimits.get(userId);
+
+    if (!ratelimit) {
+        ratelimits.set(userId, Date.now())
+    } else if (Math.round((Date.now() - ratelimit) / 1000) < 5000) {
+        return json({ error: "You are ratelimited." }, { status: 429 })
     }
 
     const body = await request.json();

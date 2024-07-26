@@ -5,6 +5,8 @@ import { followers } from '@/server/schema';
 import { eq, and } from 'drizzle-orm';
 import { verifyAuthJWT } from '@/server/jwt';
 
+const ratelimits = new Map();
+
 export const POST: RequestHandler = async ({ request, cookies }) => {
     const token = cookies.get('_TOKEN__DO_NOT_SHARE');
     if (!token) {
@@ -18,6 +20,14 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
     const { userId: authenticatedUserId } = payload;
     const { userId: targetUserId } = await request.json();
+
+    const ratelimit = ratelimits.get(authenticatedUserId);
+
+    if (!ratelimit) {
+        ratelimits.set(authenticatedUserId, Date.now())
+    } else if (Math.round((Date.now() - ratelimit) / 1000) < 10000) {
+        return json({ error: "You are ratelimited." }, { status: 429 })
+    }
 
     if (authenticatedUserId === targetUserId) {
         return json({ error: 'Cannot follow yourself' }, { status: 400 });

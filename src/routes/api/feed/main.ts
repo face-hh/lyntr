@@ -10,11 +10,6 @@ export async function mainFeed(userId: string, limit = 50) {
         .from(followers)
         .where(eq(followers.user_id, userId));
 
-    const viewedLynts = db
-        .select({ id: history.lynt_id })
-        .from(history)
-        .where(eq(history.user_id, userId));
-
     const likeCounts = db
         .select({
             lyntId: likes.lynt_id,
@@ -29,7 +24,20 @@ export async function mainFeed(userId: string, limit = 50) {
             ...lyntObj(userId),
             isFollowed: inArray(lynts.user_id, followedUsers),
             likeCount: sql<number>`coalesce(${likeCounts.likeCount}, 0)`,
-            isViewed: inArray(lynts.id, viewedLynts),
+            isViewed: exists(
+                db.select()
+                    .from(history)
+                    .where(and(
+                        eq(history.lynt_id, lynts.id),
+                        eq(history.user_id, userId)
+                    ))
+            ),
+            viewedAt: sql<Date>`(
+                SELECT ${history.createdAt}
+                FROM ${history}
+                WHERE ${history.lynt_id} = ${lynts.id}
+                AND ${history.user_id} = ${userId}
+            )`
         })
         .from(lynts)
         .leftJoin(users, eq(lynts.user_id, users.id))
@@ -44,11 +52,20 @@ export async function mainFeed(userId: string, limit = 50) {
             )
         )
         .orderBy(
-            desc(sql`case when ${lynts.id} not in ${viewedLynts} then 1 else 0 end`),
-            desc(sql`case when ${lynts.created_at} > now() - interval '7 days' then 1 else 0 end`),
-            desc(sql`case when ${lynts.user_id} in ${followedUsers} then 1 else 0 end`),
+            desc(sql`CASE WHEN NOT EXISTS (
+                SELECT 1 FROM ${history}
+                WHERE ${history.lynt_id} = ${lynts.id}
+                AND ${history.user_id} = ${userId}
+            ) THEN 1 ELSE 0 END`),
+            desc(sql`CASE WHEN ${lynts.created_at} > now() - interval '7 days' THEN 1 ELSE 0 END`),
+            desc(sql`CASE WHEN ${lynts.user_id} IN (${followedUsers}) THEN 1 ELSE 0 END`),
             desc(sql`coalesce(${likeCounts.likeCount}, 0)`),
-            desc(lynts.created_at)
+            desc(sql`coalesce((
+                SELECT ${history.createdAt}
+                FROM ${history}
+                WHERE ${history.lynt_id} = ${lynts.id}
+                AND ${history.user_id} = ${userId}
+            ), ${lynts.created_at})`)
         )
         .limit(limit);
 
