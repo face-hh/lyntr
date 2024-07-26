@@ -28,7 +28,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
         if (!ratelimit) {
             ratelimits.set(userId, Date.now())
-        } else if (Math.round((Date.now() - ratelimit) / 1000) < 5000) {
+        } else if (Math.round((Date.now() - ratelimit) / 1000) < 5) {
             return json({ error: "You are ratelimited." }, { status: 429 })
         } else {
             ratelimits.delete(userId)
