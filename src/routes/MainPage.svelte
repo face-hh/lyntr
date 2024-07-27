@@ -292,14 +292,14 @@
 		{#if lyntOpened && selectedLynt}
 			<div class="mb-2 h-full w-full pb-10">
 				<button
-					class="flex w-full justify-end p-2"
+					class="flex w-full justify-end md:justify-start p-2"
 					on:click={() => {
 						lyntOpened = null;
 						selectedLynt = null;
 					}}><X /></button
 				>
 				<div
-					class="md:min-w-1/2 flex h-full flex-col gap-2 overflow-y-auto overflow-x-hidden px-1"
+					class="md:min-w-1/2 max-w-[600px] flex h-full flex-col gap-2 overflow-y-auto overflow-x-hidden px-1"
 					id="lynt-container"
 				>
 					<!-- Referenced Lynts -->
