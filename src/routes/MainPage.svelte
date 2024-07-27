@@ -269,7 +269,7 @@
 			{:else if page.startsWith('profile')}
 				<ProfilePage profileHandle={page.replace('profile', '')} {handleLyntClick} />
 			{:else if page === 'home'}
-				<div class="min-w-1/3 mt-5 flex h-full flex-col md:px-1">
+				<div class="min-w-1/3 max-w-[600px] mt-5 flex h-full flex-col md:px-1">
 					<TopTab {tabs} {currentTab} onTabChange={handleTabChange} />
 					<Separator class="mt-4" />
 

@@ -8,7 +8,7 @@
 	export let onTabChange: (tab: string) => void;
 </script>
 
-<div class="flex justify-center gap-20">
+<div class="flex justify-evenly md:justify-center md:gap-20 gap-1">
 	{#each tabs as tab}
 		<div class="relative">
 			<Label class="cursor-pointer select-none text-xl" on:mousedown={() => onTabChange(tab)}>

@@ -47,7 +47,7 @@
 	}
 </script>
 
-<div class="mx-auto flex h-full w-full flex-col items-center">
+<div class="mx-auto flex h-full w-full flex-col items-center mt-5">
 	<h1 class="mb-4 text-2xl font-bold">Search Lynts</h1>
 	<div class="mb-4 flex w-full p-1">
 		<Input
@@ -66,7 +66,7 @@
 				<LoadingSpinner />
 			{:else if hasSearched}
 				{#if searchResults.length > 0}
-					<div class="flex flex-col gap-4">
+					<div class="flex flex-col gap-4 px-1">
 						{#each searchResults as lynt}
 							<Lynt {...lynt} myId={userId} on:lyntClick={handleLyntClick} />
 						{/each}

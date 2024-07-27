@@ -254,7 +254,7 @@
 				</blockquote>
 			</div>
 
-			<div class="flex flex-col gap-3">
+			<div class="flex flex-col gap-3 max-w-[600px]">
 				<Separator />
 				{#if userLynts.length === 0}
 					<p>No lynts yet.</p>
