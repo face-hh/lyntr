@@ -51,21 +51,16 @@ export async function mainFeed(userId: string, limit = 20) {
                 sql`${lynts.created_at} > now() - interval '30 days'`
             )
         )
+        .leftJoin(history, and(
+            eq(history.lynt_id, lynts.id),
+            eq(history.user_id, userId)
+        ))
         .orderBy(
-            desc(sql`CASE WHEN NOT EXISTS (
-                SELECT 1 FROM ${history}
-                WHERE ${history.lynt_id} = ${lynts.id}
-                AND ${history.user_id} = ${userId}
-            ) THEN 1 ELSE 0 END`),
+            desc(sql`CASE WHEN ${history.id} IS NULL THEN 1 ELSE 0 END`),
             desc(sql`CASE WHEN ${lynts.created_at} > now() - interval '7 days' THEN 1 ELSE 0 END`),
             desc(sql`CASE WHEN ${lynts.user_id} IN (${followedUsers}) THEN 1 ELSE 0 END`),
-            desc(sql`coalesce(${likeCounts.likeCount}, 0)`),
-            desc(sql`coalesce((
-                SELECT ${history.createdAt}
-                FROM ${history}
-                WHERE ${history.lynt_id} = ${lynts.id}
-                AND ${history.user_id} = ${userId}
-            ), ${lynts.created_at})`)
+            desc(sql`COALESCE(${likeCounts.likeCount}, 0)`),
+            desc(sql`COALESCE(${history.createdAt}, ${lynts.created_at})`)
         )
         .limit(limit);
 
