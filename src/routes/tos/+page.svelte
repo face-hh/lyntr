@@ -154,7 +154,8 @@
 				<AccordionTrigger>11. Contact Us</AccordionTrigger>
 				<AccordionContent>
 					<p>
-						If you have any questions about these Terms, please contact us at business.facedev@gmail.com
+						If you have any questions about these Terms, please contact us at
+						business.facedev@gmail.com
 					</p>
 				</AccordionContent>
 			</AccordionItem>

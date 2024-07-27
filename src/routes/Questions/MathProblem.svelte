@@ -16,5 +16,5 @@
 	type="number"
 	placeholder="Your guess..."
 	bind:value={$submittedValue}
-    on:change={() => ($isButtonDisabled = false)}
+	on:change={() => ($isButtonDisabled = false)}
 />

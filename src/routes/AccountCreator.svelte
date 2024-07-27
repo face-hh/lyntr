@@ -70,8 +70,8 @@
 	};
 </script>
 
-<div class="flex min-h-screen items-center justify-center">
-	<div class="flex gap-6">
+<div class="flex min-h-dvh items-center justify-center">
+	<div class="flex flex-col gap-6 p-1 md:flex-row">
 		<div class="flex flex-col items-center gap-2">
 			<div class="inline-flex items-center gap-2">
 				<img src="logo.svg" alt="Lyntr" class="pointer-events-none h-40 w-40 select-none" />
@@ -96,7 +96,7 @@
 
 				<div class="flex flex-col gap-1.5">
 					<Label for="username">Username</Label>
-						<Input
+					<Input
 						type="text"
 						id="username"
 						placeholder="@facedev"
@@ -107,7 +107,9 @@
 						}}
 					/>
 					<p class="text-sm text-muted-foreground">Enter your permanent username (max. 32 char.)</p>
-					<p class="text-xs text-muted-foreground">Only alphabetical lowercase letters (a-z) work, including '-'.</p>
+					<p class="text-xs text-muted-foreground">
+						Only alphabetical lowercase letters (a-z) work, including '-'.
+					</p>
 				</div>
 
 				{#if allQuestionsCompleted}
@@ -151,7 +153,7 @@
 			</div>
 		</div>
 		<Separator orientation="vertical" class="h-auto" />
-		<div class="min-w-[400px] max-w-[400px] rounded-md border-2 border-primary p-4">
+		<div class="w-full rounded-md border-2 border-primary p-4 md:min-w-[400px] md:max-w-[400px]">
 			<IQTest on:questionsCompleted={handleQuestionsCompleted} />
 		</div>
 	</div>

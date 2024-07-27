@@ -9,29 +9,29 @@
 	$isButtonDisabled = true;
 
 	let phrases = [
-		"to be or not to be",
-		"all that glitters is not gold",
-		"actions speak louder than words",
-		"where there is a will there is a way",
-		"practice makes perfect",
-		"knowledge is power",
-		"time is money",
-		"better late than never",
-		"two wrongs dont make a right",
-		"when in rome do as the romans do",
-		"the early bird catches the worm",
-		"an apple a day keeps the doctor away",
-		"every cloud has a silver lining",
-		"fortune favors the bold",
-		"honesty is the best policy",
-		"laughter is the best medicine",
-		"necessity is the mother of invention",
-		"a picture is worth a thousand words"
+		'to be or not to be',
+		'all that glitters is not gold',
+		'actions speak louder than words',
+		'where there is a will there is a way',
+		'practice makes perfect',
+		'knowledge is power',
+		'time is money',
+		'better late than never',
+		'two wrongs dont make a right',
+		'when in rome do as the romans do',
+		'the early bird catches the worm',
+		'an apple a day keeps the doctor away',
+		'every cloud has a silver lining',
+		'fortune favors the bold',
+		'honesty is the best policy',
+		'laughter is the best medicine',
+		'necessity is the mother of invention',
+		'a picture is worth a thousand words'
 	];
 
 	let unusedPhrases: string[] = [];
-	let currentPhrase = "";
-	let userInput = "";
+	let currentPhrase = '';
+	let userInput = '';
 	let timer = 60;
 	let wordsTyped = 0;
 	let testStarted = false;
@@ -53,8 +53,8 @@
 		currentPhrase = getNextPhrase();
 		timer = 60;
 		wordsTyped = 0;
-		userInput = "";
-		
+		userInput = '';
+
 		const interval = setInterval(() => {
 			timer--;
 			if (timer <= 0) {
@@ -66,7 +66,7 @@
 
 	function endTest() {
 		testFinished = true;
-		const wpm = Math.round(wordsTyped / 1);  // 1 minute test
+		const wpm = Math.round(wordsTyped / 1); // 1 minute test
 		$submittedValue = wpm.toString();
 		$isButtonDisabled = false;
 	}
@@ -77,7 +77,7 @@
 		if (userInput.toLowerCase() === currentPhrase) {
 			wordsTyped += currentPhrase.split(' ').length;
 			currentPhrase = getNextPhrase();
-			userInput = "";
+			userInput = '';
 		}
 	}
 
@@ -90,14 +90,12 @@
 
 <div class="flex flex-col items-center gap-4">
 	<span class="select-none text-2xl">Simple WPM Test</span>
-	
+
 	{#if !testStarted}
-		<Button on:click={startTest}>
-			Start Test
-		</Button>
+		<Button on:click={startTest}>Start Test</Button>
 	{:else if !testFinished}
 		<span class="text-xl">Time remaining: {timer} seconds</span>
-		<div class="text-lg font-mono whitespace-pre">
+		<div class="whitespace-pre font-mono text-lg">
 			{#each typedText as { char, isCorrect, isTyped }}
 				{#if isTyped}
 					<span class={isCorrect ? 'text-green-500' : 'text-red-500'}>{char}</span>
@@ -109,6 +107,9 @@
 		<Input
 			type="text"
 			placeholder="Type here..."
+			autocorrect="off"
+			autocomplete="off"
+			autocapitalize="none"
 			bind:value={userInput}
 			on:input={handleInput}
 			disabled={testFinished}

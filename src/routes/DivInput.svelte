@@ -1,6 +1,6 @@
 <script lang="ts">
 	export let lynt: string = '';
-	
+
 	$: characterCount = lynt.length;
 	$: isOverLimit = characterCount > 280;
 
@@ -18,14 +18,11 @@
 		spellcheck="true"
 		tabindex="0"
 		bind:innerText={lynt}
-		class="overflow-wrap-anywhere min-h-[40px] w-full outline-none pb-6"
+		class="overflow-wrap-anywhere min-h-[40px] w-full pb-6 outline-none"
 		placeholder="What's happening?"
 		on:paste={handlePaste}
 	/>
-	<div 
-		class="absolute bottom-1 right-1 text-sm px-1 rounded"
-		class:text-red-500={isOverLimit}
-	>
+	<div class="absolute bottom-1 right-1 rounded px-1 text-sm" class:text-red-500={isOverLimit}>
 		{characterCount}/280
 	</div>
 </div>

@@ -34,6 +34,8 @@
 <img
 	{src}
 	{alt}
-	class="h-{size} w-{size} rounded-full {border ? 'border-2 border-solid border-primary' : ''} {editable ? 'cursor-pointer' : ''}"
+	class="h-{size} w-{size} rounded-full {border
+		? 'border-2 border-solid border-primary'
+		: ''} {editable ? 'cursor-pointer' : ''} text-center"
 	on:click={handleClick}
 />

@@ -1,5 +1,5 @@
 <script lang="ts">
-    	import '../../app.css';
+	import '../../app.css';
 
 	import {
 		Card,
@@ -124,9 +124,7 @@
 			<AccordionItem value="item-8">
 				<AccordionTrigger>8. Changes to This Policy</AccordionTrigger>
 				<AccordionContent>
-					<p>
-						We may update this policy from time to time.
-					</p>
+					<p>We may update this policy from time to time.</p>
 				</AccordionContent>
 			</AccordionItem>
 
@@ -134,7 +132,8 @@
 				<AccordionTrigger>9. Contact Us</AccordionTrigger>
 				<AccordionContent>
 					<p>
-						If you have any questions about this Privacy Policy, please contact us at business.facedev@gmail.com
+						If you have any questions about this Privacy Policy, please contact us at
+						business.facedev@gmail.com
 					</p>
 				</AccordionContent>
 			</AccordionItem>

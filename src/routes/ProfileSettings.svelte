@@ -50,7 +50,9 @@
 		if (pfpRes.status === 200) {
 			opened = false;
 		} else {
-			toast(`Uploading photo failed. Common cause is file size being over 8MB. Error code: ${pfpRes.status} | ${pfpRes.statusText}`);
+			toast(
+				`Uploading photo failed. Common cause is file size being over 8MB. Error code: ${pfpRes.status} | ${pfpRes.statusText}`
+			);
 		}
 	}
 </script>
@@ -64,7 +66,7 @@
 		<div class="flex items-start space-x-3">
 			<Avatar
 				size={40}
-				src={cdnUrl(userId, "small")}
+				src={cdnUrl(userId, 'small')}
 				alt="Your profile picture."
 				border={true}
 				editable={true}
