@@ -1,5 +1,5 @@
 {
-  "id": "2dcdb0a0-5cf6-49f7-90e6-aea9ed9b7067",
+  "id": "92e81780-bed9-4ff7-98b0-b9a9a4e6bb59",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -91,7 +91,29 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "unique_user_lynt": {
+          "name": "unique_user_lynt",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "lynt_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "history_user_id_users_id_fk": {
           "name": "history_user_id_users_id_fk",

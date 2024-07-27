@@ -136,7 +136,7 @@
 	}
 
 	async function fetchFeed(append = false) {
-		const response = await fetch(`api/feed?type=${currentTab}`, { method: 'GET' });
+		const response = await fetch(`api/feed?type=${currentTab}&excludePosts=${feed.map((post: any) => post.id).join(',')}`, { method: 'GET' });
 
 		if (response.status !== 200) {
 			toast('Error generating feed! Please refresh the page');

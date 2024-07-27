@@ -15,23 +15,19 @@ async function updateViewsAndHistory(userId: string, lyntIds: string[]) {
             await trx.update(lynts)
                 .set({ views: sql`${lynts.views} + 1` })
                 .where(eq(lynts.id, lyntId));
-            
-            const existingEntry = await trx.select()
-                .from(history)
-                .where(and(
-                    eq(history.user_id, userId),
-                    eq(history.lynt_id, lyntId)
-                ))
-                .limit(1);
 
-            if (existingEntry.length === 0) {
-                await trx.insert(history)
-                    .values({
-                        id: sql`uuid_generate_v4()`,
-                        user_id: userId,
-                        lynt_id: lyntId
-                    });
-            }
+            await trx
+                .insert(history)
+                .values({
+                    id: sql`uuid_generate_v4()`,
+                    user_id: userId,
+                    lynt_id: lyntId,
+                    createdAt: sql`now()`
+                })
+                .onConflictDoUpdate({
+                    target: [history.user_id, history.lynt_id],
+                    set: { createdAt: sql`now()` }
+                });
         });
     }
 }
@@ -46,10 +42,12 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
     }
 
     const tabs = ['For you', 'Following', 'Live', 'New'];
-    
+
     if (!tabs.includes(type)) {
         return json({ error: "Invalid type property." }, { status: 400 });
     }
+
+    const excludePosts = url.searchParams.get('excludePosts')?.split(',') || [];
 
     try {
         const jwtPayload = await verifyAuthJWT(authCookie);
@@ -71,7 +69,7 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
         } else if (type === 'New') {
             result = await newFeed(userId);
         } else {
-            result = await mainFeed(userId);
+            result = await mainFeed(userId, 20, excludePosts);
         }
 
         // Start updating views and history in the background

@@ -119,3 +119,5 @@ DO $$ BEGIN
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
+--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "unique_user_lynt" ON "history" USING btree ("user_id","lynt_id");

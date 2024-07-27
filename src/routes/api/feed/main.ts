@@ -1,10 +1,10 @@
 import { json } from '@sveltejs/kit';
 import { db } from '@/server/db';
 import { lynts, likes, users, followers, history } from '@/server/schema';
-import { sql, desc, and, eq, exists, or, isNull, not, inArray } from 'drizzle-orm';
+import { sql, desc, and, eq, exists, or, isNull, not, inArray, asc } from 'drizzle-orm';
 import { lyntObj } from '../util';
 
-export async function mainFeed(userId: string, limit = 20) {
+export async function mainFeed(userId: string, limit = 20, excludePosts: string[] = []) {
     const followedUsers = db
         .select({ followedId: followers.follower_id })
         .from(followers)
@@ -18,6 +18,19 @@ export async function mainFeed(userId: string, limit = 20) {
         .from(likes)
         .groupBy(likes.lynt_id)
         .as('like_counts');
+
+    let whereConditions = and(
+        or(
+            isNull(lynts.parent),
+            eq(lynts.reposted, true)
+        ),
+        sql`${lynts.created_at} > now() - interval '30 days'`
+    );
+
+    // Add exclusion condition if there are posts to exclude
+    if (excludePosts.length > 0) {
+        whereConditions = and(whereConditions, not(inArray(lynts.id, excludePosts)));
+    }
 
     const feed = await db
         .select({
@@ -42,25 +55,22 @@ export async function mainFeed(userId: string, limit = 20) {
         .from(lynts)
         .leftJoin(users, eq(lynts.user_id, users.id))
         .leftJoin(likeCounts, eq(lynts.id, likeCounts.lyntId))
-        .where(
-            and(
-                or(
-                    isNull(lynts.parent),
-                    eq(lynts.reposted, true)
-                ),
-                sql`${lynts.created_at} > now() - interval '30 days'`
-            )
-        )
+        .where(whereConditions)
         .leftJoin(history, and(
             eq(history.lynt_id, lynts.id),
             eq(history.user_id, userId)
         ))
         .orderBy(
+            // Unviewed posts first
             desc(sql`CASE WHEN ${history.id} IS NULL THEN 1 ELSE 0 END`),
+            // Recent posts (within 7 days)
             desc(sql`CASE WHEN ${lynts.created_at} > now() - interval '7 days' THEN 1 ELSE 0 END`),
+            // Posts from followed users
             desc(sql`CASE WHEN ${lynts.user_id} IN (${followedUsers}) THEN 1 ELSE 0 END`),
+            // Posts with more likes
             desc(sql`COALESCE(${likeCounts.likeCount}, 0)`),
-            desc(sql`COALESCE(${history.createdAt}, ${lynts.created_at})`)
+            // Oldest viewed posts first (puts newest viewed posts at the bottom)
+            asc(sql`COALESCE(${history.createdAt}, timestamp '2000-01-01')`)
         )
         .limit(limit);
 

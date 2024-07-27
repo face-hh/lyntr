@@ -1,4 +1,4 @@
-import { boolean, date, pgTable, serial, timestamp, varchar, integer, type AnyPgColumn, primaryKey, text, uuid } from 'drizzle-orm/pg-core';
+import { boolean, date, pgTable, serial, timestamp, varchar, integer, type AnyPgColumn, primaryKey, text, uuid, uniqueIndex } from 'drizzle-orm/pg-core';
 import { drizzle } from 'drizzle-orm/node-postgres';
 
 export const users = pgTable('users', {
@@ -60,4 +60,8 @@ export const history = pgTable('history', {
     user_id: text('user_id').references(() => users.id),
     lynt_id: text('lynt_id').references(() => lynts.id),
     createdAt: timestamp('created_at').defaultNow(),
+}, (table) => {
+    return {
+        uniqueUserLynt: uniqueIndex('unique_user_lynt').on(table.user_id, table.lynt_id),
+    }
 });
