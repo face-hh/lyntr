@@ -275,7 +275,7 @@
 
 					<!-- Feed -->
 					<div
-						class="flex h-full flex-col gap-2 overflow-y-auto px-1 py-2"
+						class="flex w-full h-full flex-col gap-2 overflow-y-auto px-1 py-2"
 						bind:this={feedContainer}
 					>
 						{#if loadingFeed}
