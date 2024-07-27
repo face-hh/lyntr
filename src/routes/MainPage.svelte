@@ -269,7 +269,7 @@
 			{:else if page.startsWith('profile')}
 				<ProfilePage profileHandle={page.replace('profile', '')} {handleLyntClick} />
 			{:else if page === 'home'}
-				<div class="min-w-1/3 max-w-[600px] mt-5 flex h-full flex-col md:px-1">
+				<div class="min-w-1/3 md:max-w-[600px] mt-5 flex h-full flex-col md:px-1 items-center md:items-start">
 					<TopTab {tabs} {currentTab} onTabChange={handleTabChange} />
 					<Separator class="mt-4" />
 
@@ -299,7 +299,7 @@
 					}}><X /></button
 				>
 				<div
-					class="md:min-w-1/2 max-w-[600px] flex h-full flex-col gap-2 overflow-y-auto overflow-x-hidden px-1"
+					class="md:min-w-1/2 max-w-[600px] flex h-full flex-col gap-2 overflow-y-auto overflow-x-hidden px-1 mx-auto md:mx-0"
 					id="lynt-container"
 				>
 					<!-- Referenced Lynts -->
