@@ -3,7 +3,7 @@
 	import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 	import { Input } from '@/components/ui/input';
 	import { Button } from '@/components/ui/button';
-	import { cdnUrl } from "./stores"
+	import { cdnUrl } from './stores';
 
 	import Avatar from './Avatar.svelte';
 
@@ -90,14 +90,8 @@
 			{:else}
 				<div class="mr-[-10px] flex max-h-[300px] flex-col gap-2 overflow-y-auto pr-[10px]">
 					{#each users as user (user.id)}
-						<div
-							class="flex items-center gap-2 rounded-md bg-border p-2"
-						>
-						<Avatar
-								size={12}
-								src={cdnUrl(user.id, "medium")}
-								alt={user.username}
-							/>
+						<div class="flex items-center gap-2 rounded-md bg-border p-2">
+							<Avatar size={12} src={cdnUrl(user.id, 'medium')} alt={user.username} />
 							<div>
 								<div class="inline-flex items-center gap-2">
 									<p class="font-semibold">{user.username}</p>

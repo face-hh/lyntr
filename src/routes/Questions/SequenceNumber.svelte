@@ -11,11 +11,11 @@
 </script>
 
 <span class="select-none">What is the next number in this sequence?</span>
-<span class="text-4xl select-none">2, 6, 12, 20, 30</span>
+<span class="select-none text-4xl">2, 6, 12, 20, 30</span>
 
 <Input
 	type="number"
 	placeholder="Your guess..."
 	bind:value={$submittedValue}
-    on:change={() => ($isButtonDisabled = false)}
+	on:change={() => ($isButtonDisabled = false)}
 />

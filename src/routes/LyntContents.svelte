@@ -4,7 +4,7 @@
 	import * as HoverCard from '@/components/ui/hover-card/index.js';
 	import Avatar from './Avatar.svelte';
 	import { mode } from 'mode-watcher';
-	import { cdnUrl } from "./stores"
+	import { cdnUrl } from './stores';
 
 	import CalendarDays from 'lucide-svelte/icons/calendar-days';
 	import * as Popover from '@/components/ui/popover';
@@ -105,11 +105,7 @@
 <div class={`${$$props.class} flex items-start gap-2`}>
 	{#if includeAvatar}
 		<a href="/@{handle}" class="inline-block max-h-[40px] min-w-[40px]">
-			<Avatar
-				size={10}
-				src={cdnUrl(userId, "small")}
-				alt="A profile picture."
-			/>
+			<Avatar size={10} src={cdnUrl(userId, 'small')} alt="A profile picture." />
 		</a>
 	{/if}
 
@@ -128,11 +124,7 @@
 					</HoverCard.Trigger>
 					<HoverCard.Content class="flex w-80 flex-row items-center gap-2">
 						<div class="flex justify-between space-x-4">
-							<Avatar
-								size={10}
-								src={cdnUrl(userId, "small")}
-								alt="Profile picture."
-							/>
+							<Avatar size={10} src={cdnUrl(userId, 'small')} alt="Profile picture." />
 
 							<div class="space-y-1">
 								<h4 class="text-sm font-semibold">{username}</h4>
@@ -152,11 +144,13 @@
 				{#if verified}
 					<Tooltip.Root>
 						<Tooltip.Trigger>
-							<img
-								class="h-7 w-7"
-								src={$mode !== 'light' ? 'white_mode_verified.png' : 'verified.png'}
-								alt="This user is verified."
-							/>
+							<div class="flex h-full w-7 justify-center">
+								<img
+									class="h-7 w-7"
+									src={$mode !== 'light' ? 'white_mode_verified.png' : 'verified.png'}
+									alt="This user is verified."
+								/>
+							</div>
 						</Tooltip.Trigger>
 						<Tooltip.Content>
 							<p>This user is <span class="rounded-xl bg-border p-1">verified</span>.</p>
@@ -177,11 +171,7 @@
 					</HoverCard.Trigger>
 					<HoverCard.Content class="w-80">
 						<div class="flex justify-between space-x-4">
-							<Avatar
-								size={10}
-								src={cdnUrl(userId, "small")}
-								alt="Profile picture."
-							/>
+							<Avatar size={10} src={cdnUrl(userId, 'small')} alt="Profile picture." />
 
 							<div class="space-y-1">
 								<h4 class="text-sm font-semibold">{username}</h4>

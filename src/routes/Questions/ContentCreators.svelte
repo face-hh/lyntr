@@ -20,11 +20,7 @@
 
 <span class="select-none">How many people do you recognise in this picture?</span>
 <div class="flex justify-center">
-	<Magnifier
-		alt="A bunch of people."
-		src="content_creators.jpg"
-		width="300px"
-	/>
+	<Magnifier alt="A bunch of people." src="content_creators.jpg" width="300px" />
 </div>
 <Label>{sliderValue[0]} people</Label>
 <Slider bind:value={sliderValue} max={47} step={1} />

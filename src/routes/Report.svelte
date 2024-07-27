@@ -17,7 +17,7 @@
 
 	export let profile: boolean;
 	export let userId: string;
-    export let lyntId: string;
+	export let lyntId: string;
 
 	function handleInput(event: Event) {
 		const target = event.target as HTMLTextAreaElement;
@@ -35,13 +35,13 @@
 				const response = await fetch('/api/report', {
 					method: 'POST',
 					headers: {
-						'Content-Type': 'application/json',
+						'Content-Type': 'application/json'
 					},
 					body: JSON.stringify({
 						text: reportText,
 						userId, // Use this for profile reports
-						lyntId, // Use this for lynt reports
-					}),
+						lyntId // Use this for lynt reports
+					})
 				});
 
 				if (!response.ok) {
@@ -50,7 +50,7 @@
 
 				const result = await response.json();
 
-                opened = false;
+				opened = false;
 				reportText = ''; // Clear the report text
 			} catch (error) {
 				console.error('Error submitting report:', error);

@@ -9,6 +9,8 @@
 	import DivInput from './DivInput.svelte';
 
 	export let userId: string;
+	let className: $$Props['class'] = undefined;
+	export { className as class };
 
 	let lynt = '';
 	let opened = false;
@@ -59,8 +61,8 @@
 
 <Dialog.Root bind:open={opened}>
 	<Dialog.Trigger
-		class={`${buttonVariants({ variant: 'default' })} w-full`}
-		on:click={() => (opened = true)}>Post</Dialog.Trigger
+		class={`${buttonVariants({ variant: 'default' })} w-full ${className}`}
+		on:click={() => (opened = true)}><slot>Post</slot></Dialog.Trigger
 	>
 	<Dialog.Content class="sm:max-w-[500px]">
 		<div class="flex items-start space-x-3">
@@ -68,7 +70,7 @@
 
 			<div class="flex flex-grow flex-col gap-2">
 				<DivInput bind:lynt />
-				
+
 				{#if imagePreview}
 					<img class="avatar" src={imagePreview} alt="Preview" />
 				{/if}

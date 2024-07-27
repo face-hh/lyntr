@@ -104,7 +104,7 @@
 	}
 </script>
 
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto h-full overflow-y-auto px-4 py-8">
 	<h1 class="mb-6 text-3xl font-bold">Notifications</h1>
 
 	<Card.Root class="mx-auto w-full max-w-2xl bg-border">
@@ -113,7 +113,7 @@
 			<Card.Description>Your latest 50 notifications</Card.Description>
 		</Card.Header>
 		<Card.Content>
-			<ScrollArea class="h-[600px] w-full rounded-md">
+			<ScrollArea class="h-full w-full rounded-md">
 				<div class="pr-4">
 					<!-- Add right padding for scrollbar -->
 					{#if notifications.length === 0}
@@ -144,7 +144,7 @@
 													<div class="flex justify-between space-x-4">
 														<Avatar
 															size={10}
-															src={cdnUrl(notification.sourceUserId, "small")}
+															src={cdnUrl(notification.sourceUserId, 'small')}
 															alt="Profile picture."
 														/>
 

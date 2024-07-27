@@ -68,9 +68,13 @@
 			? 'border-2 border-solid border-primary p-1.5'
 			: ''} inline-flex items-center justify-center rounded-xl font-bold text-primary {className}"
 	>
-		<svelte:component this={icon} {strokeWidth} class="h-6 w-6 {text ? 'mr-1' : ''}" />
+		<svelte:component
+			this={icon}
+			{strokeWidth}
+			class="h-6 w-6 {text ? '{isActive ? "hidden md:block" : ""} md:mr-1' : ''}"
+		/>
 		{#if text}
-			<span>{text}</span>
+			<span class="hidden md:block {isActive ? '!block' : ''}">{text}</span>
 		{/if}
 	</button>
 {/if}

@@ -28,9 +28,9 @@
 	const submittedValue = writable('');
 
 	const dispatch = createEventDispatcher();
-    $: if (currentQuestion === questions.length) {
-        dispatch('questionsCompleted', true);
-    }
+	$: if (currentQuestion === questions.length) {
+		dispatch('questionsCompleted', true);
+	}
 
 	const components = {
 		AGI,
@@ -118,12 +118,12 @@
 		<Button
 			on:click={async () => {
 				localStorage.setItem(questions[currentQuestion].id, $submittedValue);
-				if (currentQuestion !== 20) currentQuestion++
+				if (currentQuestion !== 20) currentQuestion++;
 				localStorage.setItem('current_question', String(currentQuestion));
 
 				if (currentQuestion === questions.length) {
-                    dispatch('questionsCompleted', true);
-                }
+					dispatch('questionsCompleted', true);
+				}
 
 				$submittedValue = '';
 			}}

@@ -4,7 +4,7 @@
 	export let occupy_screen = true;
 </script>
 
-<div class="flex {occupy_screen ? 'h-screen' : 'h-full'} animate-pulse">
+<div class="flex {occupy_screen ? 'h-dvh' : 'h-full'} animate-pulse">
 	<div class="m-auto">
 		<img src={imageSrc} alt="Loading" class={`${size} object-contain`} />
 	</div>

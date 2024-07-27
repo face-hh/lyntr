@@ -150,20 +150,20 @@
 		await fetchProfile();
 		await Promise.all([fetchUserLynts(), checkFollowStatus(), fetchFollowCounts()]);
 		loading = false;
-		avatar = cdnUrl(profile.id, "big");
+		avatar = cdnUrl(profile.id, 'big');
 	});
 </script>
 
 {#if loading}
 	<LoadingSpinner />
 {:else if profile}
-	<div class="w-full flex-grow overflow-hidden">
+	<div class="h-full w-full flex-grow overflow-hidden pl-1">
 		<div class="mr-[-17px] h-full overflow-y-auto overflow-x-hidden pr-[17px]">
 			<div class="mt-2">
 				<div class="flex items-center gap-4">
 					<Avatar size={40} src={avatar} alt={profile.username} border={true} />
 					<div class="flex flex-col gap-2">
-						<div class="inline-flex gap-2 items-center">
+						<div class="inline-flex items-center gap-2">
 							<Label class="text-2xl font-bold text-primary">{profile.username}</Label>
 							{#if profile.verified}
 								<Tooltip.Root>

@@ -13,258 +13,277 @@ import { sendMessage } from '@/sse';
 
 const ratelimits = new Map();
 
-export const POST: RequestHandler = async ({ request, cookies }: { request: Request, cookies: Cookies }) => {
-    const authCookie = cookies.get('_TOKEN__DO_NOT_SHARE');
+export const POST: RequestHandler = async ({
+	request,
+	cookies
+}: {
+	request: Request;
+	cookies: Cookies;
+}) => {
+	const authCookie = cookies.get('_TOKEN__DO_NOT_SHARE');
 
-    if (!authCookie) {
-        return json({ error: 'Missing authentication' }, { status: 401 });
-    }
+	if (!authCookie) {
+		return json({ error: 'Missing authentication' }, { status: 401 });
+	}
 
-    let userId: string;
+	let userId: string;
 
-    try {
-        const jwtPayload = await verifyAuthJWT(authCookie);
-        userId = jwtPayload.userId;
+	try {
+		const jwtPayload = await verifyAuthJWT(authCookie);
+		userId = jwtPayload.userId;
 
-        if (!userId) {
-            throw new Error('Invalid JWT token');
-        }
-    } catch (error) {
-        console.error('Authentication error:', error);
-        return json({ error: 'Authentication failed' }, { status: 401 });
-    }
+		if (!userId) {
+			throw new Error('Invalid JWT token');
+		}
+	} catch (error) {
+		console.error('Authentication error:', error);
+		return json({ error: 'Authentication failed' }, { status: 401 });
+	}
 
-    const ratelimit = ratelimits.get(userId);
+	const ratelimit = ratelimits.get(userId);
 
-    if (!ratelimit) {
-        ratelimits.set(userId, Date.now())
-    } else if (Math.round((Date.now() - ratelimit) / 1000) < 5) {
-        return json({ error: "You are ratelimited." }, { status: 429 })
-    } else {
-        ratelimits.delete(userId)
-    }
+	if (!ratelimit) {
+		ratelimits.set(userId, Date.now());
+	} else if (Math.round((Date.now() - ratelimit) / 1000) < 5) {
+		return json({ error: 'You are ratelimited.' }, { status: 429 });
+	} else {
+		ratelimits.delete(userId);
+	}
 
-    const formData = await request.formData();
+	const formData = await request.formData();
 
-    let content = formData.get('content') as string;
-    const imageFile = formData.get('image') as File | null;
-    const reposted = formData.get('reposted') as string;
+	let content = formData.get('content') as string;
+	const imageFile = formData.get('image') as File | null;
+	const reposted = formData.get('reposted') as string;
 
-    if (!content) content = ''
+	if (!content) content = '';
 
-    if (content.length > 280) {
-        return json({ error: 'Invalid content' }, { status: 400 });
-    }
+	if (content.length > 280) {
+		return json({ error: 'Invalid content' }, { status: 400 });
+	}
 
-    try {
-        const lyntId = new Snowflake({
-            custom_epoch: new Date("2024-07-13T11:29:44.526Z").getTime(),
-        });
+	try {
+		const lyntId = new Snowflake({
+			custom_epoch: new Date('2024-07-13T11:29:44.526Z').getTime()
+		});
 
-        const uniqueLyntId = String(lyntId.getUniqueID());
+		const uniqueLyntId = String(lyntId.getUniqueID());
 
-        let lyntValues: any = {
-            id: uniqueLyntId,
-            user_id: userId,
-            content: content,
-            has_link: content.includes('http'),
-        };
+		let lyntValues: any = {
+			id: uniqueLyntId,
+			user_id: userId,
+			content: content,
+			has_link: content.includes('http')
+		};
 
-        if (reposted) {
-            const [existingLynt] = await db
-                .select({ id: lynts.id })
-                .from(lynts)
-                .where(eq(lynts.id, reposted))
-                .limit(1);
+		if (reposted) {
+			const [existingLynt] = await db
+				.select({ id: lynts.id })
+				.from(lynts)
+				.where(eq(lynts.id, reposted))
+				.limit(1);
 
-            if (existingLynt) {
-                lyntValues.reposted = true;
-                lyntValues.parent = reposted;
-            } else {
-                return json({ error: 'Invalid reposted lynt ID' }, { status: 400 });
-            }
-        }
+			if (existingLynt) {
+				lyntValues.reposted = true;
+				lyntValues.parent = reposted;
+			} else {
+				return json({ error: 'Invalid reposted lynt ID' }, { status: 400 });
+			}
+		}
 
-        if (imageFile) {
-            const buffer = await imageFile.arrayBuffer();
-            const inputBuffer = Buffer.from(buffer);
+		if (imageFile) {
+			const buffer = await imageFile.arrayBuffer();
+			const inputBuffer = Buffer.from(buffer);
 
-            const resizedBuffer = await sharp(inputBuffer)
-                .resize({
-                    fit: sharp.fit.contain,
-                    width: 800
-                })
-                .webp({ quality: 70 })
-                .toBuffer();
+			const resizedBuffer = await sharp(inputBuffer)
+				.resize({
+					fit: sharp.fit.contain,
+					width: 800
+				})
+				.webp({ quality: 70 })
+				.toBuffer();
 
-            const fileName = `${uniqueLyntId}.webp`;
+			const fileName = `${uniqueLyntId}.webp`;
 
-            await minioClient.putObject(process.env.S3_BUCKET_NAME!, fileName, resizedBuffer, resizedBuffer.length, {
-                'Content-Type': 'image/webp',
-            });
+			await minioClient.putObject(
+				process.env.S3_BUCKET_NAME!,
+				fileName,
+				resizedBuffer,
+				resizedBuffer.length,
+				{
+					'Content-Type': 'image/webp'
+				}
+			);
 
-            lyntValues.has_image = true
-        }
+			lyntValues.has_image = true;
+		}
 
-        const [newLynt] = await db.insert(lynts).values(lyntValues).returning();
+		const [newLynt] = await db.insert(lynts).values(lyntValues).returning();
 
-        sendMessage(uniqueLyntId);
+		sendMessage(uniqueLyntId);
 
-        return json(newLynt, { status: 201 });
-    } catch (error) {
-        console.error('Error creating lynt:', error);
-        return json({ error: 'Failed to create lynt' }, { status: 500 });
-    }
+		return json(newLynt, { status: 201 });
+	} catch (error) {
+		console.error('Error creating lynt:', error);
+		return json({ error: 'Failed to create lynt' }, { status: 500 });
+	}
 };
 
-export const GET: RequestHandler = async ({ url, request, cookies }: { url: URL, request: Request, cookies: Cookies }) => {
-    let userId: string;
+export const GET: RequestHandler = async ({
+	url,
+	request,
+	cookies
+}: {
+	url: URL;
+	request: Request;
+	cookies: Cookies;
+}) => {
+	let userId: string;
 
-    const authCookie = cookies.get('_TOKEN__DO_NOT_SHARE');
-    const admin = request.headers.get("Authorization");
+	const authCookie = cookies.get('_TOKEN__DO_NOT_SHARE');
+	const admin = request.headers.get('Authorization');
 
-    if (!authCookie && !admin) {
-        return json({ error: 'Missing authentication' }, { status: 401 });
-    }
+	if (!authCookie && !admin) {
+		return json({ error: 'Missing authentication' }, { status: 401 });
+	}
 
-    if (admin === process.env.ADMIN_KEY && process.env.SUDO_USER_ID) {
-        userId = process.env.SUDO_USER_ID
-    } else {
-        try {
-            const jwtPayload = await verifyAuthJWT(authCookie);
+	if (admin === process.env.ADMIN_KEY && process.env.SUDO_USER_ID) {
+		userId = process.env.SUDO_USER_ID;
+	} else {
+		try {
+			const jwtPayload = await verifyAuthJWT(authCookie);
 
-            userId = jwtPayload.userId
+			userId = jwtPayload.userId;
 
-            if (!userId) {
-                throw new Error('Invalid JWT token');
-            }
-        } catch (error) {
-            console.error('Authentication error:', error);
-            return json({ error: 'Authentication failed' }, { status: 401 });
-        }
-    }
-    const lyntId = url.searchParams.get('id');
+			if (!userId) {
+				throw new Error('Invalid JWT token');
+			}
+		} catch (error) {
+			console.error('Authentication error:', error);
+			return json({ error: 'Authentication failed' }, { status: 401 });
+		}
+	}
+	const lyntId = url.searchParams.get('id');
 
-    if (!lyntId) {
-        return json({ error: 'Missing lynt ID' }, { status: 400 });
-    }
+	if (!lyntId) {
+		return json({ error: 'Missing lynt ID' }, { status: 400 });
+	}
 
-    try {
-        const lyntobj = lyntObj(userId)
+	try {
+		const lyntobj = lyntObj(userId);
 
-        const [lynt] = await db
-            .select({ ...lyntobj, parent: lynts.parent })
-            .from(lynts)
-            .leftJoin(users, eq(lynts.user_id, users.id))
-            .where(eq(lynts.id, lyntId))
-            .limit(1);
+		const [lynt] = await db
+			.select({ ...lyntobj, parent: lynts.parent })
+			.from(lynts)
+			.leftJoin(users, eq(lynts.user_id, users.id))
+			.where(eq(lynts.id, lyntId))
+			.limit(1);
 
-        if (!lynt) {
-            return json({ error: 'Lynt not found' }, { status: 404 });
-        }
+		if (!lynt) {
+			return json({ error: 'Lynt not found' }, { status: 404 });
+		}
 
-        await db.execute(sql`UPDATE ${lynts} SET views = views + 1 WHERE id = ${lyntId}`);
+		await db.execute(sql`UPDATE ${lynts} SET views = views + 1 WHERE id = ${lyntId}`);
 
-        const referencedLynts = await fetchReferencedLynts(userId, lynt.parent);
+		const referencedLynts = await fetchReferencedLynts(userId, lynt.parent);
 
-        return json({ ...lynt, referencedLynts });
-    } catch (error) {
-        console.error('Error fetching lynt:', error);
-        return json({ error: 'Failed to fetch lynt' }, { status: 500 });
-    }
+		return json({ ...lynt, referencedLynts });
+	} catch (error) {
+		console.error('Error fetching lynt:', error);
+		return json({ error: 'Failed to fetch lynt' }, { status: 500 });
+	}
 };
 
 async function fetchReferencedLynts(userId: string, parentId: string | null): Promise<any[]> {
-    const referencedLynts: any[] = [];
+	const referencedLynts: any[] = [];
 
-    async function fetchParent(currentParentId: string) {
-        const obj = lyntObj(userId);
+	async function fetchParent(currentParentId: string) {
+		const obj = lyntObj(userId);
 
-        const [parent] = await db
-            .select(obj)
-            .from(lynts)
-            .leftJoin(users, eq(lynts.user_id, users.id))
-            .where(
-                and(
-                    eq(lynts.id, currentParentId),
-                    eq(lynts.reposted, false)
-                )
-            )
-            .limit(1);
+		const [parent] = await db
+			.select(obj)
+			.from(lynts)
+			.leftJoin(users, eq(lynts.user_id, users.id))
+			.where(and(eq(lynts.id, currentParentId), eq(lynts.reposted, false)))
+			.limit(1);
 
-        if (parent) {
-            referencedLynts.unshift(parent); // Add to the beginning of the array
-            if (parent.parentId) {
-                await fetchParent(parent.parentId);
-            }
-        }
-    }
+		if (parent) {
+			referencedLynts.unshift(parent); // Add to the beginning of the array
+			if (parent.parentId) {
+				await fetchParent(parent.parentId);
+			}
+		}
+	}
 
-    if (parentId) {
-        await fetchParent(parentId);
-    }
+	if (parentId) {
+		await fetchParent(parentId);
+	}
 
-    return referencedLynts;
+	return referencedLynts;
 }
 
-export const DELETE: RequestHandler = async ({ request, url, cookies }: { request: Request, url: URL, cookies: Cookies }) => {
-    const admin = request.headers.get("Authorization");
-    const lyntId = url.searchParams.get('id');
+export const DELETE: RequestHandler = async ({
+	request,
+	url,
+	cookies
+}: {
+	request: Request;
+	url: URL;
+	cookies: Cookies;
+}) => {
+	const admin = request.headers.get('Authorization');
+	const lyntId = url.searchParams.get('id');
 
-    if (!lyntId) {
-        return json({ error: 'Missing lynt ID' }, { status: 400 });
-    }
+	if (!lyntId) {
+		return json({ error: 'Missing lynt ID' }, { status: 400 });
+	}
 
-    if (admin === process.env.ADMIN_KEY) {
-        await deleteLynt(lyntId)
-        return json({ message: "Done" }, { status: 200 })
-    }
+	if (admin === process.env.ADMIN_KEY) {
+		await deleteLynt(lyntId);
+		return json({ message: 'Done' }, { status: 200 });
+	}
 
-    const authCookie = cookies.get('_TOKEN__DO_NOT_SHARE');
+	const authCookie = cookies.get('_TOKEN__DO_NOT_SHARE');
 
-    if (!authCookie) {
-        return json({ error: 'Missing authentication' }, { status: 401 });
-    }
+	if (!authCookie) {
+		return json({ error: 'Missing authentication' }, { status: 401 });
+	}
 
-    let userId: string;
+	let userId: string;
 
-    try {
-        const jwtPayload = await verifyAuthJWT(authCookie);
-        userId = jwtPayload.userId;
+	try {
+		const jwtPayload = await verifyAuthJWT(authCookie);
+		userId = jwtPayload.userId;
 
-        if (!userId) {
-            throw new Error('Invalid JWT token');
-        }
-    } catch (error) {
-        console.error('Authentication error:', error);
-        return json({ error: 'Authentication failed' }, { status: 401 });
-    }
+		if (!userId) {
+			throw new Error('Invalid JWT token');
+		}
+	} catch (error) {
+		console.error('Authentication error:', error);
+		return json({ error: 'Authentication failed' }, { status: 401 });
+	}
 
+	try {
+		// Check if the lynt exists and belongs to the authenticated user
+		const [lynt] = await db
+			.select({ id: lynts.id, user_id: lynts.user_id })
+			.from(lynts)
+			.where(eq(lynts.id, lyntId))
+			.limit(1);
 
+		if (!lynt) {
+			return json({ error: 'Lynt not found' }, { status: 404 });
+		}
 
+		if (lynt.user_id !== userId) {
+			return json({ error: 'Unauthorized to delete this lynt' }, { status: 403 });
+		}
 
-    try {
-        // Check if the lynt exists and belongs to the authenticated user
-        const [lynt] = await db
-            .select({ id: lynts.id, user_id: lynts.user_id })
-            .from(lynts)
-            .where(eq(lynts.id, lyntId))
-            .limit(1);
+		await deleteLynt(lyntId);
 
-        if (!lynt) {
-            return json({ error: 'Lynt not found' }, { status: 404 });
-        }
-
-        if (lynt.user_id !== userId) {
-            return json({ error: 'Unauthorized to delete this lynt' }, { status: 403 });
-        }
-
-        await deleteLynt(lyntId)
-
-        return json({ message: 'Lynt and related data deleted successfully' }, { status: 200 });
-    } catch (error) {
-        console.error('Error deleting lynt:', error);
-        return json({ error: 'Failed to delete lynt' }, { status: 500 });
-    }
+		return json({ message: 'Lynt and related data deleted successfully' }, { status: 200 });
+	} catch (error) {
+		console.error('Error deleting lynt:', error);
+		return json({ error: 'Failed to delete lynt' }, { status: 500 });
+	}
 };
-

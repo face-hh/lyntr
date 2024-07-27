@@ -21,7 +21,7 @@
 				.then((response) => {
 					if (response.ok) {
 						goto('/');
-						window.location.reload()
+						window.location.reload();
 					} else {
 						toast('Failed to delete account');
 					}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cdnUrl } from "./stores"
+	import { cdnUrl } from './stores';
 	import { Separator } from '@/components/ui/separator';
 
 	import { BarChart2, Heart, ImageUp, MessageCircle, Repeat2, Share2 } from 'lucide-svelte';
@@ -10,7 +10,7 @@
 	import OutlineButton from './OutlineButton.svelte';
 	import { toast } from 'svelte-sonner';
 	import LyntContents from './LyntContents.svelte';
-	import DivInput from "./DivInput.svelte";
+	import DivInput from './DivInput.svelte';
 
 	function formatNumber(num: number): string {
 		if (!num) return '0';
@@ -160,19 +160,15 @@
 	}
 </script>
 
-<button on:click|stopPropagation={() => openLynt(id)} class="w-full text-left">
+<button on:click|stopPropagation={() => openLynt(id)} class="mb-2 w-full text-left">
 	<div
-		class="flex min-w-[570px] gap-3 rounded-xl bg-lynt-foreground p-3 transition-colors hover:bg-border"
+		class="flex w-full gap-3 rounded-xl bg-lynt-foreground p-3 transition-colors hover:bg-border"
 	>
 		<a href="/@{handle}" class="inline-block max-h-[40px] min-w-[40px]">
-			<Avatar
-				size={10}
-				src={cdnUrl(userId, "small")}
-				alt="A profile picture."
-			/>
+			<Avatar size={10} src={cdnUrl(userId, 'small')} alt="A profile picture." />
 		</a>
 
-		<div class="flex w-full max-w-[530px] flex-col gap-2">
+		<div class="flex w-full max-w-[530px] flex-col gap-2 overflow-hidden">
 			<!-- Lynt that actually gets displayed. Main lynt -->
 			<LyntContents
 				{truncateContent}
@@ -236,11 +232,7 @@
 						</Dialog.Trigger>
 						<Dialog.Content class="min-w-[20%]">
 							<div class="flex items-start space-x-3">
-								<Avatar
-									size={10}
-									src={cdnUrl(myId, "small")}
-									alt="Your profile picture."
-								/>
+								<Avatar size={10} src={cdnUrl(myId, 'small')} alt="Your profile picture." />
 
 								<div class="flex-grow">
 									<DivInput bind:lynt />
