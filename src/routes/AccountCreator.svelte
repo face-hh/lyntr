@@ -107,7 +107,7 @@
 						}}
 					/>
 					<p class="text-sm text-muted-foreground">Enter your permanent username (max. 32 char.)</p>
-					<p class="text-xs text-muted-foreground">Only alphabetical lowercase letters work, including -.</p>
+					<p class="text-xs text-muted-foreground">Only alphabetical lowercase letters (a-z) work, including '-'.</p>
 				</div>
 
 				{#if allQuestionsCompleted}
