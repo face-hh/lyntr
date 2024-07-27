@@ -290,7 +290,7 @@
 			{/if}
 		</div>
 		{#if lyntOpened && selectedLynt}
-			<div class="mb-2 h-full w-full pb-10 md:pb-0">
+			<div class="mb-2 h-full w-full pb-10">
 				<button
 					class="flex w-full justify-end p-2"
 					on:click={() => {
