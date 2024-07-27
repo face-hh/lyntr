@@ -241,7 +241,7 @@
 >
 	<div class="fixed inset-x-0 bottom-0 z-50 flex flex-col md:static md:flex-row">
 		<div
-			class="md:max-w-1/3 flex w-full flex-row items-start gap-2 px-2 py-2 md:w-auto md:flex-col md:pt-0"
+			class="md:max-w-1/3 min-w-full flex w-full flex-row items-start gap-2 px-2 py-2 md:w-auto md:flex-col md:pt-0"
 		>
 			<button class="mt-5 hidden md:block" on:click={toggleMode}>
 				<img class="mb-5 size-20 cursor-pointer" src="logo.svg" alt="Logo" />
