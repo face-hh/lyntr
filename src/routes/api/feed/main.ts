@@ -4,7 +4,7 @@ import { lynts, likes, users, followers, history } from '@/server/schema';
 import { sql, desc, and, eq, exists, or, isNull, not, inArray } from 'drizzle-orm';
 import { lyntObj } from '../util';
 
-export async function mainFeed(userId: string, limit = 50) {
+export async function mainFeed(userId: string, limit = 20) {
     const followedUsers = db
         .select({ followedId: followers.follower_id })
         .from(followers)

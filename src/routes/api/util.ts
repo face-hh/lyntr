@@ -9,7 +9,11 @@ export const lyntObj = (userId: string) => {
         content: lynts.content,
         userId: lynts.user_id,
         createdAt: lynts.created_at,
-        views: lynts.views,
+        views: sql<number>`(
+            SELECT COUNT(*) 
+            FROM ${history} 
+            WHERE ${history.lynt_id} = ${lynts.id}
+        )`.as('views'),
         reposted: lynts.reposted,
         parentId: lynts.parent,
         has_image: lynts.has_image,
