@@ -74,12 +74,12 @@
 			<div class="flex flex-grow flex-col gap-2">
 				<div class="flex w-full max-w-sm flex-col gap-1.5">
 					<Label for="email">Username</Label>
-					<Input type="email" id="email" placeholder="email" bind:value={username} />
+					<Input type="email" id="email" placeholder="Username" bind:value={username} />
 				</div>
 
 				<div class="flex w-full max-w-sm flex-col gap-1.5">
 					<Label for="email">About me</Label>
-					<Input type="email" id="email" placeholder="email" bind:value={bio} />
+					<Input type="email" id="email" placeholder="About me..." bind:value={bio} />
 				</div>
 			</div>
 		</div>
