@@ -8,7 +8,7 @@ import sanitizeHtml from 'sanitize-html';
 import { Snowflake } from 'nodejs-snowflake';
 import sharp from 'sharp';
 import { minioClient } from '@/server/minio';
-import { lyntObj } from '../util';
+import { deleteLynt, lyntObj } from '../util';
 import { sendMessage } from '@/sse';
 
 const ratelimits = new Map();
@@ -268,42 +268,3 @@ export const DELETE: RequestHandler = async ({ request, url, cookies }: { reques
     }
 };
 
-async function deleteLynt(lyntId: string) {
-    await db.transaction(async (trx) => {
-        // Get all comments under this lynt
-        const comments = await trx
-            .select({ id: lynts.id })
-            .from(lynts)
-            .where(eq(lynts.parent, lyntId));
-
-        const commentIds = comments.map(comment => comment.id);
-        const allIds = [lyntId, ...commentIds];
-
-        // Delete likes associated with the comments and the original lynt
-        await trx.delete(likes)
-            .where(inArray(likes.lynt_id, allIds));
-
-        // Delete notifications associated with the comments and the original lynt
-        await trx.delete(notifications)
-            .where(inArray(notifications.lyntId, allIds));
-
-        // Delete history entries associated with the comments and the original lynt
-        await trx.delete(history)
-            .where(inArray(history.lynt_id, allIds));
-
-        // Delete all comments under this lynt
-        await trx.delete(lynts)
-            .where(and(eq(lynts.parent, lyntId), eq(lynts.reposted, false)));
-
-        // Update reposts of this lynt
-        await trx.update(lynts)
-            .set({
-                content: sql`${lynts.content} || '\nThe Lynt this user is reposting has been since deleted.'`,
-                parent: null
-            })
-            .where(and(eq(lynts.parent, lyntId), eq(lynts.reposted, true)));
-
-        // Delete the original lynt
-        await trx.delete(lynts).where(eq(lynts.id, lyntId));
-    });
-}

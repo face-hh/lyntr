@@ -6,6 +6,7 @@ import { lynts, likes, users } from '@/server/schema';
 import { eq, sql } from 'drizzle-orm';
 import sanitizeHtml from 'sanitize-html';
 import { Snowflake } from 'nodejs-snowflake';
+import { createNotification } from '@/server/notifications';
 
 const ratelimits = new Map();
 
@@ -62,7 +63,7 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
         };
 
         const [existingLynt] = await db
-            .select({ id: lynts.id })
+            .select({ id: lynts.id, userId: lynts.user_id })
             .from(lynts)
             .where(eq(lynts.id, id))
             .limit(1);
@@ -74,6 +75,10 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
         }
 
         const [newLynt] = await db.insert(lynts).values(lyntValues).returning();
+
+        if (existingLynt.userId && existingLynt.userId !== userId) {
+            await createNotification(existingLynt.userId, 'comment', userId, newLynt.id);
+        }
 
         return json(newLynt, { status: 201 });
     } catch (error) {

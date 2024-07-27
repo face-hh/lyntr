@@ -1,5 +1,6 @@
-import { lynts, likes, followers, users } from '@/server/schema';
-import { sql } from 'drizzle-orm';
+import { db } from '@/server/db';
+import { lynts, likes, followers, users, notifications, history } from '@/server/schema';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import sharp from 'sharp';
 
 export const lyntObj = (userId: string) => {
@@ -136,8 +137,42 @@ export async function uploadAvatar(inputBuffer: Buffer, fileName: string, minioC
     }
 }
 
-interface AuthResult {
-    userId: string;
-    error?: string;
-    status?: number;
+export async function deleteLynt(lyntId: string) {
+    await db.transaction(async (trx) => {
+        // Get all comments under this lynt
+        const comments = await trx
+            .select({ id: lynts.id })
+            .from(lynts)
+            .where(eq(lynts.parent, lyntId));
+
+        const commentIds = comments.map(comment => comment.id);
+        const allIds = [lyntId, ...commentIds];
+
+        // Delete likes associated with the comments and the original lynt
+        await trx.delete(likes)
+            .where(inArray(likes.lynt_id, allIds));
+
+        // Delete notifications associated with the comments and the original lynt
+        await trx.delete(notifications)
+            .where(inArray(notifications.lyntId, allIds));
+
+        // Delete history entries associated with the comments and the original lynt
+        await trx.delete(history)
+            .where(inArray(history.lynt_id, allIds));
+
+        // Delete all comments under this lynt
+        await trx.delete(lynts)
+            .where(and(eq(lynts.parent, lyntId), eq(lynts.reposted, false)));
+
+        // Update reposts of this lynt
+        await trx.update(lynts)
+            .set({
+                content: sql`${lynts.content} || '\nThe Lynt this user is reposting has been since deleted.'`,
+                parent: null
+            })
+            .where(and(eq(lynts.parent, lyntId), eq(lynts.reposted, true)));
+
+        // Delete the original lynt
+        await trx.delete(lynts).where(eq(lynts.id, lyntId));
+    });
 }

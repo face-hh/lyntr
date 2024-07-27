@@ -58,7 +58,7 @@ export const POST: RequestHandler = async ({ request, cookies }: { request: Requ
                 user_id: userId,
             });
 
-            if (/** userId !== lynt.user_id && */ lynt.user_id) {
+            if (userId !== lynt.user_id && lynt.user_id) {
                 await createNotification(lynt.user_id, 'like', userId, lyntId);
             }
             

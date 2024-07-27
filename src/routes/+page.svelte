@@ -22,7 +22,7 @@
 	};
 
 	async function checkAuthAndProfileStatus() {
-		const { data, error } = await supabase.auth.getSession();
+		const { data } = await supabase.auth.getSession();
 		if (data.session?.access_token) {
 			authenticated = true;
 			const {

@@ -22,7 +22,7 @@
 <div class="flex justify-center">
 	<Magnifier
 		alt="A bunch of people."
-		src="https://pbs.twimg.com/media/GPVuinxWwAAu8eO?format=jpg&name=large"
+		src="content_creators.jpg"
 		width="300px"
 	/>
 </div>

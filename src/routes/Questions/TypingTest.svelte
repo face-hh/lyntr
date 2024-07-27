@@ -9,7 +9,7 @@
 	$isButtonDisabled = true;
 
 	let phrases = [
-		"to be or not to be that is the question",
+		"to be or not to be",
 		"all that glitters is not gold",
 		"actions speak louder than words",
 		"where there is a will there is a way",

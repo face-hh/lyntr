@@ -18,7 +18,7 @@
 
 <span class="select-none">Do you know these types of accounts?</span>
 <div class="flex justify-center">
-    <img src="https://pbs.twimg.com/media/GOr-aQWXMAAC4fm?format=jpg&name=900x900" alt="Engagement bait example" class="h-44 w-full" />
+    <img src="gimmick.jpg" alt="Engagement bait example" class="h-44 w-full" />
 </div>
 
 <RadioGroup.Root bind:value={$submittedValue}>

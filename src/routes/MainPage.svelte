@@ -126,7 +126,7 @@
 	async function getLynt(lyntOpened: string) {
 		const response = await fetch('api/lynt?id=' + lyntOpened, { method: 'GET' });
 
-		if (response.status !== 200) alert('Error loading lynt!');
+		if (response.status !== 200) toast('Error loading lynt!');
 
 		const res = await response.json();
 
@@ -139,7 +139,7 @@
 		const response = await fetch(`api/feed?type=${currentTab}`, { method: 'GET' });
 
 		if (response.status !== 200) {
-			alert('Error generating feed! Please refresh the page');
+			toast('Error generating feed! Please refresh the page');
 			return;
 		}
 

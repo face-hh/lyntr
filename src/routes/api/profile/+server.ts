@@ -5,11 +5,11 @@ import { Snowflake } from 'nodejs-snowflake';
 
 import { verifyAuthJWT, createAuthJWT } from '@/server/jwt';
 import { db } from '@/server/db';
-import { followers, users } from '@/server/schema';
-import { eq, sql } from 'drizzle-orm';
+import { followers, likes, lynts, notifications, users, history } from '@/server/schema';
+import { eq, inArray, sql } from 'drizzle-orm';
 import { supabase } from '@/supabase'
 import { minioClient } from '@/server/minio';
-import { uploadAvatar } from '../util';
+import { deleteLynt, uploadAvatar } from '../util';
 import { readFileSync } from 'fs';
 import sanitizeHtml from 'sanitize-html';
 
@@ -30,7 +30,7 @@ let questions: Question[] = [
     { id: 'SequenceSymbol', condition: (input: any) => { return input === 'idfk' ? 10 : -7 } },
     { id: 'SequenceNumber', condition: (input: any) => { return parseInt(input) === 42 ? 9 : -3 } },
     { id: 'Dexerto', condition: (input: any) => { return Boolean(input) == true ? -25 : 25 } },
-    { id: 'MathProblemComplex', condition: (input: any) => { return input === '7-14-4' ? 25 : 0 } },
+    { id: 'MathProblemComplex', condition: (input: any) => { return parseInt(input) === 355 ? 25 : 0 } },
     { id: 'TypingTest', condition: (input: any) => { return Math.floor(Math.min(parseInt(input), 120) * 0.5) } },
     { id: 'AudioRick', condition: (input: any) => { return Boolean(input) ? -13 : 5 } },
     { id: 'Degree', condition: (input: any) => { return Boolean(input) ? 0 : -5 } },
@@ -230,6 +230,73 @@ export const PATCH: RequestHandler = async ({ request, cookies }) => {
     } catch (error) {
         console.error('Error updating user:', error);
         return json({ error: 'Failed to update user' }, { status: 500 });
+    }
+};
+
+export const DELETE: RequestHandler = async ({ request, cookies }) => {
+    const authToken = cookies.get('_TOKEN__DO_NOT_SHARE');
+    if (!authToken) {
+        return json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    let userId;
+    try {
+        const decodedToken = await verifyAuthJWT(authToken);
+        userId = decodedToken.userId;
+    } catch (error) {
+        return json({ error: 'Invalid token' }, { status: 401 });
+    }
+
+    try {
+        // Start a transaction
+        await db.transaction(async (tx) => {
+            // Delete notifications
+            console.log("Account deletion - " + userId)
+            console.time("Getting all lynts")
+            const userLynts = await tx.select({ id: lynts.id }).from(lynts).where(eq(lynts.user_id, userId));
+            console.timeEnd("Getting all lynts")
+            console.time("Deleting all lynts")
+            for (const lynt of userLynts) {
+                await deleteLynt(lynt.id);
+            }
+            console.timeEnd("Deleting all lynts")
+            // Delete notifications
+            console.time("Deleting all notifications")
+            await tx.delete(notifications).where(eq(notifications.userId, userId));
+            await tx.delete(notifications).where(eq(notifications.sourceUserId, userId));
+            console.timeEnd("Deleting all notifications")
+            console.time("Deleting all history")
+            // Delete history
+            await tx.delete(history).where(eq(history.user_id, userId));
+            console.timeEnd("Deleting all history")
+            // Delete followers
+            console.time("Deleting all followers/following")
+            await tx.delete(followers).where(eq(followers.user_id, userId));
+            await tx.delete(followers).where(eq(followers.follower_id, userId));
+            console.timeEnd("Deleting all followers/following")
+
+            // NEW: Delete any remaining likes by the user
+            console.time("Deleting all remaining likes")
+            await tx.delete(likes).where(eq(likes.user_id, userId));
+            console.timeEnd("Deleting all remaining likes")
+
+            // Finally, delete the user
+            console.time("Deleting user")
+            const deletedUser = await tx.delete(users).where(eq(users.id, userId)).returning();
+            console.timeEnd("Deleting user")
+            
+            if (deletedUser.length === 0) {
+                throw new Error('User not found');
+            }
+        });
+
+        // Clear the auth cookie
+        cookies.delete('_TOKEN__DO_NOT_SHARE', { path: '/' });
+
+        return json({ message: 'User and all related data deleted successfully' }, { status: 200 });
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        return json({ error: 'Failed to delete user and related data' }, { status: 500 });
     }
 };
 

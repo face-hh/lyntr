@@ -4,6 +4,7 @@ import { db } from '@/server/db';
 import { followers } from '@/server/schema';
 import { eq, and } from 'drizzle-orm';
 import { verifyAuthJWT } from '@/server/jwt';
+import { createNotification } from '@/server/notifications';
 
 const ratelimits = new Map();
 
@@ -66,6 +67,9 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
                     follower_id: authenticatedUserId
                 })
                 .execute();
+
+            await createNotification(targetUserId, 'follow', authenticatedUserId);
+
             return json({ message: 'Followed successfully' });
         }
     } catch (error) {
