@@ -95,15 +95,19 @@
 				</div>
 
 				<div class="flex flex-col gap-1.5">
-					<Label for="email-2">Username</Label>
-					<Input
-						type="email"
-						id="email-2"
+					<Label for="username">Username</Label>
+						<Input
+						type="text"
+						id="username"
 						placeholder="@facedev"
 						class="border-primary focus-visible:ring-0 focus-visible:ring-offset-0"
 						bind:value={username}
+						on:input={() => {
+							username = '@' + username.replace(/[^0-9a-z_-]/gi, '').toLowerCase();
+						}}
 					/>
 					<p class="text-sm text-muted-foreground">Enter your permanent username (max. 32 char.)</p>
+					<p class="text-xs text-muted-foreground">Only alphabetical lowercase letters (a-z) work, including '-'.</p>
 				</div>
 
 				{#if allQuestionsCompleted}
