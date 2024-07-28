@@ -236,9 +236,12 @@
 	}
 </script>
 
+<div class="flex justify-center w-full">
+	<div class="max-w-[1400px] w-full">
 <div
 	class="flex h-dvh w-full flex-col-reverse justify-end gap-4 overflow-hidden pb-20 md:flex-row md:pb-0"
 >
+
 	<div class="fixed inset-x-0 bottom-0 z-50 flex flex-col md:static md:flex-row">
 		<div
 			class="md:max-w-1/3 flex w-full flex-row items-start gap-2 px-2 py-2 md:w-auto md:flex-col md:pt-0"
@@ -257,7 +260,7 @@
 
 	<div class="flex h-full w-full flex-col gap-1 md:flex-row">
 		<div
-			class="min-w-1/2 flex h-full w-full flex-col overflow-hidden md:px-1 {lyntOpened &&
+			class="max-w-[530px] flex h-full w-full flex-col overflow-hidden md:px-1 {lyntOpened &&
 			selectedLynt
 				? 'hidden md:flex'
 				: ''}"
@@ -269,7 +272,7 @@
 			{:else if page.startsWith('profile')}
 				<ProfilePage profileHandle={page.replace('profile', '')} {handleLyntClick} />
 			{:else if page === 'home'}
-				<div class="min-w-1/3 mt-5 flex h-full flex-col md:px-1">
+				<div class=" min-w-1/2 mt-5 flex h-full flex-col md:px-1">
 					<TopTab {tabs} {currentTab} onTabChange={handleTabChange} />
 					<Separator class="mt-4" />
 
@@ -290,7 +293,7 @@
 			{/if}
 		</div>
 		{#if lyntOpened && selectedLynt}
-			<div class="mb-2 h-full w-full pb-10 md:pb-0">
+			<div class="max-w-[530px] mb-2 h-full w-full pb-10 md:pb-0">
 				<button
 					class="flex w-full justify-end p-2"
 					on:click={() => {
@@ -345,4 +348,6 @@
 			</div>
 		{/if}
 	</div>
+</div>
+</div>
 </div>

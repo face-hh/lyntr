@@ -16,7 +16,7 @@
 			</Label>
 			{#if currentTab === tab}
 				<div
-					class="absolute -bottom-2 left-0 right-0 mt-4 h-2 rounded-b-lg bg-primary"
+					class="absolute -bottom-2 left-0 right-0 mt-4 h-2 rounded-b-lg bg-primary opacity-[70%]"
 					in:fly={{ y: 10, duration: 200, easing: quintOut }}
 					out:fly={{ y: 10, duration: 200, easing: quintOut }}
 				></div>
