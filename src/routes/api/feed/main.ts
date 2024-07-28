@@ -53,8 +53,8 @@ export async function mainFeed(userId: string, limit = 20, excludePosts: string[
 		.where(whereConditions)
 		.orderBy(
 			desc(sql`CASE WHEN ${history.id} IS NULL THEN 1 ELSE 0 END`),
-			desc(sql`CASE WHEN ${users.handle} = 'facedev' THEN 1 ELSE 0 END`),
 			desc(lynts.created_at),
+			desc(sql`CASE WHEN ${users.handle} = 'facedev' THEN 1 ELSE 0 END`),
 			desc(sql`CASE WHEN ${lynts.user_id} IN (${followedUsers}) THEN 1 ELSE 0 END`),
 			desc(sql`COALESCE(${likeCounts.likeCount}, 0)`),
 			desc(sql`CASE WHEN ${lynts.created_at} > now() - interval '24 hours' THEN 1 ELSE 0 END`)
