@@ -202,7 +202,7 @@
 						{/if}
 					</div>
 				</div>
-<div class="md:hidden">
+<div class="md:hidden {!isSelf ? "hidden" : ""}">
      <ProfileButton />
 </div>
 				</div>

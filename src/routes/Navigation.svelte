@@ -13,7 +13,7 @@
 		{ icon: House, label: 'Home', page: 'home' },
 		{ icon: Search, label: 'Search', page: 'search' },
 		{ icon: Bell, label: 'Notifications', page: 'notifications' },
-		{ icon: User, label: 'Profile', page: 'profile' }
+		{ icon: User, label: 'Profile', page: 'profile' + handle }
 	];
 
 	function handleNavClick(page: string) {
@@ -21,7 +21,7 @@
 		if (page === 'home') {
 			goto('/');
 		}
-		if (page === 'profile') {
+		if (page === 'profile' + handle) {
 			goto(`/@${handle}`);
 		}
 	}

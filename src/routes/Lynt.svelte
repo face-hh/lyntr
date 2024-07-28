@@ -217,6 +217,7 @@
 						icon={MessageCircle}
 						text={formatNumber(commentCount)}
 						on:click={() => openLynt(id)}
+                                                small={false}
 					/>
 
 					<Dialog.Root bind:open={openDialog}>
@@ -228,6 +229,7 @@
 								icon={Repeat2}
 								text={formatNumber(repostCount)}
 								outline={true}
+                                                                small={false}
 							/>
 						</Dialog.Trigger>
 						<Dialog.Content class="min-w-[20%]">
