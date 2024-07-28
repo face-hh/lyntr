@@ -50,7 +50,6 @@ export async function mainFeed(userId: string, limit = 20, excludePosts: string[
 		.leftJoin(users, eq(lynts.user_id, users.id))
 		.leftJoin(likeCounts, eq(lynts.id, likeCounts.lyntId))
 		.where(whereConditions)
-		.leftJoin(history, and(eq(history.lynt_id, lynts.id), eq(history.user_id, userId)))
 		.orderBy(
 			// Unviewed posts first
 			desc(sql`CASE WHEN ${history.id} IS NULL THEN 1 ELSE 0 END`),
@@ -58,7 +57,12 @@ export async function mainFeed(userId: string, limit = 20, excludePosts: string[
 			desc(sql`CASE WHEN ${lynts.created_at} > now() - interval '7 days' THEN 1 ELSE 0 END`),
 			// Posts with more likes (for new and unseen posts)
 			desc(
-				sql`CASE WHEN isViewed = TRUE THEN 1 ELSE 0 END`
+				sql`
+				CASE WHEN EXISTS (SELECT 1 FROM history WHERE ${history.user_id} = ${userId} AND ${history.lynt_id} = ${lynts.id})
+					THEN 1
+					ELSE 0
+				END
+				`
 			),
 			// Posts from followed users
 			desc(sql`CASE WHEN ${lynts.user_id} IN (${followedUsers}) THEN 1 ELSE 0 END`),
