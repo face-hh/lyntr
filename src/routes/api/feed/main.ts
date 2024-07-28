@@ -49,30 +49,25 @@ export async function mainFeed(userId: string, limit = 20, excludePosts: string[
 		.from(lynts)
 		.leftJoin(users, eq(lynts.user_id, users.id))
 		.leftJoin(likeCounts, eq(lynts.id, likeCounts.lyntId))
-		.leftJoin(history, and(eq(history.lynt_id, lynts.id), eq(history.user_id, userId)))
 		.where(whereConditions)
+		.leftJoin(history, and(eq(history.lynt_id, lynts.id), eq(history.user_id, userId)))
 		.orderBy(
 			// Unviewed posts first
 			desc(sql`CASE WHEN ${history.id} IS NULL THEN 1 ELSE 0 END`),
 			// Recent posts (within 7 days)
 			desc(sql`CASE WHEN ${lynts.created_at} > now() - interval '7 days' THEN 1 ELSE 0 END`),
 			// Posts with more likes (for new and unseen posts)
+			desc(
+				sql`CASE WHEN ${history.id} IS NULL THEN 1 ELSE 0 END`
+			),
 			// Posts from followed users
 			desc(sql`CASE WHEN ${lynts.user_id} IN (${followedUsers}) THEN 1 ELSE 0 END`),
 			// Remaining posts ordered by likes
 			desc(sql`COALESCE(${likeCounts.likeCount}, 0)`),
 			// Newest posts first
 			desc(lynts.created_at),
-			// Oldest viewed posts first (puts newest viewed posts at the bottom)
-			asc(sql`COALESCE(${history.createdAt}, timestamp '2000-01-01')`),
-			desc(history.createdAt)
 		)
 		.limit(limit);
 
-	return feed.sort((a: any, b: any) => {
-		if (a.isViewed === b.isViewed) {
-			return 0;
-		}
-		return a.isViewed ? 1 : -1;
-	});
+	return feed;
 }
