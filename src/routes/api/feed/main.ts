@@ -56,14 +56,6 @@ export async function mainFeed(userId: string, limit = 20, excludePosts: string[
 			// Recent posts (within 7 days)
 			desc(sql`CASE WHEN ${lynts.created_at} > now() - interval '7 days' THEN 1 ELSE 0 END`),
 			// Posts with more likes (for new and unseen posts)
-			desc(
-				sql`
-				CASE WHEN EXISTS (SELECT 1 FROM history WHERE ${history.user_id} = ${userId} AND ${history.lynt_id} = ${lynts.id})
-					THEN 1
-					ELSE 0
-				END
-				`
-			),
 			// Posts from followed users
 			desc(sql`CASE WHEN ${lynts.user_id} IN (${followedUsers}) THEN 1 ELSE 0 END`),
 			// Remaining posts ordered by likes
@@ -75,5 +67,10 @@ export async function mainFeed(userId: string, limit = 20, excludePosts: string[
 		)
 		.limit(limit);
 
-	return feed;
+	return feed.sort((a: any, b: any) => {
+		if (a.isViewed === b.isViewed) {
+			return 0;
+		}
+		return a.isViewed ? 1 : -1;
+	});
 }
