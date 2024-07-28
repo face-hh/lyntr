@@ -26,7 +26,7 @@
 		'honesty is the best policy',
 		'laughter is the best medicine',
 		'necessity is the mother of invention',
-		'a picture is worth a thousand words'
+		'a picture is worth a thousand words',
 	];
 
 	let unusedPhrases: string[] = [];
@@ -95,7 +95,7 @@
 		<Button on:click={startTest}>Start Test</Button>
 	{:else if !testFinished}
 		<span class="text-xl">Time remaining: {timer} seconds</span>
-		<div class="whitespace-pre font-mono text-lg">
+		<div class="whitespace-pre-wrap font-mono text-lg">
 			{#each typedText as { char, isCorrect, isTyped }}
 				{#if isTyped}
 					<span class={isCorrect ? 'text-green-500' : 'text-red-500'}>{char}</span>
