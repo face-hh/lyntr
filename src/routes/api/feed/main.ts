@@ -58,7 +58,7 @@ export async function mainFeed(userId: string, limit = 20, excludePosts: string[
 			desc(sql`CASE WHEN ${lynts.created_at} > now() - interval '7 days' THEN 1 ELSE 0 END`),
 			// Posts with more likes (for new and unseen posts)
 			desc(
-				sql`CASE WHEN ${history.id} IS NULL THEN 1 ELSE 0 END`
+				sql`CASE WHEN isViewed = TRUE THEN 1 ELSE 0 END`
 			),
 			// Posts from followed users
 			desc(sql`CASE WHEN ${lynts.user_id} IN (${followedUsers}) THEN 1 ELSE 0 END`),
