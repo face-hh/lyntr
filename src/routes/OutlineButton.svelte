@@ -7,6 +7,7 @@
 
 	export let icon: ComponentType<SvelteComponent>;
 	export let text: string | undefined = undefined;
+	export let secondary: string | undefined = undefined;
 	export let strokeWidth: number = 2.5;
 	export let className: string = '';
 	export let colorOnClick = false;
@@ -35,6 +36,7 @@
 	const dispatch = createEventDispatcher();
 </script>
 
+<div class="shit relative flex flex-row justify-between gap-1 {className}">
 {#if popover}
 	<Popover.Root bind:open={opened} portal={null}>
 		<Popover.Trigger asChild let:builder>
@@ -43,7 +45,7 @@
 				class:active={isActive}
 				class:animate
 				on:click={handleClick}
-				class="shit {outline
+				class="{outline
 					? 'border-2 border-solid border-primary p-1.5'
 					: ''} inline-flex items-center justify-center rounded-xl font-bold text-primary {className}"
 			>
@@ -65,7 +67,7 @@
 		class:active={isActive}
 		class:animate
 		on:click={handleClick}
-		class="shit {outline
+		class="{outline
 			? 'border-2 border-solid border-primary p-1.5'
 			: ''} inline-flex items-center justify-center rounded-xl font-bold text-primary gap-1 {className}"
 	>
@@ -79,6 +81,10 @@
 		{/if}
 	</button>
 {/if}
+{#if secondary}
+    <div class="w-7 h-7 rounded-full text-center bg-primary/50 absolute -top-2 md:bottom-0 md:right-auto md:left-4 right-0 flex items-center justify-center font-mono">{secondary}</div>
+{/if}
+</div>
 
 <style>
 	.shit {

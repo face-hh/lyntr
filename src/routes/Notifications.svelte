@@ -7,7 +7,7 @@
 	import Avatar from './Avatar.svelte';
 	import { Button } from '@/components/ui/button';
 	import { toast } from 'svelte-sonner';
-	import { cdnUrl } from './stores';
+	import { cdnUrl, unreadMessages } from './stores';
 
 	interface Notification {
 		sourceUserBio: string;
@@ -34,6 +34,13 @@
 		} else {
 			console.error('Failed to fetch notifications');
 		}
+
+                const response2 = await fetch('/api/notifications/unread');
+                if (response2.ok) {
+                    $unreadMessages = (await response2.json()).count;
+                } else {
+                    console.error('Failed to fetch unread messages');
+                }
 	});
 
 	function formatTimeAgo(dateString: string) {
@@ -101,6 +108,7 @@
 		}
 
 		reactiveNotifications = reactiveNotifications.map((notif) => ({ ...notif, read: true }));
+                $unreadMessages = 0;
 	}
 </script>
 
