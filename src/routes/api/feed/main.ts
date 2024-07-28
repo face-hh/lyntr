@@ -49,14 +49,14 @@ export async function mainFeed(userId: string, limit = 20, excludePosts: string[
 		.from(lynts)
 		.leftJoin(users, eq(lynts.user_id, users.id))
 		.leftJoin(likeCounts, eq(lynts.id, likeCounts.lyntId))
-		.where(whereConditions)
 		.leftJoin(history, and(eq(history.lynt_id, lynts.id), eq(history.user_id, userId)))
+		.where(whereConditions)
 		.orderBy(
 			desc(sql`CASE WHEN ${history.id} IS NULL THEN 1 ELSE 0 END`),
+			desc(lynts.created_at),
 			desc(sql`CASE WHEN ${lynts.user_id} IN (${followedUsers}) THEN 1 ELSE 0 END`),
 			desc(sql`COALESCE(${likeCounts.likeCount}, 0)`),
-			desc(sql`CASE WHEN ${lynts.created_at} > now() - interval '24 hours' THEN 1 ELSE 0 END`),
-			desc(lynts.created_at),
+			desc(sql`CASE WHEN ${lynts.created_at} > now() - interval '24 hours' THEN 1 ELSE 0 END`)
 		)
 		.limit(limit);
 
