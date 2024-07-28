@@ -238,7 +238,7 @@
 									<DivInput bind:lynt />
 
 									{#if imagePreview}
-										<img class="avatar" src={imagePreview} alt="Preview" />
+		<img class="max-h-[600px] w-full object-contain" src={imagePreview} alt="Preview" />
 									{/if}
 									<button
 										on:click={() => {

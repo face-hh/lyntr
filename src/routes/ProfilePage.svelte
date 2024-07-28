@@ -11,6 +11,7 @@
 	import { Separator } from '@/components/ui/separator';
 	import FollowListPopup from './FollowListPopup.svelte';
 	import ProfileSettings from './ProfileSettings.svelte';
+	import ProfileButton from './ProfileButton.svelte';
 	import * as Tooltip from '@/components/ui/tooltip';
 	import { mode } from 'mode-watcher';
 	import { cdnUrl } from './stores';
@@ -160,6 +161,7 @@
 	<div class="h-full w-full flex-grow overflow-hidden pl-1">
 		<div class="mr-[-17px] h-full overflow-y-auto overflow-x-hidden pr-[17px]">
 			<div class="mt-2">
+<div class="flex justify-between items-center px-2">
 				<div class="flex items-center gap-4">
 					<Avatar size={40} src={avatar} alt={profile.username} border={true} />
 					<div class="flex flex-col gap-2">
@@ -181,14 +183,14 @@
 							{/if}
 						</div>
 						<p class="text-xl text-muted-foreground">@{profile.handle}</p>
-						<div class="w-24">
+						<div class="w-24 w-full">
 							{#if isSelf}
-								<ProfileSettings
+							
+	<ProfileSettings
 									userId={profile.id}
 									username={profile.username}
 									bio={profile.bio}
-								/>
-							{:else}
+								/>							{:else}
 								<Button class="w-full" on:click={toggleFollow}>
 									{isFollowing ? 'Unfollow' : 'Follow'}
 								</Button>
@@ -198,6 +200,10 @@
 							<p class="text-sm text-muted-foreground">Follows you</p>
 						{/if}
 					</div>
+				</div>
+<div class="md:hidden pr-5">
+     <ProfileButton />
+</div>
 				</div>
 
 				<div class="mt-4 inline-flex gap-4">

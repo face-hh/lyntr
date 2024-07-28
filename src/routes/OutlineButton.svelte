@@ -15,6 +15,7 @@
 	export let isActive = false;
 	export let popover: string | null = null;
 	export let animate = false;
+        export let small = true;
 
 	let opened = false;
 
@@ -66,15 +67,15 @@
 		on:click={handleClick}
 		class="shit {outline
 			? 'border-2 border-solid border-primary p-1.5'
-			: ''} inline-flex items-center justify-center rounded-xl font-bold text-primary {className}"
+			: ''} inline-flex items-center justify-center rounded-xl font-bold text-primary gap-1 {className}"
 	>
 		<svelte:component
 			this={icon}
 			{strokeWidth}
-			class="h-6 w-6 {text ? '{isActive ? "hidden md:block" : ""} md:mr-1' : ''}"
+			class="h-6 w-6 {text ? '{!small || isActive ? "hidden md:block" : ""} md:mr-1' : ''}"
 		/>
 		{#if text}
-			<span class="hidden md:block {isActive ? '!block' : ''}">{text}</span>
+			<span class="hidden md:block {!small || isActive ? '!block' : ''}">{text}</span>
 		{/if}
 	</button>
 {/if}
