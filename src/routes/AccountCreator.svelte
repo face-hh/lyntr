@@ -16,6 +16,10 @@
 	let iqReport: string | null;
 	let totalIQ: number | null;
 
+        async function authLogin() {
+                await supabase.auth.signInWithOAuth({ provider: 'discord' });
+        }
+
 	let allQuestionsCompleted = localStorage.getItem('current_question') === '20' ? true : false;
 
 	const handleQuestionsCompleted = (event: { detail: boolean }) => {
@@ -74,7 +78,7 @@
 	<div class="flex flex-col gap-6 p-1 md:flex-row">
 		<div class="flex flex-col items-center gap-2">
 			<div class="inline-flex items-center gap-2">
-				<img src="logo.svg" alt="Lyntr" class="pointer-events-none h-40 w-40 select-none" />
+				<img src="logo.svg" alt="Lyntr" class="pointer-events-none w-32 h-32 md:h-40 md:w-40 select-none" />
 				<Label class="select-none text-8xl">Lyntr.</Label>
 			</div>
 
@@ -152,7 +156,8 @@
 				{/if}
 			</div>
 		</div>
-		<Separator orientation="vertical" class="h-auto" />
+                <span class="text-sm text-left">Already have a account with us? <button class="text-blue-800" on:click={authLogin}>Click here</button></span>
+		<Separator class="h-[1px] w-full md:h-full md:w-[1px]" />
 		<div class="w-full rounded-md border-2 border-primary p-4 md:min-w-[400px] md:max-w-[400px]">
 			<IQTest on:questionsCompleted={handleQuestionsCompleted} />
 		</div>
