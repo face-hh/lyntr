@@ -260,7 +260,7 @@
 
 	<div class="flex h-full w-full flex-col gap-1 md:flex-row">
 		<div
-			class="max-w-[530px] flex h-full w-full flex-col overflow-hidden md:px-1 {lyntOpened &&
+			class="max-w-[600px] flex h-full w-full flex-col overflow-hidden md:px-1 {lyntOpened &&
 			selectedLynt
 				? 'hidden md:flex'
 				: ''}"
