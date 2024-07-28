@@ -64,7 +64,8 @@ export async function mainFeed(userId: string, limit = 20, excludePosts: string[
 			// Newest posts first
 			desc(lynts.created_at),
 			// Oldest viewed posts first (puts newest viewed posts at the bottom)
-			asc(sql`COALESCE(${history.createdAt}, timestamp '2000-01-01')`)
+			asc(sql`COALESCE(${history.createdAt}, timestamp '2000-01-01')`),
+			desc(history.createdAt)
 		)
 		.limit(limit);
 
