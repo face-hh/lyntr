@@ -170,12 +170,13 @@
 							{#if profile.verified}
 								<Tooltip.Root>
 									<Tooltip.Trigger>
-										<img
+<div class="flex items-center h-full w-7">
+		<img
 											class="h-7 w-7"
 											src={$mode !== 'light' ? 'white_mode_verified.png' : 'verified.png'}
 											alt="This user is verified."
 										/>
-									</Tooltip.Trigger>
+	</div>								</Tooltip.Trigger>
 									<Tooltip.Content>
 										<p>This user is <span class="rounded-xl bg-border p-1">verified</span>.</p>
 									</Tooltip.Content>
@@ -201,7 +202,7 @@
 						{/if}
 					</div>
 				</div>
-<div class="md:hidden pr-5">
+<div class="md:hidden">
      <ProfileButton />
 </div>
 				</div>
