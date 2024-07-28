@@ -49,6 +49,7 @@ export async function mainFeed(userId: string, limit = 20, excludePosts: string[
 		.from(lynts)
 		.leftJoin(users, eq(lynts.user_id, users.id))
 		.leftJoin(likeCounts, eq(lynts.id, likeCounts.lyntId))
+		.leftJoin(history, and(eq(history.lynt_id, lynts.id), eq(history.user_id, userId)))
 		.where(whereConditions)
 		.orderBy(
 			// Unviewed posts first
