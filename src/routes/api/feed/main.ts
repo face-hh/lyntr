@@ -54,18 +54,14 @@ export async function mainFeed(userId: string, limit = 20, excludePosts: string[
 		.orderBy(
 			// Unviewed posts first
 			desc(sql`CASE WHEN ${history.id} IS NULL THEN 1 ELSE 0 END`),
+			// Newest posts first
+			desc(lynts.created_at),
 			// Recent posts (within 7 days)
 			desc(sql`CASE WHEN ${lynts.created_at} > now() - interval '7 days' THEN 1 ELSE 0 END`),
 			// Posts with more likes (for new and unseen posts)
-			desc(
-				sql`CASE WHEN ${history.id} IS NULL THEN 1 ELSE 0 END`
-			),
-			// Posts from followed users
 			desc(sql`CASE WHEN ${lynts.user_id} IN (${followedUsers}) THEN 1 ELSE 0 END`),
 			// Remaining posts ordered by likes
-			desc(sql`COALESCE(${likeCounts.likeCount}, 0)`),
-			// Newest posts first
-			desc(lynts.created_at),
+			desc(sql`COALESCE(${likeCounts.likeCount}, 0)`)
 		)
 		.limit(limit);
 
