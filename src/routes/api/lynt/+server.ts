@@ -97,6 +97,7 @@ export const POST: RequestHandler = async ({
 
 			const resizedBuffer = await sharp(inputBuffer)
 				.webp({ quality: 70 })
+				.withMetadata()
 				.toBuffer();
 
 			const fileName = `${uniqueLyntId}.webp`;
