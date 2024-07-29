@@ -87,15 +87,14 @@
 		currentTab = tab;
 		fetchFeed();
 
+		eventSource.close();
 		if (currentTab === tabs[2]) {
 			eventSource = new EventSource('/api/sse');
 			eventSource.onmessage = async (event) => {
 				const newLyntId = JSON.parse(event.data);;
 				await renderLyntAtTop(newLyntId);
 			}
-		} else {
-			eventSource.close();
-		}
+		} 
 	}
 
 	let feedContainer: HTMLDivElement;
