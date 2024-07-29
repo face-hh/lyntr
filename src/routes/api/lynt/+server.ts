@@ -96,6 +96,7 @@ export const POST: RequestHandler = async ({
 			const inputBuffer = Buffer.from(buffer);
 
 			const resizedBuffer = await sharp(inputBuffer, { animated: true })
+				.rotate()
 				.webp({ quality: 70 })
 				.withMetadata()
 				.toBuffer();
