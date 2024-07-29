@@ -270,7 +270,7 @@
 					{#if page === 'search'}
 						<Search userId={id} {handleLyntClick} />
 					{:else if page === 'notifications'}
-						<Notifications />
+						<Notifications {handleLyntClick} />
 					{:else if page.startsWith('profile')}
 						{#key page}
 							<ProfilePage profileHandle={page.replace('profile', '')} {handleLyntClick} />
