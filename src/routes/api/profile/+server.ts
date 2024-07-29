@@ -34,7 +34,7 @@ let questions: Question[] = [
 	{
 		id: 'ShortFormContent',
 		condition: (input: any) => {
-			return -1 * Math.min(parseInt(input), 12);
+			return -1 * Math.min(sanitizeNum(input), 12);
 		}
 	},
 	{
@@ -58,7 +58,7 @@ let questions: Question[] = [
 	{
 		id: 'ContentCreators',
 		condition: (input: any) => {
-			return Math.floor(-1 * Math.floor(Math.min(parseInt(input), 47) * 0.25));
+			return Math.floor(-1 * Math.floor(Math.min(sanitizeNum(input), 47) * 0.25));
 		}
 	},
 	{
@@ -94,7 +94,7 @@ let questions: Question[] = [
 	{
 		id: 'TypingTest',
 		condition: (input: any) => {
-			return Math.floor(Math.min(parseInt(input), 120) * 0.5);
+			return Math.floor(Math.min(sanitizeNum(input), 120) * 0.5);
 		}
 	},
 	{
@@ -424,4 +424,12 @@ export const DELETE: RequestHandler = async ({ request, cookies }) => {
 
 function santize(input: string) {
 	return input.toLowerCase().replace(/\s/g, '');
+}
+
+function sanitizeNum(input: string) {
+	let num = parseInt(input)
+
+	if(num < 0) num = 0;
+
+	return num
 }

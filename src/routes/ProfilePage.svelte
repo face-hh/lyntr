@@ -68,6 +68,7 @@
 				toast(`Failed to load profile. Error: ${response.status}`);
 			}
 		} catch (error) {
+			if (isSelf) return
 			console.error('Error fetching profile:', error);
 			toast('Failed to load profile');
 		}
@@ -83,6 +84,7 @@
 				toast(`Failed to load user lynts. Error: ${response.status}`);
 			}
 		} catch (error) {
+			if (isSelf) return
 			console.error('Error fetching user lynts:', error);
 			toast('Failed to load user lynts');
 		}
@@ -108,6 +110,7 @@
 				toast(error.error);
 			}
 		} catch (error) {
+			if (isSelf) return
 			console.error('Error toggling follow:', error);
 			toast('Failed to update follow status');
 		}
@@ -127,6 +130,7 @@
 				toast(error.error);
 			}
 		} catch (error) {
+			if (isSelf) return
 			console.error('Error checking follow status:', error);
 			toast('Failed to check follow status');
 		}
@@ -150,6 +154,7 @@
 				toast('Failed to fetch follow counts');
 			}
 		} catch (error) {
+			if (isSelf) return
 			console.error('Error fetching follow counts:', error);
 			toast('Failed to fetch follow counts');
 		}
