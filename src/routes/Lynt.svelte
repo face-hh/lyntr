@@ -211,12 +211,13 @@
 					</div>
 				</button>
 			{/if}
-			<div class="mt-2 flex items-center justify-between gap-2">
+			<div class="mt-2 flex items-center justify-between gap-2 mb-1">
 				<div class="flex items-center gap-2">
 					<OutlineButton
 						icon={MessageCircle}
 						text={formatNumber(commentCount)}
 						on:click={() => openLynt(id)}
+						small={false}
 					/>
 
 					<Dialog.Root bind:open={openDialog}>
@@ -228,18 +229,25 @@
 								icon={Repeat2}
 								text={formatNumber(repostCount)}
 								outline={true}
+								small={false}
 							/>
 						</Dialog.Trigger>
 						<Dialog.Content class="min-w-[20%]">
-							<div class="flex items-start space-x-3">
+							<div
+								class="flex max-h-[600px] items-start space-x-3 overflow-y-auto overflow-x-hidden"
+							>
 								<Avatar size={10} src={cdnUrl(myId, 'small')} alt="Your profile picture." />
 
 								<div class="flex-grow">
-									<DivInput bind:lynt />
+									<div class="h-full w-full overflow-y-auto">
+										<DivInput bind:lynt />
 
-									{#if imagePreview}
-										<img class="avatar" src={imagePreview} alt="Preview" />
-									{/if}
+										{#if imagePreview}
+											<div class="max-h-[600px] max-w-[400px] overflow-y-auto">
+												<img class="" src={imagePreview} alt="Preview" />
+											</div>
+										{/if}
+									</div>
 									<button
 										on:click={() => {
 											fileinput.click();
@@ -255,7 +263,7 @@
 										on:change={onFileSelected}
 										bind:this={fileinput}
 									/>
-									<div class="rounded-md border-2 border-primary p-4">
+									<div class="max-h-[300px] overflow-y-auto rounded-md border-2 border-primary p-4">
 										<LyntContents
 											truncateContent={true}
 											{content}

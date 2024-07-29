@@ -35,7 +35,7 @@ export const verifyAuthJWT = async (token: string) => {
             new TextEncoder().encode(process.env.JWT_SECRET)
         );
 
-        const user = await db.select().from(users).where(eq(users.token, token)).limit(1);
+        const user = await db.select().from(users).where(eq(users.id, payload.userId)).limit(1);
 
         if (!user[0]) {
             throw error(401, "Invalid token.");

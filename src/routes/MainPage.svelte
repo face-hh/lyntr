@@ -208,6 +208,9 @@
 			);
 		} else {
 			toast('Your reply has been posted!');
+			comments = [(await response.json()) as FeedItem, ...comments];
+			selectedLynt.commentCount = parseInt(selectedLynt.commentCount) + 1;
+			selectedLynt = selectedLynt;
 		}
 	}
 
@@ -236,118 +239,124 @@
 	}
 </script>
 
-<div class="flex justify-center w-full">
-	<div class="max-w-[1400px] w-full">
-<div
-	class="flex h-dvh w-full flex-col-reverse justify-end gap-4 overflow-hidden pb-20 md:flex-row md:pb-0"
->
-
-	<div class="fixed inset-x-0 bottom-0 z-50 flex flex-col md:static md:flex-row">
+<div class="flex w-full justify-center">
+	<div class="w-full max-w-[1400px]">
 		<div
-			class="md:max-w-1/3 flex w-full flex-row items-start gap-2 px-2 py-2 md:w-auto md:flex-col md:pt-0"
+			class="flex h-dvh w-full flex-col-reverse justify-end gap-4 overflow-hidden pb-20 md:flex-row md:pb-0"
 		>
-			<button class="mt-5 hidden md:block" on:click={toggleMode}>
-				<img class="mb-5 size-20 cursor-pointer" src="logo.svg" alt="Logo" />
-			</button>
-			<Navigation {handle} {id} />
-			<div class="hidden md:flex md:w-full">
-				<PostButton userId={id} />
-				<ProfileButton src={cdnUrl(id, 'medium')} name={username} handle="@{handle}" />
-			</div>
-		</div>
-		<Separator class="h-[1px] w-full md:h-full md:w-[1px]" />
-	</div>
-
-	<div class="flex h-full w-full flex-col gap-1 md:flex-row">
-		<div
-			class="max-w-[600px] flex h-full w-full flex-col overflow-hidden md:px-1 {lyntOpened &&
-			selectedLynt
-				? 'hidden md:flex'
-				: ''}"
-		>
-			{#if page === 'search'}
-				<Search userId={id} {handleLyntClick} />
-			{:else if page === 'notifications'}
-				<Notifications />
-			{:else if page.startsWith('profile')}
-				<ProfilePage profileHandle={page.replace('profile', '')} {handleLyntClick} />
-			{:else if page === 'home'}
-				<div class=" min-w-1/2 mt-5 flex h-full flex-col md:px-1">
-					<TopTab {tabs} {currentTab} onTabChange={handleTabChange} />
-					<Separator class="mt-4" />
-
-					<!-- Feed -->
-					<div
-						class="flex h-full flex-col gap-2 overflow-y-auto px-1 py-2"
-						bind:this={feedContainer}
-					>
-						{#if loadingFeed}
-							<LoadingSpinner />
-						{:else}
-							{#each feed as lynt}
-								<Lynt {...lynt} myId={id} lyntClick={handleLyntClick} />
-							{/each}
-						{/if}
-					</div>
-				</div>
-			{/if}
-		</div>
-		{#if lyntOpened && selectedLynt}
-			<div class="max-w-[530px] mb-2 h-full w-full pb-10 md:pb-0">
-				<button
-					class="flex w-full justify-end p-2"
-					on:click={() => {
-						lyntOpened = null;
-						selectedLynt = null;
-					}}><X /></button
-				>
+			<div class="fixed inset-x-0 bottom-0 z-50 flex flex-col md:static md:flex-row">
 				<div
-					class="md:min-w-1/2 flex h-full flex-col gap-2 overflow-y-auto overflow-x-hidden px-1"
-					id="lynt-container"
+					class="md:max-w-1/3 flex w-full min-w-full flex-row items-start gap-2 px-2 py-2 md:w-auto md:flex-col md:pt-0"
 				>
-					<!-- Referenced Lynts -->
-					<div class="w-full">
-						{#each referencedLynts as lynt (lynt.id)}
-							<Lynt {...lynt} myId={id} lyntClick={handleLyntClick} connect={true} />
-						{/each}
+					<button class="mt-5 hidden md:block" on:click={toggleMode}>
+						<img class="mb-5 size-20 cursor-pointer" src="logo.svg" alt="Logo" />
+					</button>
+					<Navigation {handle} {id} />
+					<div class="hidden md:flex md:w-full">
+						<PostButton userId={id} />
+						<ProfileButton src={cdnUrl(id, 'medium')} name={username} handle="@{handle}" />
 					</div>
-
-					<!-- Selected Lynt -->
-					<div class="w-full" id="selected-lynt">
-						<Lynt {...selectedLynt} myId={id} truncateContent={false} lyntClick={handleLyntClick} />
-					</div>
-
-					<div class="flex w-full items-center gap-2 rounded-xl bg-border p-3">
-						<Reply size={32} />
-
-						<div
-							contenteditable="true"
-							role="textbox"
-							spellcheck="true"
-							tabindex="0"
-							bind:textContent={comment}
-							class="overflow-wrap-anywhere w-full text-lg outline-none"
-							placeholder="Reply..."
-							on:paste={handlePaste}
-						/>
-
-						<Button on:click={postComment}>Post</Button>
-					</div>
-					<Separator />
-					{#if loadingComments}
-						<LoadingSpinner occupy_screen={false} />
-					{:else if comments.length === 0}
-						<Label class="flex justify-center text-lg">This lynt has no comments.</Label>
-					{:else}
-						{#each comments as lynt}
-							<Lynt {...lynt} myId={id} lyntClick={handleLyntClick} />
-						{/each}
-					{/if}
-					<div class="flex h-full w-full flex-col gap-2 overflow-y-auto"></div>
 				</div>
+				<Separator class="h-[1px] w-full md:h-full md:w-[1px]" />
 			</div>
-		{/if}
+
+			<div class="flex h-full w-full flex-col items-center gap-1 md:flex-row md:items-start">
+				<div
+					class="flex h-full w-full max-w-[600px] flex-col overflow-hidden md:px-1 {lyntOpened &&
+					selectedLynt
+						? 'hidden md:flex'
+						: ''}"
+				>
+					{#if page === 'search'}
+						<Search userId={id} {handleLyntClick} />
+					{:else if page === 'notifications'}
+						<Notifications {handleLyntClick} />
+					{:else if page.startsWith('profile')}
+						{#key page}
+							<ProfilePage profileHandle={page.replace('profile', '')} {handleLyntClick} />
+						{/key}
+					{:else if page === 'home'}
+						<div class="min-w-1/3 mt-5 flex h-full flex-col md:px-1">
+							<TopTab {tabs} {currentTab} onTabChange={handleTabChange} />
+							<Separator class="mt-4" />
+
+							<!-- Feed -->
+							<div
+								class="flex h-full w-full flex-col gap-2 overflow-y-auto px-1 py-2"
+								bind:this={feedContainer}
+							>
+								{#if loadingFeed}
+									<LoadingSpinner />
+								{:else}
+									{#each feed as lynt}
+										<Lynt {...lynt} myId={id} lyntClick={handleLyntClick} />
+									{/each}
+								{/if}
+							</div>
+						</div>
+					{/if}
+				</div>
+				{#if lyntOpened && selectedLynt}
+					<div class="mb-2 h-full w-full max-w-[530px] pb-10">
+						<button
+							class="flex w-full justify-end p-2 md:justify-start"
+							on:click={() => {
+								lyntOpened = null;
+								selectedLynt = null;
+							}}><X /></button
+						>
+						<div
+							class="md:min-w-1/2 mx-auto flex h-full max-w-[600px] flex-col gap-2 overflow-y-auto overflow-x-hidden px-1 md:mx-0"
+							id="lynt-container"
+						>
+							<!-- Referenced Lynts -->
+							<div class="w-full">
+								{#each referencedLynts as lynt (lynt.id)}
+									<Lynt {...lynt} myId={id} lyntClick={handleLyntClick} connect={true} />
+								{/each}
+							</div>
+
+							<!-- Selected Lynt -->
+							<div class="w-full" id="selected-lynt">
+								<Lynt
+									{...selectedLynt}
+									myId={id}
+									truncateContent={false}
+									lyntClick={handleLyntClick}
+								/>
+							</div>
+
+							<div class="flex w-full items-center gap-2 rounded-xl bg-border p-3">
+								<Reply size={32} />
+
+								<div
+									contenteditable="true"
+									role="textbox"
+									spellcheck="true"
+									tabindex="0"
+									bind:textContent={comment}
+									class="overflow-wrap-anywhere w-full text-lg outline-none"
+									placeholder="Reply..."
+									on:paste={handlePaste}
+								/>
+
+								<Button on:click={postComment}>Post</Button>
+							</div>
+							<Separator />
+							{#if loadingComments}
+								<LoadingSpinner occupy_screen={false} />
+							{:else if comments.length === 0}
+								<Label class="flex justify-center text-lg">This lynt has no comments.</Label>
+							{:else}
+								{#each comments as lynt}
+									<Lynt {...lynt} myId={id} lyntClick={handleLyntClick} />
+								{/each}
+							{/if}
+							<div class="flex h-full w-full flex-col gap-2 overflow-y-auto"></div>
+						</div>
+					</div>
+				{/if}
+			</div>
+		</div>
 	</div>
-</div>
-</div>
 </div>
