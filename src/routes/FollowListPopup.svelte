@@ -100,7 +100,7 @@
 										>{user.iq}</span
 									>
 								</div>
-								<p class="text-sm text-muted-foreground">@{user.handle}</p>
+								<p class="text-sm text-muted-foreground"><a href="https://lyntr.com/@{user.handle}">@{user.handle}</a></p>
 							</div>
 						</div>
 					{/each}
