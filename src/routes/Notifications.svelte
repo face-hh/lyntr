@@ -111,7 +111,7 @@
 		}
 
 		reactiveNotifications = reactiveNotifications.map((notif) => ({ ...notif, read: true }));
-		$unreadMessages = 0;
+		unreadMessages.set(-1);
 	}
 </script>
 
@@ -137,9 +137,19 @@
 					  {#each reactiveNotifications as notification (notification.id)}
 						<li class="w-full">
 									<button
-										on:click={() => {
+										on:click={async () => {
 											if (notification.lyntId) {
 												handleLyntClick(notification.lyntId);
+												const id = notification.id;
+												const i = reactiveNotifications.findIndex((x) => x.id == id);
+												if (!reactiveNotifications[i].read) {
+													reactiveNotifications[i].read = true;
+													unreadMessages.set($unreadMessages - 1);
+													if ((await fetch('/api/notifications/' + id + '/read')).status !== 200) {
+														reactiveNotifications[i].read = false;
+														unreadMessages.set($unreadMessages + 1);
+													}
+												}
 											}
 										}}
 										class="flex w-full items-start space-x-4 rounded-lg bg-lynt-foreground p-4 text-left transition-colors"
