@@ -47,6 +47,10 @@
 
 		if (response.status === 201) {
 			opened = false;
+                        lynt = '';
+                        imagePreview = null;
+                        fileinput.value = "";
+                        image = null;
 			toast('Your lynt has been published!');
 		} else {
 			toast(`Something happened! Error: ${response.status} | ${response.statusText}`);
