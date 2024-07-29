@@ -81,17 +81,20 @@
 	let currentTab = 'For you';
 	const tabs = ['For you', 'Following', 'New'];
 
+	let eventSource: EventSource | undefined = undefined;
+
 	function handleTabChange(tab: string) {
 		currentTab = tab;
 		fetchFeed();
 
 		if (currentTab === tabs[2]) {
-			const eventSource = new EventSource('/api/sse');
+			eventSource = new EventSource('/api/sse');
 			eventSource.onmessage = async (event) => {
-				const newLyntId = JSON.parse(event.data);
-
+				const newLyntId = JSON.parse(event.data);;
 				await renderLyntAtTop(newLyntId);
-			};
+			}
+		} else {
+			eventSource.close();
 		}
 	}
 
