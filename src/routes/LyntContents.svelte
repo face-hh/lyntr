@@ -232,7 +232,5 @@
 	</div>
 </div>
 {#if has_image}
-	<div class="max-h-[600px]">
-		<img class="avatar mt-2 object-contain" src={cdnUrl(postId)} alt="ok" />
-	</div>
+		<img class="avatar max-h-[600px] mt-2 object-contain" src={cdnUrl(postId)} alt="ok" />
 {/if}
