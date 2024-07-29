@@ -110,7 +110,7 @@
 	} as const;
 </script>
 
-<div class="flex h-full flex-col gap-2">
+<div class="flex h-full flex-col gap-2 px-1">
 	<span class="self-center text-4xl font-bold">IQ test</span>
 	{#if currentQuestion < questions.length}
 		<svelte:component this={components[questions[currentQuestion].id]} {...props} />

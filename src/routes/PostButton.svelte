@@ -68,12 +68,14 @@
 		<div class="flex items-start space-x-3">
 			<Avatar size={10} src={cdnUrl(userId, 'small')} alt="Your profile picture." />
 
-			<div class="flex flex-grow flex-col gap-2">
-				<DivInput bind:lynt />
+			<div class="flex flex-grow flex-col gap-2 h-full">
+                                <div class="max-h-[600px] overflow-y-auto">
+				    <DivInput bind:lynt />
 
-				{#if imagePreview}
-					<img class="avatar" src={imagePreview} alt="Preview" />
-				{/if}
+				    {#if imagePreview}
+					 <img class="max-h-[600px] w-full object-contain" src={imagePreview} alt="Preview" />
+				    {/if}
+                                </div>
 				<button
 					on:click={() => {
 						fileinput.click();

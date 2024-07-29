@@ -7,7 +7,7 @@
 	import Avatar from './Avatar.svelte';
 	import { Button } from '@/components/ui/button';
 	import { toast } from 'svelte-sonner';
-	import { cdnUrl } from './stores';
+	import { cdnUrl, unreadMessages } from './stores';
 
 	interface Notification {
 		sourceUserBio: string;
@@ -20,6 +20,7 @@
 		sourceUserVerified: boolean;
 		sourceUserCreatedAt: string;
 		lyntContent?: string;
+		lyntId?: string;
 		read: boolean;
 		createdAt: string;
 	}
@@ -27,12 +28,21 @@
 	let notifications: Notification[] = [];
 	$: reactiveNotifications = notifications;
 
+	export let handleLyntClick = (id: string) => {};
+
 	onMount(async () => {
 		const response = await fetch('/api/notifications');
 		if (response.ok) {
 			notifications = await response.json();
 		} else {
 			console.error('Failed to fetch notifications');
+		}
+
+		const response2 = await fetch('/api/notifications/unread');
+		if (response2.ok) {
+			$unreadMessages = (await response2.json()).count;
+		} else {
+			console.error('Failed to fetch unread messages');
 		}
 	});
 
@@ -101,6 +111,7 @@
 		}
 
 		reactiveNotifications = reactiveNotifications.map((notif) => ({ ...notif, read: true }));
+		$unreadMessages = 0;
 	}
 </script>
 
@@ -119,66 +130,75 @@
 					{#if notifications.length === 0}
 						<p class="py-4 text-center text-muted-foreground">No notifications yet.</p>
 					{:else}
-						<ul class="space-y-4">
+						<ul class="flex w-full flex-col items-center gap-4">
 							{#each reactiveNotifications as notification (notification.id)}
-								<li
-									class="flex items-start space-x-4 rounded-lg bg-lynt-foreground p-4 transition-colors"
-								>
-									<div class="flex-shrink-0">
-										<svelte:component
-											this={getNotificationIcon(notification.type)}
-											class="h-6 w-6 text-primary"
-										/>
-									</div>
-									<div class="flex-grow">
-										<p class="text-sm font-medium">
-											<HoverCard.Root>
-												<HoverCard.Trigger
-													href="/@{notification.sourceUserHandle}"
-													rel="noreferrer noopener"
-													class="max-w-[50%] truncate rounded-sm font-bold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-black"
-												>
-													@{notification.sourceUser}
-												</HoverCard.Trigger>
-												<HoverCard.Content class="w-80">
-													<div class="flex justify-between space-x-4">
-														<Avatar
-															size={10}
-															src={cdnUrl(notification.sourceUserId, 'small')}
-															alt="Profile picture."
-														/>
+								<li class="w-full">
+									<button
+										on:click={() => {
+											if (notification.lyntId) {
+												handleLyntClick(notification.lyntId);
+											}
+										}}
+										class="flex w-full items-start space-x-4 rounded-lg bg-lynt-foreground p-4 text-left transition-colors"
+									>
+										<div class="flex-shrink-0">
+											<svelte:component
+												this={getNotificationIcon(notification.type)}
+												class="h-6 w-6 text-primary"
+											/>
+										</div>
+										<div class="flex-grow">
+											<p class="text-sm font-medium">
+												<HoverCard.Root>
+													<HoverCard.Trigger
+														href="/@{notification.sourceUserHandle}"
+														rel="noreferrer noopener"
+														class="max-w-[50%] truncate rounded-sm font-bold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-black"
+													>
+														@{notification.sourceUser}
+													</HoverCard.Trigger>
+													<HoverCard.Content class="w-80">
+														<div class="flex justify-between space-x-4">
+															<Avatar
+																size={10}
+																src={cdnUrl(notification.sourceUserId, 'small')}
+																alt="Profile picture."
+															/>
 
-														<div class="space-y-1">
-															<h4 class="text-sm font-semibold">{notification.sourceUser}</h4>
-															<h4 class="text-sm font-semibold">
-																@{notification.sourceUserHandle}
-															</h4>
-															<p class="text-sm">{notification.sourceUserBio}</p>
-															<div class="flex items-center pt-2">
-																<CalendarDays class="mr-2 h-4 w-4 opacity-70" />
-																<span class="text-xs text-muted-foreground">
-																	Joined {formatDate(notification.sourceUserCreatedAt)}
-																</span>
+															<div class="space-y-1">
+																<h4 class="text-sm font-semibold">{notification.sourceUser}</h4>
+																<h4 class="text-sm font-semibold">
+																	@{notification.sourceUserHandle}
+																</h4>
+																<p class="text-sm">{notification.sourceUserBio}</p>
+																<div class="flex items-center pt-2">
+																	<CalendarDays class="mr-2 h-4 w-4 opacity-70" />
+																	<span class="text-xs text-muted-foreground">
+																		Joined {formatDate(notification.sourceUserCreatedAt)}
+																	</span>
+																</div>
 															</div>
 														</div>
-													</div>
-												</HoverCard.Content>
-											</HoverCard.Root>
+													</HoverCard.Content>
+												</HoverCard.Root>
 
-											{getNotificationMessage(notification)}
-										</p>
-										{#if notification.lyntContent}
-											<p class="mt-1 text-sm text-muted-foreground">"{notification.lyntContent}"</p>
-										{/if}
-										<p class="mt-1 text-xs text-muted-foreground">
-											{formatTimeAgo(notification.createdAt)}
-										</p>
-									</div>
-									{#if !notification.read}
-										<div class="flex-shrink-0">
-											<div class="h-2 w-2 rounded-full bg-primary"></div>
+												{getNotificationMessage(notification)}
+											</p>
+											{#if notification.lyntContent}
+												<p class="mt-1 text-sm text-muted-foreground">
+													"{notification.lyntContent}"
+												</p>
+											{/if}
+											<p class="mt-1 text-xs text-muted-foreground">
+												{formatTimeAgo(notification.createdAt)}
+											</p>
 										</div>
-									{/if}
+										{#if !notification.read}
+											<div class="flex-shrink-0">
+												<div class="h-2 w-2 rounded-full bg-primary"></div>
+											</div>
+										{/if}
+									</button>
 								</li>
 							{/each}
 						</ul>
