@@ -155,9 +155,10 @@
 					</AlertDialog.Root>
 				{/if}
 			</div>
+			<span class="mt-4 text-sm text-left">Already have an account on Lyntr? <button class="text-primary font-bold" on:click={authLogin}>Log in</button></span>
+		
 		</div>
-                <span class="text-sm text-left">Already have a account with us? <button class="text-blue-800" on:click={authLogin}>Click here</button></span>
-		<Separator class="h-[1px] w-full md:h-full md:w-[1px]" />
+        <Separator class="h-[1px] w-full md:h-full md:w-[1px]" />
 		<div class="w-full rounded-md border-2 border-primary p-4 md:min-w-[400px] md:max-w-[400px]">
 			<IQTest on:questionsCompleted={handleQuestionsCompleted} />
 		</div>

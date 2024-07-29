@@ -4,6 +4,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import { Label } from '@/components/ui/label';
 	import { toast } from 'svelte-sonner';
+	import { Heart } from 'lucide-svelte';
 
 	export let icon: ComponentType<SvelteComponent>;
 	export let text: string | undefined = undefined;
@@ -16,7 +17,7 @@
 	export let isActive = false;
 	export let popover: string | null = null;
 	export let animate = false;
-        export let small = true;
+	export let small = true;
 
 	let opened = false;
 
@@ -37,53 +38,59 @@
 </script>
 
 <div class="relative flex flex-row justify-between gap-1 {className}">
-{#if popover}
-	<Popover.Root bind:open={opened} portal={null}>
-		<Popover.Trigger asChild let:builder>
-			<button
-				{...builder}
-				class:active={isActive}
-				class:animate
-				on:click={handleClick}
-				class="shit {outline
-					? 'border-2 border-solid border-primary p-1.5'
-					: ''} inline-flex items-center justify-center rounded-xl font-bold text-primary {className}"
-			>
-				<svelte:component this={icon} {strokeWidth} class="h-6 w-6 {text ? 'mr-1' : ''}" />
-				{#if text}
-					<span>{text}</span>
-				{/if}
-			</button>
-		</Popover.Trigger>
-		<Popover.Content class="w-60">
-			<div class="flex items-center justify-center gap-2">
-				<svelte:component this={icon} {strokeWidth} class="h-12 w-12" />
-				<Label>{popover}</Label>
-			</div>
-		</Popover.Content>
-	</Popover.Root>
-{:else}
-	<button
-		class:active={isActive}
-		class:animate
-		on:click={handleClick}
-		class="shit {outline
-			? 'border-2 border-solid border-primary p-1.5'
-			: ''} inline-flex items-center justify-center rounded-xl font-bold text-primary gap-1 {className}"
-	>
-		<svelte:component
-			this={icon}
-			{strokeWidth}
-			class="h-6 w-6 {text ? '{!small || isActive ? "hidden md:block" : ""}' : ''}"
-		/>
-		{#if text}
-			<span class="hidden md:block {!small || isActive ? '!block' : ''}">{text}</span>
-		{/if}
-	</button>
-{/if}
-{#if secondary}
-    <div class="w-7 h-7 rounded-full text-center bg-primary/50 absolute -top-2 md:bottom-0 md:right-auto md:left-4 right-0 flex items-center justify-center font-mono">{secondary}</div>
-{/if}
+	{#if popover}
+		<Popover.Root bind:open={opened} portal={null}>
+			<Popover.Trigger asChild let:builder>
+				<button
+					{...builder}
+					class:active={isActive}
+					class:animate
+					on:click={handleClick}
+					class="shit {outline
+						? 'border-2 border-solid border-primary p-1.5'
+						: ''} inline-flex items-center justify-center rounded-xl font-bold text-primary {className}"
+				>
+					<svelte:component this={icon} {strokeWidth} class="h-6 w-6 {text ? 'mr-1' : ''}" />
+					{#if text}
+						<span>{text}</span>
+					{/if}
+				</button>
+			</Popover.Trigger>
+			<Popover.Content class="w-60">
+				<div class="flex items-center justify-center gap-2">
+					<svelte:component this={icon} {strokeWidth} class="h-12 w-12" />
+					<Label>{popover}</Label>
+				</div>
+			</Popover.Content>
+		</Popover.Root>
+	{:else}
+		<button
+			class:active={isActive}
+			class:animate
+			on:click={handleClick}
+			class="shit {outline
+				? 'border-2 border-solid border-primary p-1.5'
+				: ''} inline-flex items-center justify-center gap-1 rounded-xl font-bold text-primary {className}"
+		>
+			<svelte:component
+				this={icon}
+				{strokeWidth}
+				class="h-6 w-6 {text ? '{!small || isActive ? "hidden md:block" : ""}' : ''}"
+			/>
+			{#if icon === Heart}
+				<span>{text}</span>
+			{:else if text}
+				<span class="hidden md:block {!small || isActive ? '!block' : ''}">{text}</span>
+			{/if}
+		</button>
+	{/if}
+	{#if secondary}
+		<div
+			class="absolute -top-2 right-0 flex h-7 w-7 items-center justify-center rounded-full bg-primary/50 text-center font-mono md:bottom-0 md:left-4 md:right-auto"
+		>
+			{secondary}
+		</div>
+	{/if}
 </div>
 
 <style>
