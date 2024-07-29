@@ -3,10 +3,11 @@ import type { Cookies, RequestHandler } from '@sveltejs/kit';
 import { verifyAuthJWT } from '@/server/jwt';
 import { db } from '@/server/db';
 import { lynts, likes, users } from '@/server/schema';
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql, isNull, not, and } from 'drizzle-orm';
 import sanitizeHtml from 'sanitize-html';
 import { Snowflake } from 'nodejs-snowflake';
 import { createNotification } from '@/server/notifications';
+import { lyntObj } from '../util';
 
 const ratelimits = new Map();
 
@@ -80,7 +81,14 @@ export const POST: RequestHandler = async ({
 			return json({ error: 'Invalid reposted lynt ID' }, { status: 400 });
 		}
 
-		const [newLynt] = await db.insert(lynts).values(lyntValues).returning();
+		let newId = (await db.insert(lynts).values(lyntValues).returning())[0].id || null;
+		let [newLynt] = await db
+			.select(lyntObj(userId))
+			.from(lynts)
+			.leftJoin(likes, eq(likes.lynt_id, lynts.id))
+			.leftJoin(users, eq(lynts.user_id, users.id))
+			.where(eq(lynts.id, newId))
+			.limit(1);
 
 		if (existingLynt.userId && existingLynt.userId !== userId) {
 			await createNotification(existingLynt.userId, 'comment', userId, newLynt.id);
