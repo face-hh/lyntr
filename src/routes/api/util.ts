@@ -119,7 +119,7 @@ export async function uploadAvatar(inputBuffer: Buffer, fileName: string, minioC
 
 	const buffer_medium = await sharp(inputBuffer).resize(50, 50).webp().toBuffer();
 
-	const buffer_big = await sharp(inputBuffer).resize(160, 160).webp().toBuffer();
+	const buffer_big = await sharp(inputBuffer, { animated: true }).resize(160, 160).webp().toBuffer();
 
 	const shits = [
 		{ filename: fileName + '_small.webp', buffer: buffer_small },
