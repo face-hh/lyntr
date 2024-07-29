@@ -38,12 +38,12 @@
 			console.error('Failed to fetch notifications');
 		}
 
-		const response2 = await fetch('/api/notifications/unread');
+		/*const response2 = await fetch('/api/notifications/unread');
 		if (response2.ok) {
 			$unreadMessages = (await response2.json()).count;
 		} else {
 			console.error('Failed to fetch unread messages');
-		}
+		}*/
 	});
 
 	function formatTimeAgo(dateString: string) {
