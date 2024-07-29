@@ -130,12 +130,16 @@
 					{#if notifications.length === 0}
 						<p class="py-4 text-center text-muted-foreground">No notifications yet.</p>
 					{:else}
-						<ul class="flex flex-col gap-4 items-center w-full">
+						<ul class="flex w-full flex-col items-center gap-4">
 							{#each reactiveNotifications as notification (notification.id)}
 								<li class="w-full">
 									<button
-										on:click={() => handleLyntClick(notification.lyntId)}
-										class="flex items-start space-x-4 rounded-lg bg-lynt-foreground p-4 text-left transition-colors w-full"
+										on:click={() => {
+											if (notification.lyntId) {
+												handleLyntClick(notification.lyntId);
+											}
+										}}
+										class="flex w-full items-start space-x-4 rounded-lg bg-lynt-foreground p-4 text-left transition-colors"
 									>
 										<div class="flex-shrink-0">
 											<svelte:component
