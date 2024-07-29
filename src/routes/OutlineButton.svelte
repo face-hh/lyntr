@@ -101,7 +101,7 @@
 		transform: rotate(3deg);
 	}
 
-	.shit.active {
+	button.active {
 		background-color: hsl(var(--primary));
 		color: hsl(var(--background) / var(--tw-text-opacity));
 		transform: rotate(0deg);
