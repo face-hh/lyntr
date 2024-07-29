@@ -19,7 +19,8 @@
 
 	export let profileHandle: string;
 	export let handleLyntClick;
-
+	export let myId: string;
+	
 	let profile: {
 		username: string;
 		handle: string;
@@ -283,7 +284,7 @@
 					<p>No lynts yet.</p>
 				{:else}
 					{#each userLynts.lynts as lynt}
-						<Lynt {...lynt} myId={profile.id} lyntClick={handleLyntClick} />
+						<Lynt {...lynt} {myId} lyntClick={handleLyntClick} />
 					{/each}
 				{/if}
 			</div>

@@ -273,7 +273,7 @@
 						<Notifications {handleLyntClick} />
 					{:else if page.startsWith('profile')}
 						{#key page}
-							<ProfilePage profileHandle={page.replace('profile', '')} {handleLyntClick} />
+							<ProfilePage myId={id} profileHandle={page.replace('profile', '')} {handleLyntClick} />
 						{/key}
 					{:else if page === 'home'}
 						<div class="min-w-1/3 mt-5 flex h-full flex-col md:px-1">
