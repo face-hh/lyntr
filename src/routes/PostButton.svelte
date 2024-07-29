@@ -14,6 +14,7 @@
 
 	let lynt = '';
 	let opened = false;
+        let postDisabled = false;
 
 	let image: File | null = null;
 	let imagePreview: string | null = null;
@@ -40,6 +41,7 @@
 			formData.append('image', image, image.name);
 		}
 
+                postDisabled = true;
 		const response = await fetch('api/lynt', {
 			method: 'POST',
 			body: formData
@@ -55,6 +57,7 @@
 		} else {
 			toast(`Something happened! Error: ${response.status} | ${response.statusText}`);
 		}
+                postDisabled = false;
 	}
 </script>
 
@@ -94,7 +97,9 @@
 		</div>
 
 		<div class="flex justify-end">
-			<Form.Button on:click={handlePost}>Post</Form.Button>
+			<Form.Button on:click={handlePost} disabled={postDisabled}>
+				Post
+			</Form.Button>
 		</div>
 	</Dialog.Content>
 </Dialog.Root>
