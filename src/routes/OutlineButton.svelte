@@ -36,7 +36,7 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<div class="shit relative flex flex-row justify-between gap-1 {className}">
+<div class="relative flex flex-row justify-between gap-1 {className}">
 {#if popover}
 	<Popover.Root bind:open={opened} portal={null}>
 		<Popover.Trigger asChild let:builder>
@@ -45,7 +45,7 @@
 				class:active={isActive}
 				class:animate
 				on:click={handleClick}
-				class="{outline
+				class="shit {outline
 					? 'border-2 border-solid border-primary p-1.5'
 					: ''} inline-flex items-center justify-center rounded-xl font-bold text-primary {className}"
 			>
@@ -67,7 +67,7 @@
 		class:active={isActive}
 		class:animate
 		on:click={handleClick}
-		class="{outline
+		class="shit {outline
 			? 'border-2 border-solid border-primary p-1.5'
 			: ''} inline-flex items-center justify-center rounded-xl font-bold text-primary gap-1 {className}"
 	>
@@ -101,7 +101,7 @@
 		transform: rotate(3deg);
 	}
 
-	button.active {
+	.shit.active {
 		background-color: hsl(var(--primary));
 		color: hsl(var(--background) / var(--tw-text-opacity));
 		transform: rotate(0deg);
