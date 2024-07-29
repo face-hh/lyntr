@@ -13,7 +13,8 @@ export async function likedFeed(userId: string) {
 		.innerJoin(lynts, eq(likes.lynt_id, lynts.id))
 		.innerJoin(users, eq(lynts.user_id, users.id))
 		.where(eq(likes.user_id, userId))
-		.orderBy(desc(likes.liked_at));
+		.orderBy(desc(likes.liked_at))
+		.limit(100);
 
 	return feed;
 }
