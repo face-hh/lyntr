@@ -6,7 +6,8 @@
 	import { goto } from '$app/navigation';
 	import { toggleMode } from 'mode-watcher';
 	import PostButton from './PostButton.svelte';
-        import { onMount } from 'svelte';
+        import { onMount, onDestroy } from 'svelte';
+        import { get } from 'svelte/store';
         import { unreadMessages } from "./stores";
 
 	export let id: string;
@@ -18,6 +19,8 @@
 		{ icon: User, label: 'Profile', page: 'profile' + handle }
 	];
 
+        let notificationDing = false;
+
 	function handleNavClick(page: string) {
 		currentPage.set(page);
 		if (page === 'home') {
@@ -28,13 +31,34 @@
 		}
 	}
 
-        onMount(async () => {
+        async function updateUnread() {
+            notificationDing = false;
+            let count = get(unreadMessages);
             const response = await fetch('/api/notifications/unread');
             if (response.ok) {
-                $unreadMessages = (await response.json()).count;
+                unreadMessages.set((await response.json()).count);
             } else {
                 console.error('Failed to fetch unread messages');
+                return;
             }
+
+            if ($unreadMessages > count && count !== -1) {
+                notificationDing = true;
+            }
+	}
+
+        let intervalUnreadUpdate: NodeJS.Timeout | undefined = undefined;
+
+        onMount(async () => {
+            await updateUnread();
+
+            intervalUnreadUpdate = setInterval(async () => {
+                await updateUnread();
+            }, 5000);
+        });
+
+        onDestroy(() => {
+            clearInterval(intervalUnreadUpdate);
         });
 </script>
 
@@ -53,7 +77,7 @@
 			icon={item.icon}
 			text={item.label}
                         secondary={item.label === 'Notifications' && $unreadMessages > 0 ? $unreadMessages : undefined}
-			className="border-none w-full md:w-auto"
+			className="border-none w-full md:w-auto {notificationDing ? item.label === 'Notifications' ? 'new' : '' : ''}"
 			on:click={() => handleNavClick(item.page)}
 		/>
 	{/each}

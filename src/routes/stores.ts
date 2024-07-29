@@ -7,4 +7,4 @@ export const cdnUrl = (filename: string, dimension: string | null = null) => {
     return `${PUBLIC_CDN_URL}/lyntr/${filename}${dimension ? '_' + dimension : ''}.webp?v=${v}`
 }
 
-export const unreadMessages = writable(0);
+export const unreadMessages = writable(-1);
