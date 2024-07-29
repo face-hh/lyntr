@@ -117,8 +117,8 @@ let questions: Question[] = [
 	},
 	{
 		id: 'British',
-		condition: (_: any) => {
-			return 0;
+		condition: (input: any) => {
+			return Boolean(input) ? -15 : 3;
 		}
 	},
 	{
