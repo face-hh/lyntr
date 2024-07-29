@@ -8,6 +8,7 @@ import { handleFeed } from './handle';
 import { followingFeed } from './following';
 import { newFeed } from './new';
 import { mainFeed } from './main';
+import { likedFeed } from "./liked"
 
 async function updateViewsAndHistory(userId: string, lyntIds: string[]) {
 	for (const lyntId of lyntIds) {
@@ -42,7 +43,7 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
 		return json({ error: 'Missing authentication' }, { status: 401 });
 	}
 
-	const tabs = ['For you', 'Following', 'Live', 'New'];
+	const tabs = ['For you', 'Following', 'Live', 'New', 'Liked'];
 
 	if (!tabs.includes(type)) {
 		return json({ error: 'Invalid type property.' }, { status: 400 });
@@ -68,7 +69,11 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
 			if (!user) {
 				return json({ error: 'User not found' }, { status: 404 });
 			}
-			result = await handleFeed(user.id, userId);
+			if (type === 'Liked') {
+				result = await likedFeed(user.id)
+			} else {
+				result = await handleFeed(user.id, userId)
+			}
 		} else if (type === 'Following') {
 			result = await followingFeed(userId);
 		} else if (type === 'New') {
