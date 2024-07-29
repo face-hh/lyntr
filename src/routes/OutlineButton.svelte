@@ -74,7 +74,7 @@
 		<svelte:component
 			this={icon}
 			{strokeWidth}
-			class="h-6 w-6 {text ? '{!small || isActive ? "hidden md:block" : ""} md:mr-1' : ''}"
+			class="h-6 w-6 {text ? '{!small || isActive ? "hidden md:block" : ""}' : ''}"
 		/>
 		{#if text}
 			<span class="hidden md:block {!small || isActive ? '!block' : ''}">{text}</span>
