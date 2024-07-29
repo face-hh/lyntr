@@ -52,11 +52,6 @@
 			toast(`Something happened! Error: ${response.status} | ${response.statusText}`);
 		}
 	}
-	function handlePaste(event) {
-		event.preventDefault();
-		const text = event.clipboardData.getData('text/plain');
-		document.execCommand('insertText', false, text);
-	}
 </script>
 
 <Dialog.Root bind:open={opened}>
@@ -68,14 +63,14 @@
 		<div class="flex items-start space-x-3">
 			<Avatar size={10} src={cdnUrl(userId, 'small')} alt="Your profile picture." />
 
-			<div class="flex flex-grow flex-col gap-2 h-full">
-                                <div class="max-h-[600px] overflow-y-auto">
-				    <DivInput bind:lynt />
+			<div class="flex h-full flex-grow flex-col gap-2">
+				<div class="max-h-[600px] overflow-y-auto">
+					<DivInput bind:lynt />
 
-				    {#if imagePreview}
-					 <img class="max-h-[600px] w-full object-contain" src={imagePreview} alt="Preview" />
-				    {/if}
-                                </div>
+					{#if imagePreview}
+						<img class="max-h-[600px] w-full object-contain" src={imagePreview} alt="Preview" />
+					{/if}
+				</div>
 				<button
 					on:click={() => {
 						fileinput.click();

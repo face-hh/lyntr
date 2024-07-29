@@ -6,7 +6,7 @@
 	import OutlineButton from './OutlineButton.svelte';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
-        import { Settings } from 'lucide-svelte';
+	import { Settings } from 'lucide-svelte';
 
 	let opened = false;
 
@@ -34,11 +34,7 @@
 	}
 
 	function deleteAllCookies() {
-		document.cookie.split(';').forEach((cookie) => {
-			const eqPos = cookie.indexOf('=');
-			const name = eqPos > -1 ? cookie.substring(0, eqPos) : cookie;
-			document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT';
-		});
+		localStorage.clear()
 	}
 
 	async function logout() {
@@ -59,20 +55,20 @@
 		<button
 			{...builder}
 			on:click={() => (opened = !opened)}
-			class="static bottom-2 md:absolute flex md:w-[250px] max-w-md cursor-pointer items-center gap-4 rounded-full bg-border p-4"
+			class="static bottom-2 flex max-w-md cursor-pointer items-center gap-4 rounded-full bg-border p-4 md:absolute md:w-[250px]"
 		>
-                    <div class="hidden md:flex gap-2 items-center">
-			<Avatar size={12} {src} alt="Your profile picture." />
-			<div class="flex flex-col gap-2 overflow-hidden">
-				<span class="truncate text-lg font-medium leading-none peer-enabled:cursor-pointer">
-					{name}
-				</span>
-				<span class="text-sm font-medium leading-none text-muted-foreground">
-					{handle}
-				</span>
+			<div class="hidden items-center gap-2 md:flex">
+				<Avatar size={12} {src} alt="Your profile picture." />
+				<div class="flex flex-col gap-2 overflow-hidden">
+					<span class="truncate text-lg font-medium leading-none peer-enabled:cursor-pointer">
+						{name}
+					</span>
+					<span class="text-sm font-medium leading-none text-muted-foreground">
+						{handle}
+					</span>
+				</div>
 			</div>
-                    </div>
-                    <Settings class="md:hidden" />
+			<Settings class="md:hidden" />
 		</button>
 	</Popover.Trigger>
 	<Popover.Content class="w-60">
@@ -81,24 +77,30 @@
 				icon={CheckCircle}
 				text="Verify my account"
 				outline={false}
-                                small={false}
+				small={false}
 				on:click={() => (window.location.href = 'https://discord.gg/XEXebe7Qzf')}
 			/>
 			<OutlineButton
 				icon={FileText}
 				text="Terms of Service"
 				outline={false}
-                                small={false}
+				small={false}
 				on:click={() => goto('/tos')}
 			/>
 			<OutlineButton
 				icon={ShieldCheck}
 				text="Privacy Policy"
 				outline={false}
-                                small={false}
+				small={false}
 				on:click={() => goto('/privacy')}
 			/>
-			<OutlineButton icon={UserX} text="Delete account" outline={false} on:click={deleteAccount} small={false} />
+			<OutlineButton
+				icon={UserX}
+				text="Delete account"
+				outline={false}
+				on:click={deleteAccount}
+				small={false}
+			/>
 			<OutlineButton icon={LogOut} text="Log out" outline={false} on:click={logout} small={false} />
 		</div>
 	</Popover.Content>

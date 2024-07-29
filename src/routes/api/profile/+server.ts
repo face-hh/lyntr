@@ -413,7 +413,12 @@ export const DELETE: RequestHandler = async ({ request, cookies }) => {
 		});
 
 		// Clear the auth cookie
-		cookies.delete('_TOKEN__DO_NOT_SHARE', { path: '/' });
+		cookies.delete('_TOKEN__DO_NOT_SHARE', {
+			path: '/', httpOnly: true,
+			secure: true,
+			sameSite: 'strict',
+			maxAge: 31536000 // 1 year
+		});
 
 		return json({ message: 'User and all related data deleted successfully' }, { status: 200 });
 	} catch (error) {
@@ -429,7 +434,7 @@ function santize(input: string) {
 function sanitizeNum(input: string) {
 	let num = parseInt(input)
 
-	if(num < 0) num = 0;
+	if (num < 0) num = 0;
 
 	return num
 }

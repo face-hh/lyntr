@@ -40,7 +40,11 @@ export const POST: RequestHandler = async ({ request, url, cookies }) => {
 		}
 
 		cookies.delete('_TOKEN__DO_NOT_SHARE', {
-			path: '/'
+			path: '/',
+			httpOnly: true,
+			secure: true,
+			sameSite: 'strict',
+			maxAge: 31536000 // 1 year
 		});
 
 		return json({}, { status: 200 });
