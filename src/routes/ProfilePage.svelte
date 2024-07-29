@@ -15,6 +15,7 @@
 	import * as Tooltip from '@/components/ui/tooltip';
 	import { mode } from 'mode-watcher';
 	import { cdnUrl } from './stores';
+	import TopTab from './TopTab.svelte';
 
 	export let profileHandle: string;
 	export let handleLyntClick;
@@ -41,6 +42,14 @@
 	let showFollowersPopup = false;
 	let showFollowingPopup = false;
 
+	let currentTab = 'Lynts';
+	const tabs = ['Lynts', 'Likes'];
+
+	function handleTabChange(tab: string) {
+		currentTab = tab;
+		fetchUserLynts(currentTab === tabs[1]);
+	}
+
 	function toggleFollowersPopup() {
 		showFollowersPopup = !showFollowersPopup;
 	}
@@ -65,9 +74,9 @@
 		}
 	}
 
-	async function fetchUserLynts() {
+	async function fetchUserLynts(fetchLikes: boolean) {
 		try {
-			const response = await fetch(`/api/feed?handle=${profileHandle}`);
+			const response = await fetch(`/api/feed?handle=${profileHandle}${fetchLikes ? '&type=Liked' : ''}`);
 
 			if (response.status === 200) {
 				userLynts = await response.json();
@@ -149,7 +158,7 @@
 	let avatar: string;
 	onMount(async () => {
 		await fetchProfile();
-		await Promise.all([fetchUserLynts(), checkFollowStatus(), fetchFollowCounts()]);
+		await Promise.all([fetchUserLynts(false), checkFollowStatus(), fetchFollowCounts()]);
 		loading = false;
 		avatar = cdnUrl(profile.id, 'big');
 	});
@@ -262,6 +271,8 @@
 			</div>
 
 			<div class="flex flex-col gap-3 max-w-[600px]">
+				<Separator class="mt-3" />
+				<TopTab {tabs} {currentTab} onTabChange={handleTabChange}/>
 				<Separator />
 				{#if userLynts.length === 0}
 					<p>No lynts yet.</p>
