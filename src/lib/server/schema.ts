@@ -39,6 +39,7 @@ export const followers = pgTable('followers', {
 export const likes = pgTable('likes', {
     lynt_id: text('lynt_id').references(() => lynts.id).notNull(),
     user_id: text('user_id').references(() => users.id).notNull(),
+    liked_at: timestamp('liked_at').defaultNow(),
 }, (table) => {
     return {
         pk: primaryKey({ columns: [table.lynt_id, table.user_id], name: 'likes_pkey' }),  // Replace 'likes_pkey' with the actual constraint name from your database
