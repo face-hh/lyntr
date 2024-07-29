@@ -232,7 +232,7 @@
 	</div>
 </div>
 {#if has_image}
-	<div class="max-h-[600px] overflow-y-auto">
-		<img class="mt-2 w-full object-contain" src={cdnUrl(postId)} alt="ok" />
+	<div class="max-h-[600px]">
+		<img class="avatar mt-2 object-contain" src={cdnUrl(postId)} alt="ok" />
 	</div>
 {/if}
