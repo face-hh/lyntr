@@ -95,7 +95,7 @@ export const POST: RequestHandler = async ({
 			const buffer = await imageFile.arrayBuffer();
 			const inputBuffer = Buffer.from(buffer);
 
-			const resizedBuffer = await sharp(inputBuffer)
+			const resizedBuffer = await sharp(inputBuffer, { animated: true })
 				.webp({ quality: 70 })
 				.withMetadata()
 				.toBuffer();

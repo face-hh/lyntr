@@ -69,7 +69,7 @@
 				toast(`Failed to load profile. Error: ${response.status}`);
 			}
 		} catch (error) {
-			if (isSelf) return
+			if (isSelf) return;
 			console.error('Error fetching profile:', error);
 			toast('Failed to load profile');
 		}
@@ -77,7 +77,9 @@
 
 	async function fetchUserLynts(fetchLikes: boolean) {
 		try {
-			const response = await fetch(`/api/feed?handle=${profileHandle}${fetchLikes ? '&type=Liked' : ''}`);
+			const response = await fetch(
+				`/api/feed?handle=${profileHandle}${fetchLikes ? '&type=Liked' : ''}`
+			);
 
 			if (response.status === 200) {
 				userLynts = await response.json();
@@ -85,7 +87,7 @@
 				toast(`Failed to load user lynts. Error: ${response.status}`);
 			}
 		} catch (error) {
-			if (isSelf) return
+			if (isSelf) return;
 			console.error('Error fetching user lynts:', error);
 			toast('Failed to load user lynts');
 		}
@@ -111,7 +113,7 @@
 				toast(error.error);
 			}
 		} catch (error) {
-			if (isSelf) return
+			if (isSelf) return;
 			console.error('Error toggling follow:', error);
 			toast('Failed to update follow status');
 		}
@@ -131,7 +133,7 @@
 				toast(error.error);
 			}
 		} catch (error) {
-			if (isSelf) return
+			if (isSelf) return;
 			console.error('Error checking follow status:', error);
 			toast('Failed to check follow status');
 		}
@@ -155,7 +157,7 @@
 				toast('Failed to fetch follow counts');
 			}
 		} catch (error) {
-			if (isSelf) return
+			if (isSelf) return;
 			console.error('Error fetching follow counts:', error);
 			toast('Failed to fetch follow counts');
 		}
@@ -175,50 +177,51 @@
 	<div class="h-full w-full flex-grow overflow-hidden pl-1">
 		<div class="mr-[-17px] h-full overflow-y-auto overflow-x-hidden pr-[17px]">
 			<div class="mt-2">
-<div class="flex justify-between items-center px-2">
-				<div class="flex items-center gap-4">
-					<Avatar size={40} src={avatar} alt={profile.username} border={true} />
-					<div class="flex flex-col gap-2">
-						<div class="inline-flex items-center gap-2">
-							<Label class="text-2xl font-bold text-primary">{profile.username}</Label>
-							{#if profile.verified}
-								<Tooltip.Root>
-									<Tooltip.Trigger>
-<div class="flex items-center h-full w-7">
-		<img
-											class="h-7 w-7"
-											src={$mode !== 'light' ? 'white_mode_verified.png' : 'verified.png'}
-											alt="This user is verified."
-										/>
-	</div>								</Tooltip.Trigger>
-									<Tooltip.Content>
-										<p>This user is <span class="rounded-xl bg-border p-1">verified</span>.</p>
-									</Tooltip.Content>
-								</Tooltip.Root>
+				<div class="flex items-center justify-between px-2">
+					<div class="flex items-center gap-4">
+						<Avatar size={40} src={avatar} alt={profile.username} border={true} />
+						<div class="flex flex-col gap-2">
+							<div class="inline-flex items-center gap-2">
+								<Label class="text-2xl font-bold text-primary">{profile.username}</Label>
+								{#if profile.verified}
+									<Tooltip.Root>
+										<Tooltip.Trigger>
+											<div class="flex h-full w-7 items-center">
+												<img
+													class="h-7 w-7"
+													src={$mode !== 'light' ? 'white_mode_verified.png' : 'verified.png'}
+													alt="This user is verified."
+												/>
+											</div>
+										</Tooltip.Trigger>
+										<Tooltip.Content>
+											<p>This user is <span class="rounded-xl bg-border p-1">verified</span>.</p>
+										</Tooltip.Content>
+									</Tooltip.Root>
+								{/if}
+							</div>
+							<p class="text-xl text-muted-foreground">@{profile.handle}</p>
+							<div class="w-24 w-full">
+								{#if isSelf}
+									<ProfileSettings
+										userId={profile.id}
+										username={profile.username}
+										bio={profile.bio}
+									/>
+								{:else}
+									<Button class="w-full" on:click={toggleFollow}>
+										{isFollowing ? 'Unfollow' : 'Follow'}
+									</Button>
+								{/if}
+							</div>
+							{#if isFollowedBy}
+								<p class="text-sm text-muted-foreground">Follows you</p>
 							{/if}
 						</div>
-						<p class="text-xl text-muted-foreground">@{profile.handle}</p>
-						<div class="w-24 w-full">
-							{#if isSelf}
-							
-	<ProfileSettings
-									userId={profile.id}
-									username={profile.username}
-									bio={profile.bio}
-								/>							{:else}
-								<Button class="w-full" on:click={toggleFollow}>
-									{isFollowing ? 'Unfollow' : 'Follow'}
-								</Button>
-							{/if}
-						</div>
-						{#if isFollowedBy}
-							<p class="text-sm text-muted-foreground">Follows you</p>
-						{/if}
 					</div>
-				</div>
-<div class="md:hidden {!isSelf ? "hidden" : ""}">
-     <ProfileButton />
-</div>
+					<div class="md:hidden {!isSelf ? 'hidden' : ''}">
+						<ProfileButton />
+					</div>
 				</div>
 
 				<div class="mt-4 inline-flex gap-4">
@@ -275,9 +278,9 @@
 				</blockquote>
 			</div>
 
-			<div class="flex flex-col gap-3 max-w-[600px]">
+			<div class="flex max-w-[600px] flex-col gap-3">
 				<Separator class="mt-3" />
-				<TopTab {tabs} {currentTab} onTabChange={handleTabChange}/>
+				<TopTab {tabs} {currentTab} onTabChange={handleTabChange} />
 				<Separator />
 				{#if userLynts.length === 0}
 					<p>No lynts yet.</p>
