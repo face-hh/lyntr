@@ -232,5 +232,7 @@
 	</div>
 </div>
 {#if has_image}
-	<img class="mt-2 max-h-[600px] w-full object-contain" src={cdnUrl(postId)} alt="ok" />
+	<div class="max-h-[600px] overflow-y-auto">
+		<img class="mt-2 w-full object-contain" src={cdnUrl(postId)} alt="ok" />
+	</div>
 {/if}
