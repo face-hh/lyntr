@@ -122,6 +122,7 @@
 		<Card.Header>
 			<Card.Title>Recent Activity</Card.Title>
 			<Card.Description>Your latest 50 notifications</Card.Description>
+			<Button on:click={markRead}>Mark All as Read</Button>
 		</Card.Header>
 		<Card.Content>
 			<ScrollArea class="h-full w-full rounded-md">
@@ -206,8 +207,5 @@
 				</div>
 			</ScrollArea>
 		</Card.Content>
-		<Card.Footer class="flex justify-center">
-			<Button on:click={markRead}>Mark All as Read</Button>
-		</Card.Footer>
 	</Card.Root>
 </div>
