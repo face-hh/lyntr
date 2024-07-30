@@ -10,7 +10,8 @@
 	import MainPage from './MainPage.svelte';
 	import Cookies from 'js-cookie';
 	import { Cookie } from 'lucide-svelte';
-
+	import { cdnUrl } from './stores';
+	
 	let authenticated: boolean = false;
 	let loading: boolean = true;
 	let noAccount: boolean = false;
