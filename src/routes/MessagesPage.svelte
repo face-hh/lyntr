@@ -25,7 +25,8 @@
 	import Avatar from './Avatar.svelte';
 	import LoadingSpinner from './LoadingSpinner.svelte';
 	import { Badge } from '$lib/components/ui/badge/index.js';
-	import { Input } from '$lib/components/ui/input';
+	//import { Input } from '$lib/components/ui/input';
+	import { Textarea } from "$lib/components/ui/textarea";
 	import { Button } from '$lib/components/ui/button';
 	import { Send, MoveDown } from 'lucide-svelte';
 	import VirtualScroll from 'svelte-virtual-scroll-list';
@@ -195,7 +196,7 @@
 				sender: myProfile,
 				receiver: profile,
 				content: 'hello',
-				created_at: Date.now().toString(),
+				created_at: new Date().toString(),
 				read: false
 			},
 			{
@@ -203,7 +204,7 @@
 				receiver: myProfile,
 				sender: profile,
 				content: 'hi',
-				created_at: Date.now().toString(),
+				created_at: new Date().toString(),
 				read: false
 			}
 		];
@@ -211,7 +212,7 @@
 	});
 
 	function handleKeyPress(event: KeyboardEvent) {
-		if (event.key === 'Enter') {
+		if (event.key === 'Enter' && event.shiftKey) {
 			sendMessage();
 		}
 	}
@@ -226,7 +227,7 @@
 				sender: myProfile,
 				receiver: profile,
 				content: messageValue,
-				created_at: Date.now().toString(),
+				created_at: new Date().toString(),
 				read: false
 			}
 		];
@@ -349,6 +350,7 @@
 						index={messages.findIndex((msg) => msg.id === item.id)}
 						unreadCount={friendsList[friendsList.findIndex((friend) => friend.id === profile.id)]
 							?.unread || 0}
+						{handleLyntClick}
 					/>
 				</VirtualScroll>
 				{#if messagesLoading}
@@ -362,15 +364,20 @@
 					<MoveDown/>
 				</Button>-->
 			</div>
-			<div class="mb-1 flex flex-row gap-2">
-				<Input
-					type="text"
+			<div class="mb-1 flex flex-row gap-2 items-center">
+				<Textarea
+					class="resize-none w-full min-h-min max-h-32 h-[41px]"
 					placeholder="Message @{profile.handle}"
 					bind:value={messageValue}
 					on:keydown={handleKeyPress}
 					on:focus={handleFocus}
+					on:keyup={(e) => {
+						const el = e.target;
+						el.style.height = "1px";
+						el.style.height = (4+el.scrollHeight)+"px"
+					}}
 				/>
-				<Button class="aspect-square p-1" on:click={sendMessage}>
+				<Button class="aspect-square p-1 w-[41px] h-[41px]" on:click={sendMessage}>
 					<Send />
 				</Button>
 			</div>
