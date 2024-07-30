@@ -89,7 +89,9 @@
 		currentTab = tab;
 		fetchFeed();
 
-		eventSource.close();
+		if (eventSource) {
+			eventSource.close();
+		}
 		if (currentTab === tabs[2]) {
 			eventSource = new EventSource('/api/sse');
 			eventSource.onmessage = async (event) => {
