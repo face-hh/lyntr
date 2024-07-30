@@ -1,5 +1,25 @@
+<script lang="ts" context="module">
+	export type SimpleUser = {
+		id: string;
+		username: string;
+		handle: string;
+		iq: number;
+		verified: boolean;
+	};
+
+	export type Message = {
+		id: string;
+		sender: SimpleUser;
+		receiver: SimpleUser;
+		content: string;
+		created_at: string;
+		read: boolean;
+	};
+</script>
+
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { cdnUrl, currentPage } from './stores';
 	import { toast } from 'svelte-sonner';
 	import Avatar from './Avatar.svelte';
@@ -7,10 +27,11 @@
 	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
-	import { Send } from 'lucide-svelte';
+	import { Send, MoveDown } from 'lucide-svelte';
 	import VirtualScroll from 'svelte-virtual-scroll-list';
 	import * as Tooltip from '@/components/ui/tooltip';
 	import { mode } from 'mode-watcher';
+	import MessageComponent from './Message.svelte';
 
 	export let profileHandle: string;
 	export let handleLyntClick;
@@ -32,19 +53,93 @@
 		verified: boolean;
 	};
 
+	let myProfile: {
+		username: string;
+		handle: string;
+		iq: number;
+		created_at: string;
+		id: string;
+		following: number;
+		followers: number;
+		bio: string;
+		verified: boolean;
+	};
+
+	let messages: Message[] = [];
+	let messagesContainer: VirtualInfiniteList;
+	let messagesLoading = false;
+
 	let friendsList: {
 		id: string;
 		username: string;
 		handle: string;
 		verified: boolean;
 		iq: number;
+		unread: number;
 	}[] = [];
 	let friendListLoaded = false;
 	let friendListPage = 1;
 	let friendEnd = false;
 	let loadingNextFriends = true;
+	let unreadMessageI = -1;
+
+	$: messages &&
+		(async () => {
+			const i = friendsList.findIndex((friend) => friend.id === profile.id);
+			if (i >= 0 && friendsList[i]) {
+				friendsList[i].unread = messages.filter(
+					(msg) => msg.sender.id !== myId && !msg.read
+				).length;
+			}
+			if (messagesContainer) {
+				await tick();
+				messagesContainer.scrollToBottom();
+			}
+		})();
+
+	$: {
+		const msgs = messages.filter((m) => m.sender.id !== myId);
+		const friend = friendsList[friendsList.findIndex((friend) => friend.id === profile.id)];
+
+		unreadMessageI = messages.findIndex((msg) => {
+			if (!friend || msgs.length === 0 || msgs.length - friend.unread < 0) {
+				return false;
+			}
+			return msg.id === msgs[msgs.length - friend.unread]?.id;
+		});
+	}
+
+	async function markAsRead() {
+		if (unreadMessageI < 0) return;
+
+		for (let i = unreadMessageI; i < messages.length; i++) {
+			if (messages[i] && messages[i].sender.id !== myId) {
+				messages[i].read = true;
+			}
+		}
+		unreadMessageI = -1;
+
+		// TODO: mark messages as read in database
+	}
 
 	async function fetchProfile() {
+		try {
+			const response = await fetch(`/api/profile?id=${myId}`);
+
+			if (response.status === 200) {
+				myProfile = await response.json();
+			} else {
+				toast(
+					`Failed to load profile. Error: ${response.status} ${JSON.stringify(await response.json())}`
+				);
+			}
+		} catch (error) {
+			console.error('Error fetching profile:', error);
+			toast('Failed to load profile: ' + error);
+		}
+
+		if (!profileHandle) return;
+
 		try {
 			const response = await fetch(`/api/profile?handle=${profileHandle}`);
 
@@ -52,12 +147,14 @@
 				profile = await response.json();
 				isSelf = profile.id === myId;
 			} else {
-				toast(`Failed to load profile. Error: ${response.status}`);
+				toast(
+					`Failed to load profile. Error: ${response.status} ${JSON.stringify(await response.json())}`
+				);
 			}
 		} catch (error) {
 			if (isSelf) return;
 			console.error('Error fetching profile:', error);
-			toast('Failed to load profile');
+			toast('Failed to load profile: ' + error);
 		}
 	}
 
@@ -87,9 +184,30 @@
 		await fetchProfile();
 		loading = false;
 
-		// todo: load friends
 		await appendFriends();
 		friendListLoaded = true;
+
+		messagesLoading = true;
+		// TODO: load messages
+		messages = [
+			{
+				id: '' + Math.floor(Math.random() * 99999),
+				sender: myProfile,
+				receiver: profile,
+				content: 'hello',
+				created_at: Date.now().toString(),
+				read: false
+			},
+			{
+				id: '' + Math.floor(Math.random() * 99999),
+				receiver: myProfile,
+				sender: profile,
+				content: 'hi',
+				created_at: Date.now().toString(),
+				read: false
+			}
+		];
+		messagesLoading = false;
 	});
 
 	function handleKeyPress(event: KeyboardEvent) {
@@ -99,7 +217,33 @@
 	}
 
 	function sendMessage() {
-		toast.info(messageValue);
+		if (messageValue.trim() === '') return;
+
+		messages = [
+			...messages,
+			{
+				id: '' + Math.floor(Math.random() * 99999),
+				sender: myProfile,
+				receiver: profile,
+				content: messageValue,
+				created_at: Date.now().toString(),
+				read: false
+			}
+		];
+
+		messageValue = '';
+	}
+
+	async function preappendPreviousMessages() {
+		messagesLoading = true;
+
+		toast('test');
+
+		messagesLoading = false;
+	}
+
+	async function handleFocus() {
+		await markAsRead();
 	}
 </script>
 
@@ -130,6 +274,15 @@
 						friend.id
 							? 'bg-secondary/50'
 							: ''}"
+						on:click={() => {
+							currentPage.set('messages/@' + friend.handle);
+
+							goto('/messages/@' + friend.handle, {
+								replaceState: true,
+
+								noScroll: true
+							});
+						}}
 					>
 						<div class="flex flex-row items-center gap-1">
 							<Avatar src={cdnUrl(friend.id, 'big')} alt={friend.username} border={true} />
@@ -138,7 +291,7 @@
 								<span class="text-muted-foreground">@{friend.handle}</span>
 							</div>
 						</div>
-						<Badge>{friend.iq}</Badge>
+						<Badge>{friend.unread || 0}</Badge>
 					</button>
 				</VirtualScroll>
 			{:else}
@@ -180,12 +333,34 @@
 				</div>
 				<Badge>{profile.iq}</Badge>
 			</div>
-			<div class="flex h-full w-full flex-col gap-1 overflow-y-auto rounded-md bg-secondary/90 p-2">
-				<div class="mt-auto"></div>
-				<span class="w-full whitespace-pre-wrap text-wrap break-all"
-					>{JSON.stringify(profile, null, 2)}</span
+			<div
+				class="messagesContainer relative flex h-full w-full flex-col justify-end overflow-hidden rounded-md bg-secondary/90 px-1 py-2"
+			>
+				<VirtualScroll
+					bind:this={messagesContainer}
+					data={messages}
+					key="id"
+					on:top={preappendPreviousMessages}
+					let:data={item}
 				>
-				{myId}
+					<MessageComponent
+						message={item}
+						{unreadMessageI}
+						index={messages.findIndex((msg) => msg.id === item.id)}
+						unreadCount={friendsList[friendsList.findIndex((friend) => friend.id === profile.id)]
+							?.unread || 0}
+					/>
+				</VirtualScroll>
+				{#if messagesLoading}
+					<LoadingSpinner />
+				{/if}
+
+				<!--<Button class="absolute right-2 bottom-2 rounded-md p-2 aspect-square" on:click={() => {
+					messagesContainer.scrollToBottom();
+					markAsRead();
+				}}>
+					<MoveDown/>
+				</Button>-->
 			</div>
 			<div class="mb-1 flex flex-row gap-2">
 				<Input
@@ -193,6 +368,7 @@
 					placeholder="Message @{profile.handle}"
 					bind:value={messageValue}
 					on:keydown={handleKeyPress}
+					on:focus={handleFocus}
 				/>
 				<Button class="aspect-square p-1" on:click={sendMessage}>
 					<Send />
