@@ -305,7 +305,9 @@
 									<LoadingSpinner />
 								{:else}
 									{#each feed as lynt}
-										<Lynt {...lynt} myId={id} lyntClick={handleLyntClick} />
+										<Lynt {...lynt} myId={id} lyntClick={handleLyntClick} on:delete={({ detail: { id } }) => {
+	feed = feed.filter((item) => item.id !== id);
+}} />
 									{/each}
 								{/if}
 							</div>
@@ -343,6 +345,7 @@
 									myId={id}
 									truncateContent={false}
 									lyntClick={handleLyntClick}
+									on:delete={() => updateURL('/')}
 								/>
 							</div>
 
@@ -369,7 +372,9 @@
 								<Label class="flex justify-center text-lg">This lynt has no comments.</Label>
 							{:else}
 								{#each comments as lynt}
-									<Lynt {...lynt} myId={id} lyntClick={handleLyntClick} />
+									<Lynt {...lynt} myId={id} lyntClick={handleLyntClick} on:delete={({ detail: { id } }) => {
+	comments = comments.filter((item) => item.id !== id);
+}} />
 								{/each}
 							{/if}
 							<div class="flex h-full w-full flex-col gap-2 overflow-y-auto"></div>

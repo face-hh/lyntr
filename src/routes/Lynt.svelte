@@ -184,6 +184,7 @@
 				{content}
 				{iq}
 				{userCreatedAt}
+				on:delete
 			/>
 
 			{#if reposted && parentId}
@@ -206,6 +207,7 @@
 								iq={parentUserIq}
 								userCreatedAt={parentUserCreatedAt}
 								includeAvatar={true}
+								on:delete
 							/>
 						{/if}
 					</div>
@@ -280,6 +282,7 @@
 											{userCreatedAt}
 											includeAvatar={true}
 											smaller={true}
+											on:delete
 										/>
 									</div>
 								</div>
