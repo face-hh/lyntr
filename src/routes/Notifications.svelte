@@ -115,24 +115,27 @@
 	}
 </script>
 
-<div class="container mx-auto h-full overflow-y-auto px-4 py-8">
-	<h1 class="mb-6 text-3xl font-bold">Notifications</h1>
-
+<div class="container mx-auto px-4 py-8">
+	<div class="inline-flex justify-between w-full mb-6">
+	  <h1 class="text-3xl font-bold">Notifications</h1>
+	  <Button class="ml-4" on:click={markRead}>Mark All as Read</Button>
+	</div>
+	
 	<Card.Root class="mx-auto w-full max-w-2xl bg-border">
-		<Card.Header>
-			<Card.Title>Recent Activity</Card.Title>
-			<Card.Description>Your latest 50 notifications</Card.Description>
-		</Card.Header>
-		<Card.Content>
-			<ScrollArea class="h-full w-full rounded-md">
-				<div class="pr-4">
+	  <Card.Header>
+		<Card.Title>Recent Activity</Card.Title>
+		<Card.Description>Your latest 50 notifications</Card.Description>
+	  </Card.Header>
+	  <Card.Content>
+		<ScrollArea class="h-[70vh] w-full rounded-md">
+		  <div class="pr-4">
 					<!-- Add right padding for scrollbar -->
 					{#if notifications.length === 0}
-						<p class="py-4 text-center text-muted-foreground">No notifications yet.</p>
-					{:else}
-						<ul class="flex w-full flex-col items-center gap-4">
-							{#each reactiveNotifications as notification (notification.id)}
-								<li class="w-full">
+					<p class="py-4 text-center text-muted-foreground">No notifications yet.</p>
+				  {:else}
+					<ul class="flex w-full flex-col items-center gap-4">
+					  {#each reactiveNotifications as notification (notification.id)}
+						<li class="w-full">
 									<button
 										on:click={async () => {
 											if (notification.lyntId) {
@@ -216,8 +219,5 @@
 				</div>
 			</ScrollArea>
 		</Card.Content>
-		<Card.Footer class="flex justify-center">
-			<Button on:click={markRead}>Mark All as Read</Button>
-		</Card.Footer>
 	</Card.Root>
 </div>
