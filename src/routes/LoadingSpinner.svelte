@@ -1,5 +1,5 @@
 <script lang="ts">
-	export let imageSrc = 'logo.svg'; // Replace with your image path
+	export let imageSrc = '/logo.svg'; // Replace with your image path
 	export let size = 'w-48 h-48'; // Default size using Tailwind classes
 	export let occupy_screen = true;
 </script>

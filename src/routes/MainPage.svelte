@@ -19,6 +19,7 @@
 	import Search from './Search.svelte';
 	import Notifications from './Notifications.svelte';
 	import ProfilePage from './ProfilePage.svelte';
+	import MessagesPage from './MessagesPage.svelte';
 	import { goto } from '$app/navigation';
 	import TopTab from './TopTab.svelte';
 
@@ -27,6 +28,7 @@
 	// export let created_at: string;
 	// export let iq: number;
 	export let id: string;
+	export let otherId: string | null = null;
 	export let lyntOpened: string | null = null;
 	export let profileOpened: string | null = null;
 
@@ -91,10 +93,10 @@
 		if (currentTab === tabs[2]) {
 			eventSource = new EventSource('/api/sse');
 			eventSource.onmessage = async (event) => {
-				const newLyntId = JSON.parse(event.data);;
+				const newLyntId = JSON.parse(event.data);
 				await renderLyntAtTop(newLyntId);
-			}
-		} 
+			};
+		}
 	}
 
 	let feedContainer: HTMLDivElement;
@@ -123,6 +125,8 @@
 		})();
 	} else if (profileOpened !== null) {
 		page = `profile${profileOpened}`;
+	} else if (otherId !== null) {
+		page = `messages/${otherId}`;
 	}
 
 	async function getLynt(lyntOpened: string) {
@@ -139,11 +143,12 @@
 
 	async function fetchFeed(append = false) {
 		const response = await fetch(
-			`api/feed?type=${currentTab}&excludePosts=${feed.map((post: any) => post.id).join(',')}`,
+			`/api/feed?type=${currentTab}&excludePosts=${feed.map((post: any) => post.id).join(',')}`,
 			{ method: 'GET' }
 		);
 
 		if (response.status !== 200) {
+			console.log(currentTab);
 			toast('Error generating feed! Please refresh the page');
 			return;
 		}
@@ -251,7 +256,7 @@
 					class="md:max-w-1/3 flex w-full min-w-full flex-row items-start gap-2 px-2 py-2 md:w-auto md:flex-col md:pt-0"
 				>
 					<button class="mt-5 hidden md:block" on:click={toggleMode}>
-						<img class="mb-5 size-20 cursor-pointer" src="logo.svg" alt="Logo" />
+						<img class="mb-5 size-20 cursor-pointer" src="/logo.svg" alt="Logo" />
 					</button>
 					<Navigation {handle} {id} />
 					<div class="hidden md:flex md:w-full">
@@ -264,8 +269,9 @@
 
 			<div class="flex h-full w-full flex-col items-center gap-1 md:flex-row md:items-start">
 				<div
-					class="flex h-full w-full max-w-[600px] flex-col overflow-hidden md:px-1 {lyntOpened &&
-					selectedLynt
+					class="flex h-full w-full {page.startsWith('messages')
+						? ''
+						: 'max-w-[600px]'} flex-col overflow-hidden md:px-1 {lyntOpened && selectedLynt
 						? 'hidden md:flex'
 						: ''}"
 				>
@@ -273,9 +279,15 @@
 						<Search userId={id} {handleLyntClick} />
 					{:else if page === 'notifications'}
 						<Notifications {handleLyntClick} />
+					{:else if page.startsWith('messages')}
+						<MessagesPage myId={id} profileHandle={page.split('/')[1]} {handleLyntClick} />
 					{:else if page.startsWith('profile')}
 						{#key page}
-							<ProfilePage myId={id} profileHandle={page.replace('profile', '')} {handleLyntClick} />
+							<ProfilePage
+								myId={id}
+								profileHandle={page.replace('profile', '')}
+								{handleLyntClick}
+							/>
 						{/key}
 					{:else if page === 'home'}
 						<div class="min-w-1/3 mt-5 flex h-full flex-col md:px-1">
@@ -303,8 +315,12 @@
 						<button
 							class="flex w-full justify-end p-2 md:justify-start"
 							on:click={() => {
-								lyntOpened = null;
-								selectedLynt = null;
+								if (selectedLynt && selectedLynt.parentId && !selectedLynt.reposted) {
+									handleLyntClick(selectedLynt.parentId);
+								} else {
+									lyntOpened = null;
+									selectedLynt = null;
+								}
 							}}><X /></button
 						>
 						<div

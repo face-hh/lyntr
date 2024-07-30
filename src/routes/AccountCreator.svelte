@@ -16,9 +16,9 @@
 	let iqReport: string | null;
 	let totalIQ: number | null;
 
-        async function authLogin() {
-                await supabase.auth.signInWithOAuth({ provider: 'discord' });
-        }
+	async function authLogin() {
+		await supabase.auth.signInWithOAuth({ provider: 'discord' });
+	}
 
 	let allQuestionsCompleted = localStorage.getItem('current_question') === '20' ? true : false;
 
@@ -78,7 +78,11 @@
 	<div class="flex flex-col gap-6 p-1 md:flex-row">
 		<div class="flex flex-col items-center gap-2">
 			<div class="inline-flex items-center gap-2">
-				<img src="logo.svg" alt="Lyntr" class="pointer-events-none w-32 h-32 md:h-40 md:w-40 select-none" />
+				<img
+					src="/logo.svg"
+					alt="Lyntr"
+					class="pointer-events-none h-32 w-32 select-none md:h-40 md:w-40"
+				/>
 				<Label class="select-none text-8xl">Lyntr.</Label>
 			</div>
 
@@ -155,10 +159,14 @@
 					</AlertDialog.Root>
 				{/if}
 			</div>
-			<span class="mt-4 text-sm text-left">Already have an account on Lyntr? <button class="text-primary font-bold" on:click={authLogin}>Log in</button></span>
-		
+			<span class="mt-4 text-left text-sm"
+				>Already have an account on Lyntr? <button
+					class="font-bold text-primary"
+					on:click={authLogin}>Log in</button
+				></span
+			>
 		</div>
-        <Separator class="h-[1px] w-full md:h-full md:w-[1px]" />
+		<Separator class="h-[1px] w-full md:h-full md:w-[1px]" />
 		<div class="w-full rounded-md border-2 border-primary p-4 md:min-w-[400px] md:max-w-[400px]">
 			<IQTest on:questionsCompleted={handleQuestionsCompleted} />
 		</div>
