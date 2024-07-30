@@ -127,7 +127,7 @@
 		<Card.Description>Your latest 50 notifications</Card.Description>
 	  </Card.Header>
 	  <Card.Content>
-		<ScrollArea class="h-[70vh] w-full rounded-md">
+		<ScrollArea class="h-[60dvh] w-full rounded-md">
 		  <div class="pr-4">
 					<!-- Add right padding for scrollbar -->
 					{#if notifications.length === 0}
