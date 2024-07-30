@@ -90,6 +90,8 @@
 	let imagePreview: string | null = null;
         let fileinput: HTMLInputElement;
 
+	let textarea: any;
+
 	$: messages &&
 		(async () => {
 			const i = friendsList.findIndex((friend) => friend.id === profile.id);
@@ -219,13 +221,13 @@
 		messagesLoading = false;
 	});
 
-	function handleKeyPress(event: KeyboardEvent) {
+	async function handleKeyPress(event: KeyboardEvent) {
 		if (event.key === 'Enter' && event.shiftKey) {
-			sendMessage();
+			await sendMessage();
 		}
 	}
 
-	function sendMessage() {
+	async function sendMessage() {
 		if (messageValue.trim() === '' && (imagePreview === null || fileinput.value === "")) return;
 
 		messages = [
@@ -245,6 +247,10 @@
 		imagePreview = null;
                 fileinput.value = "";
                 image = null;
+
+		await tick();
+		textarea.style.height = "1px";
+		textarea.style.height = (4+textarea.scrollHeight)+"px"
 	}
 
 	async function preappendPreviousMessages() {
@@ -403,6 +409,7 @@
 					<Image />
 				</Button>
 				<Textarea
+					bind:ref={textarea}
 					class="resize-none w-full min-h-min max-h-32 h-[41px] border-none bg-transparent"
 					placeholder="Message @{profile.handle}"
 					bind:value={messageValue}
