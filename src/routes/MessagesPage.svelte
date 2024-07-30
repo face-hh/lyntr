@@ -13,6 +13,7 @@
 		receiver: SimpleUser;
 		content: string;
 		created_at: string;
+		image: string | null;
 		read: boolean;
 	};
 </script>
@@ -28,11 +29,12 @@
 	//import { Input } from '$lib/components/ui/input';
 	import { Textarea } from "$lib/components/ui/textarea";
 	import { Button } from '$lib/components/ui/button';
-	import { Send, MoveDown } from 'lucide-svelte';
+	import { Send, MoveDown, Image, X } from 'lucide-svelte';
 	import VirtualScroll from 'svelte-virtual-scroll-list';
 	import * as Tooltip from '@/components/ui/tooltip';
 	import { mode } from 'mode-watcher';
 	import MessageComponent from './Message.svelte';
+	import { Separator } from "$lib/components/ui/separator";
 
 	export let profileHandle: string;
 	export let handleLyntClick;
@@ -83,6 +85,10 @@
 	let friendEnd = false;
 	let loadingNextFriends = true;
 	let unreadMessageI = -1;
+
+	let image: File | null = null;
+	let imagePreview: string | null = null;
+        let fileinput: HTMLInputElement;
 
 	$: messages &&
 		(async () => {
@@ -197,6 +203,7 @@
 				receiver: profile,
 				content: 'hello',
 				created_at: new Date().toString(),
+				image: null,
 				read: false
 			},
 			{
@@ -205,6 +212,7 @@
 				sender: profile,
 				content: 'hi',
 				created_at: new Date().toString(),
+				image: null,
 				read: false
 			}
 		];
@@ -218,7 +226,7 @@
 	}
 
 	function sendMessage() {
-		if (messageValue.trim() === '') return;
+		if (messageValue.trim() === '' && (imagePreview === null || fileinput.value === "")) return;
 
 		messages = [
 			...messages,
@@ -228,17 +236,20 @@
 				receiver: profile,
 				content: messageValue,
 				created_at: new Date().toString(),
+				image: imagePreview,
 				read: false
 			}
 		];
 
 		messageValue = '';
+		imagePreview = null;
+                fileinput.value = "";
+                image = null;
 	}
 
 	async function preappendPreviousMessages() {
 		messagesLoading = true;
 
-		toast('test');
 
 		messagesLoading = false;
 	}
@@ -246,6 +257,18 @@
 	async function handleFocus() {
 		await markAsRead();
 	}
+
+	const onFileSelected = (e: Event) => {
+                const target = e.target as HTMLInputElement;
+                if (target.files && target.files[0]) {
+                        image = target.files[0];
+                        let reader = new FileReader();
+                        reader.readAsDataURL(image);
+                        reader.onload = (e) => {
+                                imagePreview = e.target?.result as string;
+                        };
+                }
+        };
 </script>
 
 {#if loading}
@@ -255,7 +278,7 @@
 {:else if profile}
 	<div class="relative flex h-full w-full flex-row gap-1">
 		<div class="hidden h-full w-full flex-col items-center gap-1 md:flex md:w-[300px]">
-			<span class="my-2 text-xl">Friends</span>
+			<span class="my-2 text-xl">Messages</span>
 			{#if !friendListLoaded}
 				<LoadingSpinner />
 			{:else if friendsList.length > 0}
@@ -296,9 +319,10 @@
 					</button>
 				</VirtualScroll>
 			{:else}
-				<span>No Friends</span>
+				<span>No Messages</span>
 			{/if}
 		</div>
+		<Separator orientation="vertical" class="hidden md:block" />
 		<div class="mt-2 flex w-full flex-col gap-2 px-1">
 			<!--<span class="text-2xl text-center py-2">Private Messages With {profile.username}</span>-->
 			<div
@@ -335,7 +359,7 @@
 				<Badge>{profile.iq}</Badge>
 			</div>
 			<div
-				class="messagesContainer relative flex h-full w-full flex-col justify-end overflow-hidden rounded-md bg-secondary/90 px-1 py-2"
+				class="messagesContainer relative flex h-full w-full flex-col justify-end overflow-hidden rounded-md px-1 py-2"
 			>
 				<VirtualScroll
 					bind:this={messagesContainer}
@@ -351,6 +375,7 @@
 						unreadCount={friendsList[friendsList.findIndex((friend) => friend.id === profile.id)]
 							?.unread || 0}
 						{handleLyntClick}
+						{myId}
 					/>
 				</VirtualScroll>
 				{#if messagesLoading}
@@ -364,9 +389,21 @@
 					<MoveDown/>
 				</Button>-->
 			</div>
-			<div class="mb-1 flex flex-row gap-2 items-center">
+			<div class="p-2 bg-input rounded-t-lg w-full h-72" class:hidden={!imagePreview}>
+				<div class="relative bg-no-repeat w-full h-full bg-center bg-contain" style:background-image={`url(${imagePreview})`}>
+					<Button variant="ghost" class="absolute top-0 right-2 w-16 h-16" on:click={() => {
+						imagePreview = null;
+				                fileinput.value = "";
+					        image = null;
+					}}><X/></Button>
+				</div>
+			</div>
+			<div class="mb-1 mt-2 flex flex-row gap-1 items-center rounded-xl p-1 bg-secondary text-secondary-foreground">
+				<Button variant="ghost" class="aspect-square p-1 w-[41px] h-[41px]" on:click={() => fileinput.click()}>
+					<Image />
+				</Button>
 				<Textarea
-					class="resize-none w-full min-h-min max-h-32 h-[41px]"
+					class="resize-none w-full min-h-min max-h-32 h-[41px] border-none bg-transparent"
 					placeholder="Message @{profile.handle}"
 					bind:value={messageValue}
 					on:keydown={handleKeyPress}
@@ -377,9 +414,16 @@
 						el.style.height = (4+el.scrollHeight)+"px"
 					}}
 				/>
-				<Button class="aspect-square p-1 w-[41px] h-[41px]" on:click={sendMessage}>
+				<Button variant="ghost" class="aspect-square p-1 w-[41px] h-[41px]" on:click={sendMessage}>
 					<Send />
 				</Button>
+				<input
+                                        style="display:none"
+                                        type="file"
+                                        accept=".jpg, .jpeg, .png"
+                                        on:change={onFileSelected}
+                                        bind:this={fileinput}
+                                />
 			</div>
 		</div>
 	</div>
