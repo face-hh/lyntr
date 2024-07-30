@@ -9,7 +9,8 @@
 	import { supabase } from '@/supabase';
 	import { page } from '$app/stores';
 	import MainPage from './MainPage.svelte';
-
+	import { cdnUrl } from './stores';
+	
 	let authenticated: boolean = false;
 	let loading: boolean = true;
 	let noAccount: boolean = false;

@@ -9,6 +9,8 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Send } from 'lucide-svelte';
 	import VirtualScroll from 'svelte-virtual-scroll-list';
+	import * as Tooltip from '@/components/ui/tooltip';
+	import { mode } from 'mode-watcher';
 
 	export let profileHandle: string;
 	export let handleLyntClick;
@@ -123,8 +125,13 @@
 						await appendFriends();
 					}}
 				>
-					<button class="flex flex-row justify-center items-center gap-2 rounded-full bg-secondary p-1.5 {profile.id === friend.id ? 'bg-secondary/50' : ''}">
-						<div class="flex flex-row gap-1 items-center">
+					<button
+						class="flex flex-row items-center justify-center gap-2 rounded-full bg-secondary p-1.5 {profile.id ===
+						friend.id
+							? 'bg-secondary/50'
+							: ''}"
+					>
+						<div class="flex flex-row items-center gap-1">
 							<Avatar src={cdnUrl(friend.id, 'big')} alt={friend.username} border={true} />
 							<div class="text-elipsis flex w-full flex-col gap-1 overflow-hidden truncate text-sm">
 								<span class="font-bold">{friend.username}</span>
@@ -148,6 +155,22 @@
 					<div class="flex flex-col">
 						<div class="flex flex-row gap-2">
 							<span class="text-lg font-bold">{profile.username}</span>
+							{#if profile.verified}
+								<Tooltip.Root>
+									<Tooltip.Trigger>
+										<div class="flex h-full w-7 justify-center">
+											<img
+												class="h-7 w-7"
+												src={$mode !== 'light' ? '/white_mode_verified.png' : '/verified.png'}
+												alt="This user is verified."
+											/>
+										</div>
+									</Tooltip.Trigger>
+									<Tooltip.Content>
+										<p>This user is <span class="rounded-xl bg-border p-1">verified</span>.</p>
+									</Tooltip.Content>
+								</Tooltip.Root>
+							{/if}
 							<span class="text-lg text-muted-foreground">@{profile.handle}</span>
 						</div>
 						<span class="w-full max-w-full overflow-hidden truncate text-ellipsis"
