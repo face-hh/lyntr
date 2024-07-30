@@ -69,8 +69,6 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
 			.offset(page * LIMIT)
 			.execute();
 
-		console.log(friends);
-
 		return json(
 			{
 				friends,
