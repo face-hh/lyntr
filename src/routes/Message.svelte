@@ -4,10 +4,21 @@
 	import Avatar from './Avatar.svelte'
 	import { cdnUrl } from './stores';
 
+	import dayjs from 'dayjs';
+	import utc from 'dayjs/plugin/utc';
+	import timezone from 'dayjs/plugin/timezone';
+	import relativeTime from 'dayjs/plugin/relativeTime';
+
+	dayjs.extend(utc);
+	dayjs.extend(timezone);
+	dayjs.extend(relativeTime);
+	dayjs.tz.guess();
+
 	export let message: Message;
 	export let index: number;
 	export let unreadMessageI: number;
 	export let unreadCount: number;
+	export let handleLyntClick: (id: string) => void;
 </script>
 
 <div class="flex flex-col mx-1">
@@ -23,8 +34,9 @@
 		<div class="flex flex-col gap-1 w-full">
 			<div class="text-elipsis flex w-full flex-row gap-1 overflow-hidden truncate text-sm">
 				<span class="font-bold">{message.sender.username}</span>
+				<span class="font-bold text-muted-foreground">{dayjs.utc(message.created_at).tz().fromNow()}</span>
 			</div>
-			<span>{message.content}</span>
+			<span class="whitespace-pre-wrap break-all">{message.content}</span>
 		</div>
 
 		<Badge>{message.sender.iq}</Badge>
