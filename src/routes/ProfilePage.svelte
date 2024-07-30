@@ -14,13 +14,14 @@
 	import ProfileButton from './ProfileButton.svelte';
 	import * as Tooltip from '@/components/ui/tooltip';
 	import { mode } from 'mode-watcher';
-	import { cdnUrl } from './stores';
+	import { cdnUrl, currentPage } from './stores';
 	import TopTab from './TopTab.svelte';
+	import { goto } from '$app/navigation';
 
 	export let profileHandle: string;
 	export let handleLyntClick;
 	export let myId: string;
-	
+
 	let profile: {
 		username: string;
 		handle: string;
@@ -210,9 +211,25 @@
 										bio={profile.bio}
 									/>
 								{:else}
-									<Button class="w-full" on:click={toggleFollow}>
-										{isFollowing ? 'Unfollow' : 'Follow'}
-									</Button>
+									<div class="flex flex-row gap-2">
+										<Button class="w-full" on:click={toggleFollow}>
+											{isFollowing ? 'Unfollow' : 'Follow'}
+										</Button>
+										{#if isFollowing && isFollowedBy}
+											<Button
+												class="w-full"
+												on:click={() => {
+													currentPage.set('messages/@' + profile.handle);
+													goto('/messages/@' + profile.handle, {
+														replaceState: true,
+														noScroll: true
+													});
+												}}
+											>
+												Message
+											</Button>
+										{/if}
+									</div>
 								{/if}
 							</div>
 							{#if isFollowedBy}

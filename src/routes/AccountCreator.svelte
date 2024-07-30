@@ -73,7 +73,7 @@
 		<div class="flex flex-col items-center gap-2">
 			<div class="inline-flex items-center gap-2">
 				<img
-					src="logo.svg"
+					src="/logo.svg"
 					alt="Lyntr"
 					class="pointer-events-none h-32 w-32 select-none md:h-40 md:w-40"
 				/>
