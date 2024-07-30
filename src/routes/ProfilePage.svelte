@@ -304,7 +304,9 @@
 					<p>No lynts yet.</p>
 				{:else}
 					{#each userLynts.lynts as lynt}
-						<Lynt {...lynt} {myId} lyntClick={handleLyntClick} />
+						<Lynt {...lynt} {myId} lyntClick={handleLyntClick} on:delete={({ detail: { id }}) => {
+							userLynts.lynts = userLynts.lynts.filter((item) => item.id !== id);
+						}} />
 					{/each}
 				{/if}
 			</div>

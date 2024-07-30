@@ -11,6 +11,7 @@
 	import { Ellipsis, Trash } from 'lucide-svelte';
 	import { toast } from 'svelte-sonner';
 	import Report from './Report.svelte';
+	import { createEventDispatcher } from 'svelte';
 
 	function getTimeElapsed(date: Date | string) {
 		if (typeof date === 'string') date = new Date(date);
@@ -56,6 +57,11 @@
 	}
 
 	let popoverOpened = false;
+        const dispatcher = createEventDispatcher<{
+		delete: {
+			id: string
+		}
+	}>();
 
 	export let truncateContent: boolean = false;
 	export let username;
@@ -80,6 +86,8 @@
 
 		if (response.status === 200) {
 			toast(`Your post has been permanently deleted.`);
+			dispatcher('delete', { id: postId });
+			popoverOpened = false;
 		} else if (response.status === 403) {
 			toast(`Missing access - frontend may be desynchronised.`);
 		} else {
