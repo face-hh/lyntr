@@ -105,7 +105,7 @@
 									<button
 										on:click={() => {
 											current_page.set(`profile${user.handle}`);
-											goto(`/@${user.handle}`, { replaceState: true, noScrol: true });
+											goto(`/@${user.handle}`, { replaceState: true, noScroll: true });
 										}}>@{user.handle}</button
 									>
 								</p>
