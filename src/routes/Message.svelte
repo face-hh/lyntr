@@ -19,16 +19,19 @@
 	export let unreadMessageI: number;
 	export let unreadCount: number;
 	export let handleLyntClick: (id: string) => void;
+	export let myId: string;
 </script>
 
-<div class="flex flex-col mx-1">
-	{#if index === unreadMessageI}
-		<div class="w-full rounded-md border-t-4 border-solid border-t-primary/30 mt-4">
+{#if index === unreadMessageI}
+	<div class="text-center">
+		<div class="w-full rounded-md border-t-4 border-solid border-t-border mt-4">
 		</div>
 		<span class="px-2 py-1">Unread Messages ({unreadCount})</span>
-	{/if}
+	</div>
+{/if}
 
-	<div class="flex flex-row px-1 py-2 mt-2 w-full gap-2 items-center rounded-md bg-background/30">
+<div class="flex flex-col mx-1 {message.sender.id === myId ? 'items-end' : ''}">
+	<div class="flex flex-row px-1 py-2 mt-2 w-fit max-w-full gap-2 rounded-md {message.sender.id === myId ? 'bg-input/70' : 'bg-input'}">
 		<Avatar src={cdnUrl(message.sender.id, 'big')} alt={message.sender.username} border={true} />
 
 		<div class="flex flex-col gap-1 w-full">
@@ -37,8 +40,11 @@
 				<span class="font-bold text-muted-foreground">{dayjs.utc(message.created_at).tz().fromNow()}</span>
 			</div>
 			<span class="whitespace-pre-wrap break-all">{message.content}</span>
+			{#if message.image}
+				<img src={message.image} alt="" class="max-w-full max-h-[400px] overflow-hidden" />
+			{/if}
 		</div>
 
-		<Badge>{message.sender.iq}</Badge>
+		<Badge class="h-6">{message.sender.iq}</Badge>
 	</div>
 </div>
