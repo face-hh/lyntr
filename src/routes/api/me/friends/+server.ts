@@ -3,7 +3,7 @@ import type { RequestHandler } from '@sveltejs/kit';
 import { verifyAuthJWT } from '@/server/jwt';
 import { db } from '@/server/db';
 import { users, followers } from '@/server/schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 
 const LIMIT = 30;
@@ -51,7 +51,8 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
 				username: users.username,
 				handle: users.handle,
 				verified: users.verified,
-				iq: users.iq
+				iq: users.iq,
+				unread: sql<number>`0 as unread`
 			})
 			.from(users)
 			.innerJoin(followers, eq(users.id, followers.follower_id))
