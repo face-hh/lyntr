@@ -97,7 +97,7 @@
 		let date = new Date(_date);
 
 		const options = { year: 'numeric', month: 'long' };
-		return date.toLocaleDateString('en-US', options);
+		return date.toLocaleDateString(undefined, options);
 	}
 
 	async function markRead() {
