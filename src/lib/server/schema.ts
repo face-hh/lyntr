@@ -27,6 +27,16 @@ export const lynts = pgTable('lynts', {
     parent: text('parent').references((): AnyPgColumn => lynts.id)
 });
 
+export const messages = pgTable('messages', {
+    id: text('id').primaryKey(),
+    sender_id: text('sender_id').references(() => users.id),
+    receiver_id: text('receiver_id').references(() => users.id),
+    content: text('content').notNull(),
+    image: text('image'),
+    read: boolean('read').default(false),
+    created_at: timestamp('created_at').defaultNow()
+});
+
 export const followers = pgTable('followers', {
     user_id: text('user_id').references(() => users.id).notNull(),
     follower_id: text('follower_id').references(() => users.id).notNull(),

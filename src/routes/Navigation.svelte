@@ -73,7 +73,7 @@
 			icon={item.icon}
 			text={item.label}
 			secondary={item.label === 'Notifications' && $unreadMessages > 0
-				? $unreadMessages
+				? "" + $unreadMessages
 				: undefined}
 			className="border-none w-full md:w-auto {notificationDing
 				? item.label === 'Notifications'

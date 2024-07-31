@@ -38,7 +38,7 @@
 	}
 
 	async function logout() {
-		const response = await fetch('api/logout', { method: 'POST' });
+		const response = await fetch('/api/logout', { method: 'POST' });
 
 		if (response.status !== 200)
 			return toast(
