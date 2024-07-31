@@ -96,6 +96,7 @@
 			eventSource = new EventSource('/api/sse');
 			eventSource.onmessage = async (event) => {
 				const newLyntId = JSON.parse(event.data);
+				toast(newLyntId);
 				await renderLyntAtTop(newLyntId);
 			};
 		}
