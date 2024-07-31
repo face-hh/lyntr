@@ -95,9 +95,11 @@
 		if (currentTab === tabs[2]) {
 			eventSource = new EventSource('/api/sse');
 			eventSource.onmessage = async (event) => {
-				const newLyntId = JSON.parse(event.data);
-				toast(newLyntId);
-				await renderLyntAtTop(newLyntId);
+				const data = JSON.parse(event.data);
+				if (data.type === 'lynt_add') {
+					const newLyntId = data.data;
+					await renderLyntAtTop(newLyntId);
+				}
 			};
 		}
 	}
