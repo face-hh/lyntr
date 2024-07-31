@@ -84,7 +84,7 @@
 			);
 
 			if (response.status === 200) {
-				userLynts = await response.json();
+				userLynts = (await response.json()).lynts;
 			} else {
 				toast(`Failed to load user lynts. Error: ${response.status}`);
 			}
@@ -303,9 +303,9 @@
 				{#if userLynts.length === 0}
 					<p>No lynts yet.</p>
 				{:else}
-					{#each userLynts.lynts as lynt}
+					{#each userLynts as lynt}
 						<Lynt {...lynt} {myId} lyntClick={handleLyntClick} on:delete={({ detail: { id }}) => {
-							userLynts.lynts = userLynts.lynts.filter((item) => item.id !== id);
+							userLynts = userLynts.filter((item) => item.id !== id);
 						}} />
 					{/each}
 				{/if}

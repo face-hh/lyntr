@@ -3,12 +3,12 @@
 	import type { TextareaEvents } from "./index.js";
 	import { cn } from "$lib/utils.js";
 
-	type $$Props = HTMLTextareaAttributes;
+	type $$Props = HTMLTextareaAttributes & { ref: HTMLTextAreaElement };
 	type $$Events = TextareaEvents;
 
 	let className: $$Props["class"] = undefined;
 	export let value: $$Props["value"] = undefined;
-	export let ref: HTMLTextareaElement;
+	export let ref: HTMLTextAreaElement;
 	export { className as class };
 
 	// Workaround for https://github.com/sveltejs/svelte/issues/9305

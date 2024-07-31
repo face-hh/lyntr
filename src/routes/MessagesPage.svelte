@@ -56,20 +56,8 @@
 		verified: boolean;
 	};
 
-	let myProfile: {
-		username: string;
-		handle: string;
-		iq: number;
-		created_at: string;
-		id: string;
-		following: number;
-		followers: number;
-		bio: string;
-		verified: boolean;
-	};
-
 	let messages: Message[] = [];
-	let messagesContainer: VirtualInfiniteList;
+	let messagesContainer: VirtualScroll;
 	let messagesLoading = false;
 
 	let friendsList: {
@@ -132,21 +120,6 @@
 	}
 
 	async function fetchProfile() {
-		try {
-			const response = await fetch(`/api/profile?id=${myId}`);
-
-			if (response.status === 200) {
-				myProfile = await response.json();
-			} else {
-				toast(
-					`Failed to load profile. Error: ${response.status} ${JSON.stringify(await response.json())}`
-				);
-			}
-		} catch (error) {
-			console.error('Error fetching profile:', error);
-			toast('Failed to load profile: ' + error);
-		}
-
 		if (!profileHandle) return;
 
 		try {
@@ -190,34 +163,23 @@
 	}
 
 	onMount(async () => {
-		await fetchProfile();
+		messagesLoading = true;
+
+		await Promise.all([appendFriends(), fetchProfile()]);
+		friendListLoaded = true;
 		loading = false;
 
-		await appendFriends();
-		friendListLoaded = true;
-
-		messagesLoading = true;
-		// TODO: load messages
-		messages = [
-			{
-				id: '' + Math.floor(Math.random() * 99999),
-				sender: myProfile,
-				receiver: profile,
-				content: 'hello',
-				created_at: new Date().toString(),
-				image: null,
-				read: false
-			},
-			{
-				id: '' + Math.floor(Math.random() * 99999),
-				receiver: myProfile,
-				sender: profile,
-				content: 'hi',
-				created_at: new Date().toString(),
-				image: null,
-				read: false
+		try {
+			const response = await fetch('/api/messages');
+			if (response.status !== 200) {
+				toast("failed to get messages");
+			} else {
+				messages = (await response.json()).messages || [];
 			}
-		];
+		} catch (error) {
+			toast("failed to get messages: " + error);
+		}
+
 		messagesLoading = false;
 	});
 
@@ -230,18 +192,9 @@
 	async function sendMessage() {
 		if (messageValue.trim() === '' && (imagePreview === null || fileinput.value === "")) return;
 
-		messages = [
+		/*messages = [
 			...messages,
-			{
-				id: '' + Math.floor(Math.random() * 99999),
-				sender: myProfile,
-				receiver: profile,
-				content: messageValue,
-				created_at: new Date().toString(),
-				image: imagePreview,
-				read: false
-			}
-		];
+		];*/
 
 		messageValue = '';
 		imagePreview = null;
@@ -416,9 +369,14 @@
 					on:keydown={handleKeyPress}
 					on:focus={handleFocus}
 					on:keyup={(e) => {
+						/** 
+						 * @type {HTMLTextaAreaElement} 
+						 **/
 						const el = e.target;
-						el.style.height = "1px";
-						el.style.height = (4+el.scrollHeight)+"px"
+						if (el) {
+                        	el.style.height = "1px";
+						    el.style.height = (4+el.scrollHeight)+"px";
+						}
 					}}
 				/>
 				<Button variant="ghost" class="aspect-square p-1 w-[41px] h-[41px]" on:click={sendMessage}>
