@@ -158,7 +158,7 @@
 							<div class="flex h-full w-7 justify-center">
 								<img
 									class="h-7 w-7"
-									src={$mode !== 'light' ? 'white_mode_verified.png' : 'verified.png'}
+									src={$mode !== 'light' ? '/white_mode_verified.png' : '/verified.png'}
 									alt="This user is verified."
 								/>
 							</div>

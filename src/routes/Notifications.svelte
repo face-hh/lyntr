@@ -101,7 +101,7 @@
 	}
 
 	async function markRead() {
-		const response = await fetch('api/notifications', { method: 'PATCH' });
+		const response = await fetch('/api/notifications', { method: 'PATCH' });
 
 		if (response.status !== 200) {
 			toast(
