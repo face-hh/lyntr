@@ -12,6 +12,7 @@
 	}
 </script>
 
+<slot />
 <svelte:head>
 	<script async src="https://www.googletagmanager.com/gtag/js?id=G-DCLJJ37WDZ"></script>
 </svelte:head>
