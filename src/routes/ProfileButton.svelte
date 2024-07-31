@@ -2,11 +2,12 @@
 	import Avatar from './Avatar.svelte';
 	import * as Popover from '@/components/ui/popover';
 	import { Button } from '@/components/ui/button';
-	import { CheckCircle, FileText, LogOut, ShieldCheck, UserX } from 'lucide-svelte';
+	import { CheckCircle, FileText, LogOut, Moon, ShieldCheck, UserX } from 'lucide-svelte';
 	import OutlineButton from './OutlineButton.svelte';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import { Settings } from 'lucide-svelte';
+	import { toggleMode } from 'mode-watcher';
 
 	let opened = false;
 
@@ -101,6 +102,12 @@
 				on:click={deleteAccount}
 				small={false}
 			/>
+			<OutlineButton
+				icon={Moon}
+				text="Darkmode"
+				outline={false}
+				on:click={toggleMode}
+				small={false}/>
 			<OutlineButton icon={LogOut} text="Log out" outline={false} on:click={logout} small={false} />
 		</div>
 	</Popover.Content>
