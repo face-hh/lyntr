@@ -31,25 +31,28 @@
 		if (minutes > 0) return `${minutes}m`;
 		return `${seconds}s`;
 	}
-	function formatDate(date: Date | number) {
-		if (typeof date === 'string') date = new Date(date);
+	function formatDate(date) {
+    	if (typeof date === 'string') date = new Date(date);
 
-		const options: Intl.DateTimeFormatOptions = {
-			year: 'numeric',
-			month: 'long'
-		};
-		return date.toLocaleDateString('en-US', options);
+    	const options = {
+        	year: 'numeric',
+        	month: 'long'
+    	};
+    	return date.toLocaleDateString(undefined, options);
 	}
-	function formatDateTooltip(date: Date | number) {
-		date = new Date(date);
-		const options: Intl.DateTimeFormatOptions = {
-			hour: '2-digit',
-			minute: '2-digit',
-			month: 'short',
-			day: 'numeric',
-			year: 'numeric'
+
+	function formatDateTooltip(date) {
+    	date = new Date(date);
+    	
+		const options = {
+        	hour: '2-digit',
+        	minute: '2-digit',
+        	month: 'short',
+        	day: 'numeric',
+        	year: 'numeric'
 		};
-		return `${date.toLocaleTimeString('en-US', options)}`;
+		
+    	return date.toLocaleString(undefined, options);
 	}
 
 	let popoverOpened = false;
