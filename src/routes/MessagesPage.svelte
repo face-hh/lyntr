@@ -8,7 +8,7 @@
 	};
 
 	export type Message = {
-		id: string;
+		id: number;
 		sender: SimpleUser;
 		receiver: SimpleUser;
 		content: string;
@@ -165,12 +165,12 @@
 	onMount(async () => {
 		messagesLoading = true;
 
-		await Promise.all([appendFriends(), fetchProfile()]);
+		await Promise.all([fetchProfile(), appendFriends()]);
 		friendListLoaded = true;
 		loading = false;
 
 		try {
-			const response = await fetch('/api/messages');
+			const response = await fetch('/api/messages?other_id=' + profile.id);
 			if (response.status !== 200) {
 				toast("failed to get messages");
 			} else {
@@ -192,14 +192,26 @@
 	async function sendMessage() {
 		if (messageValue.trim() === '' && (imagePreview === null || fileinput.value === "")) return;
 
-		/*messages = [
-			...messages,
-		];*/
+		const formData = new FormData();
+		if (image !== null) {
+			formData.append('image', fileinput.files[0]);
+		}
+		formData.append('other_id', profile.id);
+		formData.append('content', messageValue);
 
 		messageValue = '';
 		imagePreview = null;
                 fileinput.value = "";
                 image = null;
+
+		messages = [
+			...messages,
+			(await (await fetch('/api/messages/post', {
+				method: 'POST',
+				body: formData
+			})).json()).message
+		];
+
 
 		await tick();
 		textarea.style.height = "1px";

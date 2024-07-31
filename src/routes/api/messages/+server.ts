@@ -3,7 +3,7 @@ import type { Cookies, RequestHandler } from '@sveltejs/kit';
 import { verifyAuthJWT } from '@/server/jwt';
 import { db } from '@/server/db';
 import { users, messages } from '@/server/schema';
-import { eq, and, asc, sql, or } from 'drizzle-orm';
+import { eq, and, asc, desc, sql, or } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 
 export const GET: RequestHandler = async ({ request, cookies, url }) => {
@@ -37,39 +37,29 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
 		}
 
 		const user_id = user[0].id;
+		const other_id = url.searchParams.get('other_id');
 
-		const sender = db.select({
-			id: users.id,
-			username: users.username,
-			handle: users.handle,
-			iq: users.iq,
-			verified: users.verified
-		}).from(users).as("sender");
+		if (!other_id) {
+			return json({ error: 'Missing other id' }, { status: 403 });
+		}
 
-		const receiver = db.select({
-			id: users.id,
-			username: users.username,
-			handle: users.handle,
-			iq: users.iq,
-			verified: users.verified
-		}).from(users).as("receiver");
-
+		const parent = alias(users, 'parent');
 		let msgs = await db
 			.select({
 				id: messages.id,
 				sender: {
-					id: sender.id, 
-					username: sender.username, 
-					handle: sender.handle,
-					iq: sender.iq, 
-					verified: sender.verified
+					id: users.id,
+					username: users.username,
+					handle: users.handle,
+					iq: users.iq,
+					verified: users.verified
 				},
 				receiver: {
-					id: receiver.id, 
-					username: receiver.username, 
-					handle: receiver.handle,
-					iq: receiver.iq, 
-					verified: receiver.verified
+					id: parent.id,
+					username: parent.username,
+					handle: parent.handle,
+					iq: parent.iq,
+					verified: parent.verified
 				},
 				content: messages.content,
 				image: messages.image,
@@ -77,14 +67,16 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
 				created_at: messages.created_at
 			})
 			.from(messages)
-			.fullJoin(sender, eq(messages.sender_id, sender.id))
-			.fullJoin(receiver, eq(messages.receiver_id, receiver.id))
-			.where(or(
-				eq(messages.sender_id, user_id),
-				eq(messages.receiver_id, user_id)
-			))
-			.orderBy(asc(messages.created_at))
-			.limit(30)
+			.leftJoin(users, eq(messages.sender_id, users.id))
+			.leftJoin(parent, eq(messages.receiver_id, parent.id))
+			.where(
+				and(
+					or(eq(messages.sender_id, user_id), eq(messages.receiver_id, user_id)),
+					or(eq(messages.sender_id, other_id), eq(messages.receiver_id, other_id))
+				)
+			)
+			.orderBy(asc(messages.created_at), desc(messages.id))
+			.limit(30);
 
 		console.log(msgs);
 		return json({ messages: msgs }, { status: 200 });

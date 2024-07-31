@@ -28,7 +28,7 @@ export const lynts = pgTable('lynts', {
 });
 
 export const messages = pgTable('messages', {
-    id: text('id').primaryKey(),
+    id: serial('id').primaryKey(),
     sender_id: text('sender_id').references(() => users.id),
     receiver_id: text('receiver_id').references(() => users.id),
     content: text('content').notNull(),

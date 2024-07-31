@@ -54,7 +54,7 @@
 
 		intervalUnreadUpdate = setInterval(async () => {
 			await updateUnread();
-		}, 5000);
+		}, 10000);
 	});
 
 	onDestroy(() => {

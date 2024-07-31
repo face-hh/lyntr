@@ -8,7 +8,7 @@ import sanitizeHtml from 'sanitize-html';
 import { Snowflake } from 'nodejs-snowflake';
 import sharp from 'sharp';
 import { minioClient } from '@/server/minio';
-import { deleteLynt, lyntObj } from '../util';
+import { deleteLynt, lyntObj, uploadCompressed } from '../util';
 import { sendMessage } from '@/sse';
 import { isImageNsfw, NSFW_ERROR } from '@/moderation';
 
@@ -104,26 +104,11 @@ export const POST: RequestHandler = async ({
 				return NSFW_ERROR;
 			}
 
-			const resizedBuffer = await sharp(inputBuffer, {
-				animated: true
-			})
-				.rotate()
-				.webp({ quality: 70 })
-				.withMetadata()
-				.toBuffer();
+			if (await isImageNsfw(inputBuffer)) {
+				return NSFW_ERROR;
+			}
 
-			const fileName = `${uniqueLyntId}.webp`;
-
-			await minioClient.putObject(
-				process.env.S3_BUCKET_NAME!,
-				fileName,
-				resizedBuffer,
-				resizedBuffer.length,
-				{
-					'Content-Type': 'image/webp'
-				}
-			);
-
+			uploadCompressed(inputBuffer, uniqueLyntId, minioClient);
 			lyntValues.has_image = true;
 		}
 
