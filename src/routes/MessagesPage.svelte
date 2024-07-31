@@ -374,8 +374,8 @@
 						 **/
 						const el = e.target;
 						if (el) {
-                        	el.style.height = "1px";
-						    el.style.height = (4+el.scrollHeight)+"px";
+							el.style.height = "1px";
+							el.style.height = (4+el.scrollHeight)+"px";
 						}
 					}}
 				/>
@@ -385,7 +385,7 @@
 				<input
                                         style="display:none"
                                         type="file"
-                                        accept=".jpg, .jpeg, .png"
+                                        accept=".jpg, .jpeg, .png, .gif"
                                         on:change={onFileSelected}
                                         bind:this={fileinput}
                                 />
