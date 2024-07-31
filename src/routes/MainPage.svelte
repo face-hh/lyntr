@@ -244,11 +244,19 @@
 		const lyntData = await getLynt(lyntId);
 		feed = [lyntData].concat(feed);
 	}
+
 	function handlePaste(event: ClipboardEvent) {
 		event.preventDefault();
 		const text = event.clipboardData?.getData('text/plain') || '';
 		document.execCommand('insertText', false, text);
 	}
+
+	function goHome() 
+	{
+		currentPage.set('home');
+		goto('/');
+	}
+
 </script>
 
 <div class="flex w-full justify-center">
@@ -260,7 +268,7 @@
 				<div
 					class="md:max-w-1/3 flex w-full min-w-full flex-row items-start gap-2 px-2 py-2 md:w-auto md:flex-col md:pt-0"
 				>
-					<button class="mt-5 hidden md:block" on:click={toggleMode}>
+					<button class="mt-5 hidden md:block" on:click={goHome}>
 						<img class="mb-5 size-20 cursor-pointer" src="/logo.svg" alt="Logo" />
 					</button>
 					<Navigation {handle} {id} />
