@@ -65,6 +65,13 @@ DB_NAME="postgres" # Can be left like this
 ```
 ![New project - 6](github-assets/supabase6.png)
 
+Now run the following:
+```bash
+npx drizzle-kit generate
+npx drizzle-kit migrate
+npx drizzle-kit push
+```
+
 ## MinIO
 We need Min.io for images. This and the next step can be omitted if you don't need *Image support* / *reporting*.
 
