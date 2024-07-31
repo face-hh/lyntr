@@ -8,7 +8,7 @@ import sanitizeHtml from 'sanitize-html';
 import { Snowflake } from 'nodejs-snowflake';
 import sharp from 'sharp';
 import { minioClient } from '@/server/minio';
-import { deleteLynt, lyntObj } from '../util';
+import { deleteLynt, lyntObj, uploadCompressed } from '../util';
 import { sendMessage } from '@/sse';
 
 const ratelimits = new Map();
@@ -95,26 +95,7 @@ export const POST: RequestHandler = async ({
 			const buffer = await imageFile.arrayBuffer();
 			const inputBuffer = Buffer.from(buffer);
 
-			const resizedBuffer = await sharp(inputBuffer, {
-				animated: true
-			})
-				.rotate()
-				.webp({ quality: 70 })
-				.withMetadata()
-				.toBuffer();
-
-			const fileName = `${uniqueLyntId}.webp`;
-
-			await minioClient.putObject(
-				process.env.S3_BUCKET_NAME!,
-				fileName,
-				resizedBuffer,
-				resizedBuffer.length,
-				{
-					'Content-Type': 'image/webp'
-				}
-			);
-
+			uploadCompressed(inputBuffer, uniqueLyntId, minioClient);
 			lyntValues.has_image = true;
 		}
 

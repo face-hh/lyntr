@@ -114,6 +114,27 @@ export const lyntObj = (userId: string) => {
 	};
 };
 
+export async function uploadCompressed(inputBuffer: Buffer, id: string, minioClient: any) {
+	const resizedBuffer = await sharp(inputBuffer, {
+		animated: true
+        })
+		.rotate()
+                .webp({ quality: 70 })
+                .withMetadata()
+                .toBuffer();
+
+        const fileName = `${id}.webp`;
+        await minioClient.putObject(
+		process.env.S3_BUCKET_NAME!,
+		fileName,
+		resizedBuffer,
+		resizedBuffer.length,
+		{
+		        'Content-Type': 'image/webp'
+                }
+        );
+}
+
 export async function uploadAvatar(inputBuffer: Buffer, fileName: string, minioClient: any) {
 	const buffer_small = await sharp(inputBuffer).resize(40, 40).webp().toBuffer();
 

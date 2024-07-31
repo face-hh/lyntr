@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS "messages" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" serial PRIMARY KEY NOT NULL,
 	"sender_id" text,
 	"receiver_id" text,
 	"content" text NOT NULL,
