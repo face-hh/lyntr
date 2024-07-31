@@ -35,6 +35,8 @@
 	import { mode } from 'mode-watcher';
 	import MessageComponent from './Message.svelte';
 	import { Separator } from "$lib/components/ui/separator";
+	import { fly } from 'svelte/transition';
+	import { quintOut } from 'svelte/easing';
 
 	export let profileHandle: string;
 	export let handleLyntClick;
@@ -43,6 +45,7 @@
 	export let loading: boolean = true;
 
 	let messageValue: string = '';
+	let unreadTop = false;
 
 	let profile: {
 		username: string;
@@ -332,6 +335,20 @@
 			<div
 				class="messagesContainer relative flex h-full w-full flex-col justify-end overflow-hidden rounded-md px-1 py-2"
 			>
+				{#if unreadTop}
+					<div 
+						class="absolute top-0 inset-x-0 flex justify-center bg-secondary/70 z-30 p-1"
+						transition:fly={{ 
+							delay: 0, 
+							duration: 300, 
+							x: 0, 
+							y: -500, 
+							opacity: 0.5, 
+							easing: quintOut
+						}}>
+						Unread Messages ({friendsList[friendsList.findIndex((friend) => friend.id === profile.id)]?.unread || 0})
+					</div>
+				{/if}
 				<VirtualScroll
 					bind:this={messagesContainer}
 					data={messages}
@@ -343,10 +360,10 @@
 						message={item}
 						{unreadMessageI}
 						index={messages.findIndex((msg) => msg.id === item.id)}
-						unreadCount={friendsList[friendsList.findIndex((friend) => friend.id === profile.id)]
-							?.unread || 0}
+						unreadCount={friendsList[friendsList.findIndex((friend) => friend.id === profile.id)]?.unread || 0}
 						{handleLyntClick}
 						{myId}
+						bind:unreadTop={unreadTop}
 					/>
 				</VirtualScroll>
 				{#if messagesLoading}

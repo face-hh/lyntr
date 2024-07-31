@@ -3,6 +3,7 @@
 	import { Badge } from '$lib/components/ui/badge/index.js';
 	import Avatar from './Avatar.svelte'
 	import { cdnUrl } from './stores';
+	import { inview } from '$lib/inview';
 
 	import dayjs from 'dayjs';
 	import utc from 'dayjs/plugin/utc';
@@ -20,10 +21,16 @@
 	export let unreadCount: number;
 	export let handleLyntClick: (id: string) => void;
 	export let myId: string;
+	export let unreadTop: boolean = false;
 </script>
 
 {#if index === unreadMessageI}
-	<div class="text-center">
+	<div class="text-center" use:inview={{}}
+		on:inview_change={(event) => {
+			const { inView } = event.detail;
+			unreadTop = !inView;
+		}}
+	>
 		<div class="w-full rounded-md border-t-4 border-solid border-t-border mt-4">
 		</div>
 		<span class="px-2 py-1">Unread Messages ({unreadCount})</span>
