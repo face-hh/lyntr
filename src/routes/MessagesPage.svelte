@@ -335,7 +335,7 @@
 			<div
 				class="messagesContainer relative flex h-full w-full flex-col justify-end overflow-hidden rounded-md px-1 py-2"
 			>
-				{#if unreadTop}
+				{#if unreadTop && (friendsList[friendsList.findIndex((friend) => friend.id === profile.id)]?.unread || 0) > 0}
 					<div 
 						class="absolute top-0 inset-x-0 flex justify-center bg-secondary/70 z-30 p-1"
 						transition:fly={{ 
