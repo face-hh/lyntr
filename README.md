@@ -18,8 +18,12 @@ First, we need to setup the `.env` file with the right secrets.
 Firstly we have to setup the database. Head to https://supabase.com and **create an account.**
 
 ![New project](github-assets/supabase1.png)
+
 Now, click **"New project"**.
+
 ![New project - 2](github-assets/supabase2.png)
+
+
 For the **project name**, choose whatever name you wish.
 For the **database password**, you could generate a random password or input yours. **Make sure to save it.**
 For the **region**, choose the region closer to your machine.
