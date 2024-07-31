@@ -101,7 +101,7 @@ export const POST: RequestHandler = async ({
 
 		const [newLynt] = await db.insert(lynts).values(lyntValues).returning();
 
-		sendMessage(uniqueLyntId);
+		sendMessage({ type: 'lynt_add', data: uniqueLyntId });
 
 		return json(newLynt, { status: 201 });
 	} catch (error) {
