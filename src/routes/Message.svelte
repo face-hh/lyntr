@@ -38,7 +38,7 @@
 {/if}
 
 <div class="flex flex-col mx-1 {message.sender.id === myId ? 'items-end' : ''}">
-	<div class="flex flex-row px-1 py-2 mt-2 w-fit max-w-full gap-2 rounded-md {message.sender.id === myId ? 'bg-input/70' : 'bg-input'}">
+	<div class="flex flex-row px-2 py-2 mt-2 w-fit max-w-full gap-2 rounded-2xl {message.sender.id === myId ? 'bg-input/70' : 'bg-input'}">
 		<Avatar src={cdnUrl(message.sender.id, 'big')} alt={message.sender.username} border={true} />
 
 		<div class="flex flex-col gap-1 w-full">
