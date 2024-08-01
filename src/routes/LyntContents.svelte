@@ -2,6 +2,7 @@
 	import * as Tooltip from '@/components/ui/tooltip';
 	import { Label } from '@/components/ui/label';
 	import * as HoverCard from '@/components/ui/hover-card/index.js';
+	import * as AlertDialog from '@/components/ui/alert-dialog';
 	import Avatar from './Avatar.svelte';
 	import { mode } from 'mode-watcher';
 	import { cdnUrl } from './stores';
@@ -82,6 +83,8 @@
 	export let reposted = false;
 	let contentElement: HTMLSpanElement | null = null;
 	content = content!;
+	let clickingExternalLink = false;
+	let openExternalLink = false;
 
 	const formattedDate = formatDateTooltip(createdAt);
 
@@ -124,8 +127,16 @@
 			for (const link of links) {
 				contentElement.innerHTML = contentElement.innerHTML.replace(
 					link,
-					`<a href="${link}" target="_blank">${link}</a>`
+					`<a href="${link}" class="post-link" target="_blank">${link}</a>`
 				);
+				const a = contentElement.querySelector("a");
+				a?.addEventListener("click", async (e) => {
+					e.preventDefault();
+					if (new URL(a.href).host !== window.location.host) {
+						clickingExternalLink = true;
+					}
+					return false;
+				})
 			}
 	}
 </script>
@@ -135,6 +146,25 @@
 		<a href="/@{handle}" class="inline-block max-h-[40px] min-w-[40px]">
 			<Avatar size={10} src={cdnUrl(userId, 'small')} alt="A profile picture." />
 		</a>
+	{/if}
+
+	{#if clickingExternalLink}
+	<AlertDialog.Root>
+		<AlertDialog.Content>
+			<AlertDialog.Header>
+				<AlertDialog.Title class="mb-2 text-2xl font-bold"
+					>Open external website?</AlertDialog.Title
+				>
+				<AlertDialog.Description>
+					This link leads to a external website.
+				</AlertDialog.Description>
+			</AlertDialog.Header>
+			<AlertDialog.Footer>
+				<AlertDialog.Action on:click={() => openExternalLink = true}>Open</AlertDialog.Action>
+				<AlertDialog.Action on:click={() => openExternalLink = false}>Return to Lyntr</AlertDialog.Action>
+			</AlertDialog.Footer>
+		</AlertDialog.Content>
+	</AlertDialog.Root>
 	{/if}
 
 	<div class="flex w-full flex-col text-left">
