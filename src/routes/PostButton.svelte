@@ -66,7 +66,7 @@
 	}
 
 	function handleInput(event: CustomEvent<Event>) {
-		if (lynt.length == 0) {
+		if (lynt.trim() == '') {
 			postDisabled = true;
 		} else {
 			postDisabled = false;
