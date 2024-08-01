@@ -2,13 +2,21 @@
 	import { createEventDispatcher } from "svelte";
 
 	export let lynt: string = '';
+	export let placeholder: string = "What's happening?";
+	export let maxLength: number = 280;
+	export let characterCountOnNewLine = false;
+
+	let className: string = "";
+	export { className as class };
 
 	$: characterCount = lynt.length;
-	$: isOverLimit = characterCount > 280;
+	$: isOverLimit = characterCount > maxLength;
 
 	const dispatch = createEventDispatcher<{
-        input: Event;
-    }>();
+	        input: Event;
+		submit: {};
+		focus: Event;
+	}>();
 
 	function handlePaste(event: ClipboardEvent) {
 		event.preventDefault();
@@ -22,27 +30,38 @@
 			event.preventDefault();
 			document.execCommand('insertText', false, '\n');
 		}
+
+		if (event.key === 'Enter' && event.shiftKey) {
+			dispatch('submit', {});
+		}
 	}
 
 	function handleInput(event: Event) {
 		dispatch('input', event);
 	}
+
+	function handleFocus(event: Event) {
+		dispatch('focus', event);
+	}
 </script>
 
-<div class="relative">
+<div class="relative {className}">
 	<div
 		contenteditable="true"
 		role="textbox"
 		spellcheck="true"
 		tabindex="0"
 		bind:innerText={lynt}
-		class="overflow-wrap-anywhere min-h-[40px] w-full pb-6 outline-none"
-		placeholder="What's happening?"
+		{placeholder}
+		class="overflow-wrap-anywhere w-full pb-6 outline-none"
 		on:paste={handlePaste}
 		on:keydown={interfere}
 		on:input={handleInput}
+		on:focus={handleFocus}
 	/>
-	<div class="absolute bottom-1 right-1 rounded px-1 text-sm" class:text-red-500={isOverLimit}>
-		{characterCount}/280
-	</div>
+	{#if lynt.split("\n").length > 1 || !characterCountOnNewLine}
+		<div class="absolute bottom-1 right-1 rounded px-1 text-sm" class:text-red-500={isOverLimit}>
+			{characterCount}/{maxLength}
+		</div>
+	{/if}
 </div>

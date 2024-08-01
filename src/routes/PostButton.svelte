@@ -47,7 +47,7 @@
 		}
 
 	        postDisabled = true;
-		const response = await fetch('api/lynt', {
+		const response = await fetch('/api/lynt', {
 			method: 'POST',
 			body: formData
 		});

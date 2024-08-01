@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { type Message } from './MessagesPage.svelte';
 	import { Badge } from '$lib/components/ui/badge/index.js';
-	import Avatar from './Avatar.svelte'
+	import Avatar from './Avatar.svelte';
 	import { cdnUrl } from './stores';
 	import { inview } from '$lib/inview';
+	import * as Popover from "$lib/components/ui/popover";
+	import { Button } from "$lib/components/ui/button";
+	import { Copy } from 'lucide-svelte';
 
 	import dayjs from 'dayjs';
 	import utc from 'dayjs/plugin/utc';
@@ -22,36 +25,59 @@
 	export let handleLyntClick: (id: string) => void;
 	export let myId: string;
 	export let unreadTop: boolean = false;
+
+	let open = false;
 </script>
 
 {#if index === unreadMessageI}
-	<div class="text-center" use:inview={{}}
+	<div
+		class="text-center"
+		use:inview={{}}
 		on:inview_change={(event) => {
 			const { inView } = event.detail;
 			unreadTop = !inView;
 		}}
 	>
-		<div class="w-full rounded-md border-t-4 border-solid border-t-border mt-4">
-		</div>
+		<div class="mt-4 w-full rounded-md border-t-4 border-solid border-t-border"></div>
 		<span class="px-2 py-1">Unread Messages ({unreadCount})</span>
 	</div>
 {/if}
 
-<div class="flex flex-col mx-1 {message.sender.id === myId ? 'items-end' : ''}">
-	<div class="flex flex-row px-2 py-2 mt-2 w-fit max-w-full gap-2 rounded-3xl {message.sender.id === myId ? 'bg-input/70' : 'bg-input'}">
-		<Avatar src={cdnUrl(message.sender.id, 'big')} alt={message.sender.username} border={true} />
+<div class="mx-1 flex flex-col {message.sender.id === myId ? 'items-end' : ''} pt-2">
+<Popover.Root bind:open={open}>
+	<Popover.Trigger>
+	<div
+		class="mt-2 flex w-fit max-w-full flex-row gap-2 rounded-3xl px-2 py-2 {message.sender.id ===
+		myId
+			? 'bg-input/70'
+			: 'bg-input'}"
+	>
+		<!--<Avatar src={cdnUrl(message.sender.id, 'big')} alt={message.sender.username} border={true} />-->
 
-		<div class="flex flex-col gap-1 w-full">
-			<div class="text-elipsis flex w-full flex-row gap-1 overflow-hidden truncate text-sm">
+		<div class="flex w-full flex-col gap-1">
+			<!--<div class="text-elipsis flex w-full flex-row gap-1 overflow-hidden truncate text-sm">
 				<span class="font-bold">{message.sender.username}</span>
-				<span class="font-bold text-muted-foreground">{dayjs.utc(message.created_at).tz().fromNow()}</span>
-			</div>
+			</div>-->
 			<span class="whitespace-pre-wrap break-all">{message.content}</span>
 			{#if message.image}
-				<img src={cdnUrl(message.image)} alt="" class="max-w-full max-h-[400px] overflow-hidden rounded-lg" />
+				<img
+					src={cdnUrl(message.image)}
+					alt=""
+					class="max-h-[400px] max-w-full overflow-hidden rounded-lg"
+				/>
 			{/if}
 		</div>
 
-		<Badge class="h-6">{message.sender.iq}</Badge>
+		<!--<Badge class="h-6">{message.sender.iq}</Badge>-->
 	</div>
+	</Popover.Trigger>
+	<Popover.Content class="flex flex-col gap-1 w-64">
+		<span class="text-sm text-muted-foreground">{dayjs.utc(message.created_at).tz().fromNow()}</span>
+		<div class="bg-secondary w-full h-[1px]"></div>
+		<Button variant="ghost" class="flex justify-between gap-1" on:click={() => {
+			navigator.clipboard.writeText(message.content);
+			open = false;
+		}}>Copy <Copy size={20} /></Button>
+	</Popover.Content>
+</Popover.Root>
 </div>
