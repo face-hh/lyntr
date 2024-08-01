@@ -71,6 +71,10 @@ export const POST: RequestHandler = async ({ request, cookies, url }) => {
 			return json({ error: 'Empty Content' }, { status: 400 });
 		}
 
+		if (content.length > 2000) {
+			return json({ error: 'Message is too long' }, { status: 400 });
+		}
+
 		const following = await db
 			.select()
 			.from(followers)

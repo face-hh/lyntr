@@ -481,7 +481,8 @@
 					<DivInput
 						class="h-fit max-h-32 w-full overflow-y-auto border-none pt-6"
 						placeholder="Message @{profile.handle}"
-						characterCountOnNewLine={true}
+						charactersBeforeCount={200}
+						maxLength={2000}
 						bind:lynt={messageValue}
 						on:focus={handleFocus}
 						on:submit={sendMessage}

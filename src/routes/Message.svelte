@@ -54,8 +54,8 @@
 	>
 		<!--<Avatar src={cdnUrl(message.sender.id, 'big')} alt={message.sender.username} border={true} />-->
 
-		<div class="flex w-full flex-col gap-1">
-			<!--<div class="text-elipsis flex w-full flex-row gap-1 overflow-hidden truncate text-sm">
+		<div class="flex flex-col gap-1">
+			<!--<div class="text-elipsis flex flex-row gap-1 overflow-hidden truncate text-sm">
 				<span class="font-bold">{message.sender.username}</span>
 			</div>-->
 			<span class="whitespace-pre-wrap break-all">{message.content}</span>
@@ -71,7 +71,7 @@
 		<!--<Badge class="h-6">{message.sender.iq}</Badge>-->
 	</div>
 	</Popover.Trigger>
-	<Popover.Content class="flex flex-col gap-1 w-64">
+	<Popover.Content class="flex flex-col gap-1 w-64" align="start" overlap={true} side="top">
 		<span class="text-sm text-muted-foreground">{dayjs.utc(message.created_at).tz().fromNow()}</span>
 		<div class="bg-secondary w-full h-[1px]"></div>
 		<Button variant="ghost" class="flex justify-between gap-1" on:click={() => {
