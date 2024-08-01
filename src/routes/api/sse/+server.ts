@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // src/routes/api/sse/+server.ts
 
 import { json } from '@sveltejs/kit';
@@ -47,15 +48,26 @@ export const GET: RequestHandler = async ({ setHeaders, cookies }) => {
 	setHeaders({
 		'Content-Type': 'text/event-stream',
 		'Cache-Control': 'no-cache',
-		Connection: 'keep-alive'
+		'Connection': 'keep-alive',
+		'X-Accel-Buffering': 'no'
 	});
 
 	const stream = new ReadableStream({
 		start(controller) {
 			addConnection(user.id, controller);
 
+			const keepAliveInterval = setInterval(() => {
+				try {
+					controller.enqueue(': keep-alive\n\n');
+				} catch (error) {
+					clearInterval(keepAliveInterval);
+					removeConnection(user.id, controller);
+				}
+			}, 20000); // Ping every 20 seconds
+
 			return () => {
 				removeConnection(user.id, controller);
+				clearInterval(keepAliveInterval);
 			};
 		}
 	});
