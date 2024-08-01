@@ -66,7 +66,7 @@
 		<div class="flex items-start space-x-3">
 			<Avatar
 				size={40}
-				src={cdnUrl(userId, 'small')}
+				src={cdnUrl(userId, 'big')}
 				alt="Your profile picture."
 				border={true}
 				editable={true}
