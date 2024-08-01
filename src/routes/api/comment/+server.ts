@@ -7,7 +7,8 @@ import { eq, sql, isNull, not, and } from 'drizzle-orm';
 import sanitizeHtml from 'sanitize-html';
 import { Snowflake } from 'nodejs-snowflake';
 import { createNotification } from '@/server/notifications';
-import { lyntObj } from '../util';
+import { lyntObj, uploadCompressed } from '../util';
+import { minioClient } from '@/server/minio';
 
 const ratelimits = new Map();
 
@@ -48,13 +49,15 @@ export const POST: RequestHandler = async ({
 		ratelimits.delete(userId);
 	}
 
-	const body = await request.json();
-	const { content, id } = body;
+	const formData = await request.formData();
 
-	if (!content ||
-		typeof content !== 'string' ||
+	const content = formData.get('content') as string;
+	const id = formData.get('id') as string;
+	const imageFile = formData.get('image') as File | null;
+
+	if (typeof content !== 'string' ||
 		content.length > 280 ||
-		content.trim() == '') {
+		(content.trim() == '' && imageFile == null)) {
 		return json({ error: 'Invalid content' }, { status: 400 });
 	}
 
@@ -71,6 +74,14 @@ export const POST: RequestHandler = async ({
 			content: content,
 			has_link: content.includes('http')
 		};
+
+		if (imageFile) {
+			const buffer = await imageFile.arrayBuffer();
+			const inputBuffer = Buffer.from(buffer);
+	
+			await uploadCompressed(inputBuffer, uniqueLyntId, minioClient);
+			lyntValues.has_image = true;
+		}
 
 		const [existingLynt] = await db
 			.select({ id: lynts.id, userId: lynts.user_id })
