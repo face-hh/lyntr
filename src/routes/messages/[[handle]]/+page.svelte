@@ -56,7 +56,7 @@
 		checkAuthAndProfileStatus();
 	});
 
-	$: otherId = $page.params.handle.replace(/^@/, '');
+	$: otherId = $page.params.handle?.replace(/^@/, '') || undefined;
 </script>
 
 <ModeWatcher defaultMode={'light'} />
@@ -70,5 +70,7 @@
 {:else if noAccount}
 	<AccountCreator />
 {:else}
-	<MainPage {...userData} {otherId} />
+	{#key otherId}
+		<MainPage {...userData} {otherId} />
+	{/key}
 {/if}
