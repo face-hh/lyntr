@@ -65,6 +65,12 @@ DB_NAME="postgres" # Can be left like this
 ```
 ![New project - 6](github-assets/supabase6.png)
 
+> [!IMPORTANT]
+> If this command fails with an error of `ECONNRESET` or `ECONNTIMEOUT`,
+> it may be because you're using a VPN (e.g. Proton VPN, see issue #17).
+> If that's the case, you can disable the VPN, try again, and then re-enable it.
+> Also, you can't skip this, because it initializes the DB structure. Without this,
+> you can't create an account or anything that requires the DB.
 Now run the following:
 ```bash
 npx drizzle-kit generate
