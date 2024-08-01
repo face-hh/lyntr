@@ -33,6 +33,7 @@
 	export let profileOpened: string | null = null;
 
 	let comment: string;
+	let postCommentDisabled: boolean = true;
 	let loadingFeed = true;
 
 	let page: string = 'home';
@@ -208,6 +209,12 @@
 	}
 
 	async function postComment() {
+
+		if (comment.trim() == '') {
+			toast("Cannot post an empty comment.");
+			return;
+		}
+
 		const response = await fetch('api/comment', {
 			method: 'POST',
 			body: JSON.stringify({ id: selectedLynt?.id, content: comment })
@@ -255,6 +262,14 @@
 	{
 		currentPage.set('home');
 		goto('/');
+	}
+
+	function handleInput(event: Event) {
+		if (comment.trim() == '') {
+			postCommentDisabled = true;
+		} else {
+			postCommentDisabled = false;
+		}
 	}
 
 </script>
@@ -372,9 +387,10 @@
 									class="overflow-wrap-anywhere w-full text-lg outline-none"
 									placeholder="Reply..."
 									on:paste={handlePaste}
+									on:input={handleInput}
 								/>
 
-								<Button on:click={postComment}>Post</Button>
+								<Button on:click={postComment} disabled={postCommentDisabled}>Post</Button>
 							</div>
 							<Separator />
 							{#if loadingComments}
