@@ -14,7 +14,7 @@
 
 	let lynt = '';
 	let opened = false;
-        let postDisabled = false;
+    let postDisabled = true;
 
 	let image: File | null = null;
 	let imagePreview: string | null = null;
@@ -33,6 +33,12 @@
 	};
 
 	async function handlePost() {
+
+		if (lynt.length == 0) {
+			toast("Cannot post an empty lynt.");
+			return;
+		}
+
 		const formData = new FormData();
 
 		formData.append('content', lynt);
@@ -41,7 +47,7 @@
 			formData.append('image', image, image.name);
 		}
 
-                postDisabled = true;
+        postDisabled = true;
 		const response = await fetch('api/lynt', {
 			method: 'POST',
 			body: formData
@@ -57,7 +63,15 @@
 		} else {
 			toast(`Something happened! Error: ${response.status} | ${response.statusText}`);
 		}
-                postDisabled = false;
+        postDisabled = false;
+	}
+
+	function handleInput(event: CustomEvent<Event>) {
+		if (lynt.length == 0) {
+			postDisabled = true;
+		} else {
+			postDisabled = false;
+		}
 	}
 </script>
 
@@ -72,7 +86,7 @@
 
 			<div class="flex h-full flex-grow flex-col gap-2">
 				<div class="max-h-[600px] overflow-y-auto">
-					<DivInput bind:lynt />
+					<DivInput bind:lynt on:input={handleInput}/>
 
 					{#if imagePreview}
 						<img class="max-h-[600px] w-full object-contain" src={imagePreview} alt="Preview" />
