@@ -11,6 +11,7 @@
 	import { Ellipsis, Trash } from 'lucide-svelte';
 	import { toast } from 'svelte-sonner';
 	import Report from './Report.svelte';
+	import DOMPurify from 'dompurify';
 
 	function getTimeElapsed(date: Date | string) {
 		if (typeof date === 'string') date = new Date(date);
@@ -63,7 +64,7 @@
 	export let verified;
 	export let handle: string;
 	export let createdAt;
-	export let content;
+	export let content: string | null;
 	export let iq;
 	export let bio: string | null;
 	export let smaller = false;
@@ -72,6 +73,8 @@
 	export let isAuthor: boolean;
 	export let has_image: boolean | null;
 	export let postId: string;
+	let contentElement: HTMLSpanElement | null = null;
+	content = content!;
 
 	const formattedDate = formatDateTooltip(createdAt);
 
@@ -103,6 +106,16 @@
 	}
 
 	$: ({ truncated, needsReadMore } = truncateContentFunc(content));
+
+	$: if (contentElement) {
+		// this shouldn't have any XSS vulnerabilities. Or at least, hopefully...
+		const sanitizedContent = DOMPurify.sanitize(content);
+		const links = sanitizedContent.match(/[A-z|A-Z|a-z]+:\/\/[^\s]+/gm);
+		if (links)
+			for (const link of links) {
+				contentElement.innerHTML = contentElement.innerHTML.replace(link, `<a href="${link}" target="_blank">${link}</a>`);
+			}
+	}
 </script>
 
 <div class={`${$$props.class} flex items-start gap-2`}>
@@ -227,7 +240,7 @@
 			</div>
 		</div>
 
-		<span class="max-w-[490px] whitespace-pre-wrap break-words text-lg">{truncated}</span>
+		<span bind:this={contentElement} class="max-w-[490px] whitespace-pre-wrap break-words text-lg">{truncated}</span>
 
 		{#if needsReadMore}
 			<span class="mt-2 text-sm text-muted-foreground hover:underline">Click to Read more...</span>
