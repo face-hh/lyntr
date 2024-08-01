@@ -114,7 +114,7 @@
 
 	$: if (contentElement) {
 		// this shouldn't have any XSS vulnerabilities. Or at least, hopefully...
-		const sanitizedContent: string = DOMPurify.sanitize(content, {
+		const sanitizedContent: string = DOMPurify.sanitize(contentElement.innerHTML, {
 			USE_PROFILES: {
 				html: true
 			},
