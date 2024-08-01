@@ -78,7 +78,6 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
 			.orderBy(asc(messages.created_at), desc(messages.id))
 			.limit(30);
 
-		console.log(msgs);
 		return json({ messages: msgs }, { status: 200 });
 	} catch (error) {
 		console.error('Authentication error:', error);

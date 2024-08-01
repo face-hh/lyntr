@@ -85,28 +85,32 @@
 
 	$: messages &&
 		(async () => {
-			const i = friendsList.findIndex((friend) => friend.id === profile.id);
-			if (i >= 0 && friendsList[i]) {
-				friendsList[i].unread = messages.filter(
-					(msg) => msg.sender.id !== myId && !msg.read
-				).length;
-			}
-			if (messagesContainer) {
-				await tick();
-				messagesContainer.scrollToBottom();
+			if (profile) {
+				const i = friendsList.findIndex((friend) => friend.id === profile.id);
+				if (i >= 0 && friendsList[i]) {
+					friendsList[i].unread = messages.filter(
+						(msg) => msg.sender.id !== myId && !msg.read
+					).length;
+				}
+				if (messagesContainer) {
+					await tick();
+					messagesContainer.scrollToBottom();
+				}
 			}
 		})();
 
 	$: {
-		const msgs = messages.filter((m) => m.sender.id !== myId);
-		const friend = friendsList[friendsList.findIndex((friend) => friend.id === profile.id)];
+		if (profile) {
+			const msgs = messages.filter((m) => m.sender.id !== myId);
+			const friend = friendsList[friendsList.findIndex((friend) => friend.id === profile.id)];
 
-		unreadMessageI = messages.findIndex((msg) => {
-			if (!friend || msgs.length === 0 || msgs.length - friend.unread < 0) {
-				return false;
-			}
-			return msg.id === msgs[msgs.length - friend.unread]?.id;
-		});
+			unreadMessageI = messages.findIndex((msg) => {
+				if (!friend || msgs.length === 0 || msgs.length - friend.unread < 0) {
+					return false;
+				}
+				return msg.id === msgs[msgs.length - friend.unread]?.id;
+			});
+		}
 	}
 
 	async function markAsRead() {
@@ -172,15 +176,17 @@
 		friendListLoaded = true;
 		loading = false;
 
-		try {
-			const response = await fetch('/api/messages?other_id=' + profile.id);
-			if (response.status !== 200) {
-				toast("failed to get messages");
-			} else {
-				messages = (await response.json()).messages || [];
+		if (profileHandle && profile) {
+			try {
+				const response = await fetch('/api/messages?other_id=' + profile.id);
+				if (response.status !== 200) {
+					toast("failed to get messages");
+				} else {
+					messages = (await response.json()).messages || [];
+				}
+			} catch (error) {
+				toast("failed to get messages: " + error);
 			}
-		} catch (error) {
-			toast("failed to get messages: " + error);
 		}
 
 		messagesLoading = false;
@@ -249,9 +255,9 @@
 	<LoadingSpinner />
 {:else if isSelf}
 	<span>You can't private message with your self</span>
-{:else if profile}
+{:else}
 	<div class="relative flex h-full w-full flex-row gap-1">
-		<div class="hidden h-full w-full flex-col items-center gap-1 md:flex md:w-[300px]">
+		<div class="hidden {!profile ? "!flex w-full" : ""} h-full w-full flex-col items-center gap-1 md:flex md:w-[300px]">
 			<span class="my-2 text-xl">Messages</span>
 			{#if !friendListLoaded}
 				<LoadingSpinner />
@@ -268,7 +274,7 @@
 					}}
 				>
 					<button
-						class="flex flex-row items-center justify-center gap-2 rounded-full bg-secondary p-1.5 {profile.id ===
+						class="flex flex-row items-center justify-center gap-2 rounded-full bg-secondary p-1.5 w-full {profile && profile.id ===
 						friend.id
 							? 'bg-secondary/50'
 							: ''}"
@@ -297,6 +303,7 @@
 			{/if}
 		</div>
 		<Separator orientation="vertical" class="hidden md:block" />
+		{#if profile}
 		<div class="mt-2 flex w-full flex-col gap-2 px-1">
 			<!--<span class="text-2xl text-center py-2">Private Messages With {profile.username}</span>-->
 			<div
@@ -420,7 +427,6 @@
                                 />
 			</div>
 		</div>
+		{/if}
 	</div>
-{:else}
-	<span>Invalid Profile</span>
 {/if}

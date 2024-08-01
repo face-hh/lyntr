@@ -9,6 +9,7 @@ import { Snowflake } from 'nodejs-snowflake';
 import { uploadCompressed } from '../../util';
 import { cdnUrl } from '../../../stores';
 import { minioClient } from '@/server/minio';
+import { sendMessage } from '@/sse';
 
 const ratelimits = new Map();
 
