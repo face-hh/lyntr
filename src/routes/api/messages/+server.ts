@@ -3,7 +3,7 @@ import type { Cookies, RequestHandler } from '@sveltejs/kit';
 import { verifyAuthJWT } from '@/server/jwt';
 import { db } from '@/server/db';
 import { users, messages } from '@/server/schema';
-import { eq, and, asc, desc, sql, or } from 'drizzle-orm';
+import { eq, and, asc, desc, sql, or, count } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 
 export const GET: RequestHandler = async ({ request, cookies, url }) => {
@@ -38,9 +38,14 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
 
 		const user_id = user[0].id;
 		const other_id = url.searchParams.get('other_id');
+		const previous = url.searchParams.get('previous') || 0;
 
 		if (!other_id) {
 			return json({ error: 'Missing other id' }, { status: 403 });
+		}
+
+		if (previous < 0) {
+			return json({ error: 'You can not load back negative' }, { status: 400 });
 		}
 
 		const parent = alias(users, 'parent');
@@ -73,6 +78,7 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
 			)
 			.orderBy(desc(messages.id))
 			.limit(30)
+			.offset(previous * 30)
 			.as('sq');
 		const msgs = db
 			.select({

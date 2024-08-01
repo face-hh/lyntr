@@ -62,6 +62,8 @@
 	let messages: Message[] = [];
 	let messagesContainer: VirtualScroll;
 	let messagesLoading = false;
+	let messagesFarBack = true;
+	let messagesPage = 0;
 
 	let friendsList: {
 		id: string;
@@ -193,6 +195,10 @@
 				} else {
 					messages = (await response.json()).messages || [];
 				}
+
+				if (messages.length >= 30) {
+					messagesFarBack = false;
+				}
 			} catch (error) {
 				toast("failed to get messages: " + error);
 			}
@@ -264,7 +270,26 @@
 	}
 
 	async function preappendPreviousMessages() {
+		if (messagesFarBack || messagesLoading) return;
+
+		messagesPage += 1;
 		messagesLoading = true;
+
+		try {
+			const response = await fetch(`/api/messages?other_id=${profile.id}&previous=${messagesPage}`);
+			if (response.status !== 200) {
+				toast("failed to get messages");
+			} else {
+				const msgs = (await response.json()).messages || [];
+				if (msgs.length === 0) {
+					messagesFarBack = true;
+				} else {
+					messages = [...msgs, ...messages];
+				}
+			}
+		} catch (error) {
+			toast("failed to get messages: " + error);
+		}
 
 
 		messagesLoading = false;
