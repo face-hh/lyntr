@@ -67,7 +67,7 @@
 		postDisabled = false;
 	}
 
-	function handleInput(event: CustomEvent<Event>) {
+	function checkPostButton() {
 		if (lynt.trim() == '' && image == null) {
 			postDisabled = true;
 		} else {
@@ -79,7 +79,7 @@
 <Dialog.Root bind:open={opened}>
 	<Dialog.Trigger
 		class={`${buttonVariants({ variant: 'default' })} w-full ${className}`}
-		on:click={() => (opened = true)}><slot>Post</slot></Dialog.Trigger
+		on:click={() => { opened = true; checkPostButton(); }}><slot>Post</slot></Dialog.Trigger
 	>
 	<Dialog.Content class="sm:max-w-[500px]">
 		<div class="flex items-start space-x-3">
@@ -87,7 +87,7 @@
 
 			<div class="flex h-full flex-grow flex-col gap-2">
 				<div class="max-h-[600px] overflow-y-auto">
-					<DivInput bind:lynt on:input={handleInput}/>
+					<DivInput bind:lynt on:input={checkPostButton}/>
 
 					{#if imagePreview}
 						<img class="max-h-[600px] w-full object-contain" src={imagePreview} alt="Preview" />
