@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { verifyAuthJWT } from '@/server/jwt';
 import { db } from '@/server/db';
-import { users, followers } from '@/server/schema';
+import { users, followers, messages } from '@/server/schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 
@@ -45,6 +45,18 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
 			return json({}, { status: 400 });
 		}
 
+		const unreadCount = db.select({
+			count: sql<number>`cast(count(*) as integer)`.mapWith(Number)
+		})
+		.from(messages)
+		.where(
+			and(
+				eq(messages.sender_id, users.id),
+				eq(messages.receiver_id, user_id),
+				eq(messages.read, false)
+			)
+		);
+
 		const friends = await db
 			.select({
 				id: users.id,
@@ -52,7 +64,7 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
 				handle: users.handle,
 				verified: users.verified,
 				iq: users.iq,
-				unread: sql<number>`0 as unread`
+				unread: sql<number>`(${unreadCount})`.mapWith(Number)
 			})
 			.from(users)
 			.innerJoin(followers, eq(users.id, followers.follower_id))
