@@ -33,6 +33,7 @@ export const messages = pgTable('messages', {
     receiver_id: text('receiver_id').references(() => users.id),
     content: text('content').notNull(),
     image: text('image'),
+    referencedLyntId: text('referenced_lynt_id').references(() => lynts.id),
     read: boolean('read').default(false),
     created_at: timestamp('created_at').defaultNow()
 }, (table) => {

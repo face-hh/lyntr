@@ -2,9 +2,10 @@ import { json } from '@sveltejs/kit';
 import type { Cookies, RequestHandler } from '@sveltejs/kit';
 import { verifyAuthJWT } from '@/server/jwt';
 import { db } from '@/server/db';
-import { users, messages } from '@/server/schema';
+import { users, messages, lynts, likes } from '@/server/schema';
 import { eq, and, asc, desc, sql, or, count } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
+import { lyntObj } from '../util';
 
 export const GET: RequestHandler = async ({ request, cookies, url }) => {
 	const authCookie = cookies.get('_TOKEN__DO_NOT_SHARE');
@@ -65,7 +66,8 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
 				receiver_username: sql<string>`${parent.username}`.as('receiver_username'),
 				receiver_handle: sql<string>`${parent.handle}`.as('receiver_handle'),
 				receiver_iq: sql<number>`${parent.iq}`.as('receiver_iq'),
-				receiver_verified: sql<boolean>`${parent.verified}`.as('receiver_verified')
+				receiver_verified: sql<boolean>`${parent.verified}`.as('receiver_verified'),
+				referenced_lynt_id: messages.referencedLyntId,
 			})
 			.from(messages)
 			.leftJoin(users, eq(messages.sender_id, users.id))
@@ -100,9 +102,13 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
 					handle: sq.receiver_handle,
 					iq: sq.receiver_iq,
 					verified: sq.receiver_verified
-				}
+				},
+				referenced_lynt: lyntObj(user_id)
 			})
 			.from(sq)
+			.leftJoin(lynts, eq(lynts.id, sq.referenced_lynt_id))
+			.leftJoin(likes, eq(likes.lynt_id, lynts.id))
+	                .leftJoin(users, eq(lynts.user_id, users.id))
 			.orderBy(asc(sq.created_at));
 
 		return json({ messages: await msgs }, { status: 200 });

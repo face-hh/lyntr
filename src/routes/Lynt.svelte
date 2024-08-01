@@ -62,6 +62,7 @@
 	export let parentCreatedAt: number | null;
 	export let parentUserCreatedAt: number | null;
 	export let connect = false;
+	export let small = false;
 
 	let openDialog = false;
 	let lynt = '';
@@ -184,6 +185,7 @@
 				{content}
 				{iq}
 				{userCreatedAt}
+				smaller={small}
 				on:delete
 			/>
 
@@ -206,6 +208,8 @@
 								createdAt={parentCreatedAt}
 								iq={parentUserIq}
 								userCreatedAt={parentUserCreatedAt}
+								smaller={small}
+								{reposted}
 								includeAvatar={true}
 								on:delete
 							/>

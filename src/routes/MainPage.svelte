@@ -137,7 +137,7 @@
 	}
 
 	async function getLynt(lyntOpened: string) {
-		const response = await fetch('api/lynt?id=' + lyntOpened, { method: 'GET' });
+		const response = await fetch('/api/lynt?id=' + lyntOpened, { method: 'GET' });
 
 		if (response.status !== 200) toast('Error loading lynt!');
 
@@ -197,7 +197,7 @@
 	}
 
 	async function getComments(id: string) {
-		const response = await fetch('api/comments?id=' + id, {
+		const response = await fetch('/api/comments?id=' + id, {
 			method: 'GET'
 		});
 
@@ -216,7 +216,7 @@
 			return;
 		}
 
-		const response = await fetch('api/comment', {
+		const response = await fetch('/api/comment', {
 			method: 'POST',
 			body: JSON.stringify({ id: selectedLynt?.id, content: comment })
 		});
@@ -252,12 +252,6 @@
 	async function renderLyntAtTop(lyntId: string) {
 		const lyntData = await getLynt(lyntId);
 		feed = [lyntData].concat(feed);
-	}
-
-	function handlePaste(event: ClipboardEvent) {
-		event.preventDefault();
-		const text = event.clipboardData?.getData('text/plain') || '';
-		document.execCommand('insertText', false, text);
 	}
 
 	function goHome() 
@@ -310,7 +304,7 @@
 					{:else if page === 'notifications'}
 						<Notifications {handleLyntClick} />
 					{:else if page.startsWith('messages')}
-						<MessagesPage myId={id} profileHandle={page.split('/')[1]} {handleLyntClick} />
+						<MessagesPage myId={id} profileHandle={page.split('/')[1]} {handleLyntClick} {getLynt} />
 					{:else if page.startsWith('profile')}
 						{#key page}
 							<ProfilePage
