@@ -51,7 +51,10 @@ export const POST: RequestHandler = async ({
 	const body = await request.json();
 	const { content, id } = body;
 
-	if (!content || typeof content !== 'string' || content.length > 280) {
+	if (!content ||
+		typeof content !== 'string' ||
+		content.length > 280 ||
+		content.trim() == '') {
 		return json({ error: 'Invalid content' }, { status: 400 });
 	}
 
