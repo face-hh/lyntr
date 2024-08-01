@@ -4,7 +4,7 @@
 	export let lynt: string = '';
 	export let placeholder: string = "What's happening?";
 	export let maxLength: number = 280;
-	export let characterCountOnNewLine = false;
+	export let charactersBeforeCount = 0;
 
 	let className: string = "";
 	export { className as class };
@@ -45,7 +45,8 @@
 	}
 </script>
 
-<div class="relative {className}">
+<div class="relative {className} !p-0">
+	<div class="relative {className}">
 	<div
 		contenteditable="true"
 		role="textbox"
@@ -59,8 +60,9 @@
 		on:input={handleInput}
 		on:focus={handleFocus}
 	/>
-	{#if lynt.split("\n").length > 1 || !characterCountOnNewLine}
-		<div class="absolute bottom-1 right-1 rounded px-1 text-sm" class:text-red-500={isOverLimit}>
+	</div>
+	{#if lynt.length > charactersBeforeCount}
+		<div class="absolute bottom-1 right-2 rounded px-1 text-sm bg-secondary/70 rounded-full" class:text-red-500={isOverLimit}>
 			{characterCount}/{maxLength}
 		</div>
 	{/if}
