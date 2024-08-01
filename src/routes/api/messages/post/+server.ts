@@ -93,7 +93,7 @@ export const POST: RequestHandler = async ({ request, cookies, url }) => {
 
 		if (imageData) {
 			const fileName = user_id + '_' + String(idGenerator.getUniqueID());
-			uploadCompressed(Buffer.from(await imageData.arrayBuffer()), fileName, minioClient);
+			await uploadCompressed(Buffer.from(await imageData.arrayBuffer()), fileName, minioClient);
 			image = fileName;
 		}
 

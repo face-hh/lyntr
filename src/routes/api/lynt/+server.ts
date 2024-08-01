@@ -104,11 +104,7 @@ export const POST: RequestHandler = async ({
 				return NSFW_ERROR;
 			}
 
-			if (await isImageNsfw(inputBuffer)) {
-				return NSFW_ERROR;
-			}
-
-			uploadCompressed(inputBuffer, uniqueLyntId, minioClient);
+			await uploadCompressed(inputBuffer, uniqueLyntId, minioClient);
 			lyntValues.has_image = true;
 		}
 
