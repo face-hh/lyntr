@@ -108,10 +108,11 @@
 	$: ({ truncated, needsReadMore } = truncateContentFunc(content));
 	$: if (contentElement) {
 		// this shouldn't have any XSS vulnerabilities. Or at least, hopefully...
-		const sanitizedContent: string = DOMPurify.sanitize(content);
+		const sanitizedContent: string = DOMPurify.sanitize(contentElement.textContent!);
 		const mentions = sanitizedContent.match(/@[a-zA-Z0-9_-]+/gm);
 		if (mentions)
 			for (const mention of mentions) {
+				console.log(mention);
 				contentElement.innerHTML = contentElement.innerHTML.replace(
 					mention,
 					`<a href="/${mention}" target="_blank">${mention}</a>`
@@ -242,7 +243,7 @@
 			</div>
 		</div>
 
-		<span bind:this={contentElement} class="max-w-[490px] whitespace-pre-wrap break-words text-lg">{truncated}</span>
+		<span bind:this={contentElement}>{truncated}</span>
 
 		{#if needsReadMore}
 			<span class="mt-2 text-sm text-muted-foreground hover:underline">Click to Read more...</span>
