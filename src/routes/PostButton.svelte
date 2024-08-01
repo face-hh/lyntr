@@ -29,11 +29,13 @@
 			reader.onload = (e) => {
 				imagePreview = e.target?.result as string;
 			};
+
+			postDisabled = false;
 		}
 	};
 
 	async function handlePost() {
-		if (lynt.trim() == '') {
+		if (lynt.trim() == '' && image == null) {
 			toast("Cannot post an empty lynt.");
 			return;
 		}
@@ -66,7 +68,7 @@
 	}
 
 	function handleInput(event: CustomEvent<Event>) {
-		if (lynt.trim() == '') {
+		if (lynt.trim() == '' && image == null) {
 			postDisabled = true;
 		} else {
 			postDisabled = false;
