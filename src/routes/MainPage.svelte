@@ -2,7 +2,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
-	import { Moon, Reply, Sun, X } from 'lucide-svelte';
+	import { ImageUp, Moon, Reply, Sun, X } from 'lucide-svelte';
 
 	import { cdnUrl, v } from './stores';
 	import { source } from 'sveltekit-sse';
@@ -209,17 +209,46 @@
 		return res.map((post: any) => ({ ...post }));
 	}
 
+	let image: File | null = null;
+	let imagePreview: string | null = null;
+	let fileInput: HTMLInputElement;
+
+	const onFileSelected = (e: Event) => {
+		const target = e.target as HTMLInputElement;
+		if (target.files && target.files[0]) {
+			image = target.files[0];
+			let reader = new FileReader();
+			reader.readAsDataURL(image);
+			reader.onload = (e) => {
+				imagePreview = e.target?.result as string;
+			};
+
+			postCommentDisabled = false;
+		}
+	};
+
 	async function postComment() {
 
-		if (comment.trim() == '') {
+		if (comment.trim() == '' && image == null) {
 			toast("Cannot post an empty comment.");
 			return;
 		}
 
+		const formData = new FormData();
+		formData.append('id', selectedLynt?.id ?? '');
+		formData.append('content', comment);
+
+		if (image) {
+			formData.append('image', image, image.name);
+		}
+
 		const response = await fetch('/api/comment', {
-			method: 'POST',
-			body: JSON.stringify({ id: selectedLynt?.id, content: comment })
+			method: "POST",
+			body: formData
 		});
+
+		image = null;
+		imagePreview = null;
 		comment = '';
 		postCommentDisabled = true;
 
@@ -261,7 +290,7 @@
 	}
 
 	function handleInput(event: Event) {
-		if (comment.trim() == '') {
+		if (comment.trim() == '' && image == null) {
 			postCommentDisabled = true;
 		} else {
 			postCommentDisabled = false;
@@ -371,23 +400,43 @@
 								/>
 							</div>
 
-							<div class="flex w-full items-center gap-2 rounded-xl bg-border p-3">
-								<Reply size={32} />
+							<div class="flex w-full flex-col gap-2 rounded-xl bg-border p-3">
+								<div class="flex w-full items-center gap-2">
+									<Reply size={32} />
+	
+									<!--<div
+										contenteditable="true"
+										role="textbox"
+										spellcheck="true"
+										tabindex="0"
+										bind:textContent={comment}
+										class="overflow-wrap-anywhere w-full text-lg outline-none"
+										placeholder="Reply..."
+										on:paste={handlePaste}
+										on:input={handleInput}
+									/>-->
+									<DivInput placeholder="Reply..." class="overflow-wrap-anywhere w-full text-lg outline-none" bind:lynt={comment} on:input={handleInput} />
 
-								<!--<div
-									contenteditable="true"
-									role="textbox"
-									spellcheck="true"
-									tabindex="0"
-									bind:textContent={comment}
-									class="overflow-wrap-anywhere w-full text-lg outline-none"
-									placeholder="Reply..."
-									on:paste={handlePaste}
-									on:input={handleInput}
-								/>-->
-								<DivInput placeholder="Reply..." class="overflow-wrap-anywhere w-full text-lg outline-none" bind:lynt={comment} on:input={handleInput} />
+									<button
+										on:click={() => {
+											fileInput.click();
+										}}>
+										<ImageUp class="h-auto"/>
+									</button>
+	
+									<input
+										style="display:none"
+										type="file"
+										accept=".jpg, .jpeg, .png, .gif"
+										on:change={onFileSelected}
+										bind:this={fileInput}/>
 
-								<Button on:click={postComment} disabled={postCommentDisabled}>Post</Button>
+									<Button on:click={postComment} disabled={postCommentDisabled}>Post</Button>
+								</div>
+
+								{#if imagePreview}
+										<img class="max-h-[600px] w-full object-contain" src={imagePreview} alt="Preview" />
+								{/if}
 							</div>
 							<Separator />
 							{#if loadingComments}
