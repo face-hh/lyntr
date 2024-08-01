@@ -48,7 +48,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		const inputBuffer = Buffer.from(arrayBuffer);
 
 		// compression
-		uploadAvatar(inputBuffer, fileName, minioClient);
+		await uploadAvatar(inputBuffer, fileName, minioClient);
 
 		return json(
 			{

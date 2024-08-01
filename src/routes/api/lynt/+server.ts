@@ -95,7 +95,7 @@ export const POST: RequestHandler = async ({
 			const buffer = await imageFile.arrayBuffer();
 			const inputBuffer = Buffer.from(buffer);
 
-			uploadCompressed(inputBuffer, uniqueLyntId, minioClient);
+			await uploadCompressed(inputBuffer, uniqueLyntId, minioClient);
 			lyntValues.has_image = true;
 		}
 
