@@ -124,7 +124,13 @@
 		}
 		unreadMessageI = -1;
 
-		// TODO: mark messages as read in database
+		try {
+			(await fetch(`/api/messages/read?other_id=${profile.id}`, {
+				method: "PATCH"
+			}));
+		} catch (error) {
+			toast("error: " + error);
+		}
 	}
 
 	async function fetchProfile() {
