@@ -76,6 +76,7 @@
 	let friendEnd = false;
 	let loadingNextFriends = true;
 	let unreadMessageI = -1;
+	let sending = false;
 
 	let image: File | null = null;
 	let imagePreview: string | null = null;
@@ -201,6 +202,7 @@
 	async function sendMessage() {
 		if (messageValue.trim() === '' && (imagePreview === null || fileinput.value === "")) return;
 
+		sending = true;
 		const formData = new FormData();
 		if (image !== null) {
 			formData.append('image', fileinput.files[0]);
@@ -208,19 +210,30 @@
 		formData.append('other_id', profile.id);
 		formData.append('content', messageValue);
 
-		messageValue = '';
-		imagePreview = null;
-                fileinput.value = "";
-                image = null;
-
-		messages = [
-			...messages,
-			(await (await fetch('/api/messages/post', {
+		try {
+			const response = await fetch('/api/messages/post', {
 				method: 'POST',
 				body: formData
-			})).json()).message
-		];
+			});
 
+			if (response.status === 200) {
+				messageValue = '';
+				imagePreview = null;
+				fileinput.value = "";
+		                image = null;
+
+				messages = [
+					...messages,
+					(await response.json()).message
+				];
+			} else {
+				toast((await response.json()).error);
+			}
+		} catch(error) {
+			toast("error: " + error);
+		}
+
+		sending = false;
 
 		await tick();
 		textarea.style.height = "1px";
@@ -415,7 +428,7 @@
 						}
 					}}
 				/>
-				<Button variant="ghost" class="aspect-square p-1 w-[41px] h-[41px]" on:click={sendMessage}>
+				<Button variant="ghost" class="aspect-square p-1 w-[41px] h-[41px]" on:click={sendMessage} disabled={sending}>
 					<Send />
 				</Button>
 				<input
