@@ -63,9 +63,7 @@ export const POST: RequestHandler = async ({
 
 	if (!content) content = '';
 
-	if (content.length > 280 ||
-		content.length == 0 ||
-		content.trim() == '') {
+	if (content.length > 280 || (content.trim() == '' && imageFile == null)) {
 		return json({ error: 'Invalid content' }, { status: 400 });
 	}
 
