@@ -19,6 +19,26 @@
             "type": "image/png"
         }
     ],
+    "screenshots": [
+        {
+            "src": "/screenshots/banner_mobile.png",
+            "type": "image/png",
+            "sizes": "378x819",
+            "form_factor": "narrow"
+        },
+        {
+            "src": "/screenshots/banner.png",
+            "type": "image/png",
+            "sizes": "1920x914",
+            "form_factor": "wide"
+        },
+        {
+            "src": "/screenshots/banner_white.png",
+            "type": "image/png",
+            "sizes": "1919x919",
+            "form_factor": "wide"
+        }
+    ],
     "theme_color": "#0C0A09",
     "background_color": "#F1F0E9",
     "start_url": "/?source=pwa",
