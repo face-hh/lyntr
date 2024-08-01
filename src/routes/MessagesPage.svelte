@@ -27,14 +27,15 @@
 	import LoadingSpinner from './LoadingSpinner.svelte';
 	import { Badge } from '$lib/components/ui/badge/index.js';
 	//import { Input } from '$lib/components/ui/input';
-	import { Textarea } from "$lib/components/ui/textarea";
+	//import { Textarea } from '$lib/components/ui/textarea';
+	import DivInput from './DivInput.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Send, MoveDown, Image, X } from 'lucide-svelte';
 	import VirtualScroll from 'svelte-virtual-scroll-list';
 	import * as Tooltip from '@/components/ui/tooltip';
 	import { mode } from 'mode-watcher';
 	import MessageComponent from './Message.svelte';
-	import { Separator } from "$lib/components/ui/separator";
+	import { Separator } from '$lib/components/ui/separator';
 	import { fly } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 
@@ -82,9 +83,7 @@
 
 	let image: File | null = null;
 	let imagePreview: string | null = null;
-        let fileinput: HTMLInputElement;
-
-	let textarea: any;
+	let fileinput: HTMLInputElement;
 
 	$: messages &&
 		(async () => {
@@ -126,11 +125,11 @@
 		unreadMessageI = -1;
 
 		try {
-			(await fetch(`/api/messages/read?other_id=${profile.id}`, {
-				method: "PATCH"
-			}));
+			await fetch(`/api/messages/read?other_id=${profile.id}`, {
+				method: 'PATCH'
+			});
 		} catch (error) {
-			toast("error: " + error);
+			toast('error: ' + error);
 		}
 	}
 
@@ -190,7 +189,7 @@
 			try {
 				const response = await fetch('/api/messages?other_id=' + profile.id);
 				if (response.status !== 200) {
-					toast("failed to get messages");
+					toast('failed to get messages');
 				} else {
 					messages = (await response.json()).messages || [];
 				}
@@ -199,23 +198,23 @@
 					messagesFarBack = false;
 				}
 			} catch (error) {
-				toast("failed to get messages: " + error);
+				toast('failed to get messages: ' + error);
 			}
 		}
 
 		messagesLoading = false;
 
 		eventSource = new EventSource('/api/sse');
-                eventSource.onmessage = async (event) => {
-                        const data = JSON.parse(event.data);
-                        if (data.type === 'message') {
-                                const msg = data.data;
+		eventSource.onmessage = async (event) => {
+			const data = JSON.parse(event.data);
+			if (data.type === 'message') {
+				const msg = data.data;
 				messages = [...messages, msg];
 
 				await tick();
 				messagesContainer.scrollToBottom();
-                        }
-                };
+			}
+		};
 
 		await tick();
 		messagesContainer.scrollToBottom();
@@ -227,14 +226,8 @@
 		}
 	});
 
-	async function handleKeyPress(event: KeyboardEvent) {
-		if (event.key === 'Enter' && event.shiftKey) {
-			await sendMessage();
-		}
-	}
-
 	async function sendMessage() {
-		if (messageValue.trim() === '' && (imagePreview === null || fileinput.value === "")) return;
+		if (messageValue.trim() === '' && (imagePreview === null || fileinput.value === '')) return;
 
 		sending = true;
 		const formData = new FormData();
@@ -253,25 +246,20 @@
 			if (response.status === 200) {
 				messageValue = '';
 				imagePreview = null;
-				fileinput.value = "";
-		                image = null;
+				fileinput.value = '';
+				image = null;
 
-				messages = [
-					...messages,
-					(await response.json()).message
-				];
+				messages = [...messages, (await response.json()).message];
 			} else {
 				toast((await response.json()).error);
 			}
-		} catch(error) {
-			toast("error: " + error);
+		} catch (error) {
+			toast('error: ' + error);
 		}
 
 		sending = false;
 
 		await tick();
-		textarea.style.height = "1px";
-		textarea.style.height = (4+textarea.scrollHeight)+"px"
 		messagesContainer.scrollToBottom();
 	}
 
@@ -284,7 +272,7 @@
 		try {
 			const response = await fetch(`/api/messages?other_id=${profile.id}&previous=${messagesPage}`);
 			if (response.status !== 200) {
-				toast("failed to get messages");
+				toast('failed to get messages');
 			} else {
 				const msgs = (await response.json()).messages || [];
 				if (msgs.length === 0) {
@@ -294,9 +282,8 @@
 				}
 			}
 		} catch (error) {
-			toast("failed to get messages: " + error);
+			toast('failed to get messages: ' + error);
 		}
-
 
 		messagesLoading = false;
 	}
@@ -306,16 +293,16 @@
 	}
 
 	const onFileSelected = (e: Event) => {
-                const target = e.target as HTMLInputElement;
-                if (target.files && target.files[0]) {
-                        image = target.files[0];
-                        let reader = new FileReader();
-                        reader.readAsDataURL(image);
-                        reader.onload = (e) => {
-                                imagePreview = e.target?.result as string;
-                        };
-                }
-        };
+		const target = e.target as HTMLInputElement;
+		if (target.files && target.files[0]) {
+			image = target.files[0];
+			let reader = new FileReader();
+			reader.readAsDataURL(image);
+			reader.onload = (e) => {
+				imagePreview = e.target?.result as string;
+			};
+		}
+	};
 </script>
 
 {#if loading}
@@ -324,7 +311,11 @@
 	<span>You can't private message with your self</span>
 {:else}
 	<div class="relative flex h-full w-full flex-row gap-1">
-		<div class="hidden {!profile ? "!flex w-full" : ""} h-full w-full flex-col items-center gap-1 md:flex md:w-[300px]">
+		<div
+			class="hidden {!profile
+				? '!flex w-full'
+				: ''} h-full w-full flex-col items-center gap-1 md:flex md:w-[300px]"
+		>
 			<span class="my-2 text-xl">Messages</span>
 			{#if !friendListLoaded}
 				<LoadingSpinner />
@@ -341,8 +332,8 @@
 					}}
 				>
 					<button
-						class="flex flex-row items-center justify-center gap-2 rounded-full bg-secondary p-1.5 w-full {profile && profile.id ===
-						friend.id
+						class="flex w-full flex-row items-center justify-center gap-2 rounded-full bg-secondary p-1.5 {profile &&
+						profile.id === friend.id
 							? 'bg-secondary/50'
 							: ''}"
 						on:click={() => {
@@ -371,94 +362,147 @@
 		</div>
 		<Separator orientation="vertical" class="hidden md:block" />
 		{#if profile}
-		<div class="mt-2 flex w-full flex-col gap-2 px-1">
-			<!--<span class="text-2xl text-center py-2">Private Messages With {profile.username}</span>-->
-			<div
-				class="flex w-full flex-row items-center justify-between gap-2 rounded-md bg-secondary/50 p-2"
-			>
-				<div class="flex flex-row gap-2">
-					<Avatar src={cdnUrl(profile.id, 'big')} alt={profile.username} border={true} />
-					<div class="flex flex-col">
-						<div class="flex flex-row gap-2">
-							<span class="text-lg font-bold">{profile.username}</span>
-							{#if profile.verified}
-								<Tooltip.Root>
-									<Tooltip.Trigger>
-										<div class="flex h-full w-7 justify-center">
-											<img
-												class="h-7 w-7"
-												src={$mode !== 'light' ? '/white_mode_verified.png' : '/verified.png'}
-												alt="This user is verified."
-											/>
-										</div>
-									</Tooltip.Trigger>
-									<Tooltip.Content>
-										<p>This user is <span class="rounded-xl bg-border p-1">verified</span>.</p>
-									</Tooltip.Content>
-								</Tooltip.Root>
-							{/if}
-							<span class="text-lg text-muted-foreground">@{profile.handle}</span>
+			<div class="mt-2 flex w-full flex-col gap-2 px-1">
+				<!--<span class="text-2xl text-center py-2">Private Messages With {profile.username}</span>-->
+				<div
+					class="min-h-18 flex w-full flex-row items-center justify-center gap-2 rounded-md bg-secondary/50 p-2"
+				>
+					<div class="flex flex-row items-center gap-2">
+						<div class="mr-4">
+							<Avatar
+								size={10}
+								src={cdnUrl(profile.id, 'big')}
+								alt={profile.username}
+								border={true}
+							/>
 						</div>
-						<span class="w-full max-w-full overflow-hidden truncate text-ellipsis"
-							>{profile.bio}</span
-						>
+						<div class="flex flex-col">
+							<div class="flex flex-row gap-2">
+								<span class="text-lg font-bold">{profile.username}</span>
+								{#if profile.verified}
+									<Tooltip.Root>
+										<Tooltip.Trigger>
+											<div class="flex h-full w-7 justify-center">
+												<img
+													class="h-7 w-7"
+													src={$mode !== 'light' ? '/white_mode_verified.png' : '/verified.png'}
+													alt="This user is verified."
+												/>
+											</div>
+										</Tooltip.Trigger>
+										<Tooltip.Content>
+											<p>This user is <span class="rounded-xl bg-border p-1">verified</span>.</p>
+										</Tooltip.Content>
+									</Tooltip.Root>
+								{/if}
+								<span class="w-full max-w-full overflow-hidden truncate text-ellipsis text-lg"
+									><Badge>{profile.iq}</Badge></span
+								>
+							</div>
+							<!--							<span class="text-sm text-muted-foreground">@{profile.handle}</span>-->
+						</div>
 					</div>
 				</div>
-				<Badge>{profile.iq}</Badge>
-			</div>
-			<div
-				class="messagesContainer relative flex h-full w-full flex-col justify-end overflow-hidden rounded-md px-1 py-2"
-			>
-				{#if unreadTop && (friendsList[friendsList.findIndex((friend) => friend.id === profile.id)]?.unread || 0) > 0}
-					<div 
-						class="absolute top-0 inset-x-0 flex justify-center bg-secondary/70 z-30 p-1"
-						transition:fly={{ 
-							delay: 0, 
-							duration: 300, 
-							x: 0, 
-							y: -500, 
-							opacity: 0.5, 
-							easing: quintOut
-						}}>
-						Unread Messages ({friendsList[friendsList.findIndex((friend) => friend.id === profile.id)]?.unread || 0})
-					</div>
-				{/if}
-				<VirtualScroll
-					bind:this={messagesContainer}
-					data={messages}
-					key="id"
-					on:top={preappendPreviousMessages}
-					let:data={item}
+				<div
+					class="messagesContainer relative flex h-full w-full flex-col justify-end overflow-hidden rounded-md px-1 py-2"
 				>
-					<MessageComponent
-						message={item}
-						{unreadMessageI}
-						index={messages.findIndex((msg) => msg.id === item.id)}
-						unreadCount={friendsList[friendsList.findIndex((friend) => friend.id === profile.id)]?.unread || 0}
-						{handleLyntClick}
-						{myId}
-						bind:unreadTop={unreadTop}
-					/>
-				</VirtualScroll>
-				{#if messagesLoading}
-					<LoadingSpinner />
-				{/if}
+					{#if unreadTop && (friendsList[friendsList.findIndex((friend) => friend.id === profile.id)]?.unread || 0) > 0}
+						<div
+							class="absolute inset-x-0 top-0 z-30 flex justify-center bg-secondary/70 p-1"
+							transition:fly={{
+								delay: 0,
+								duration: 300,
+								x: 0,
+								y: -500,
+								opacity: 0.5,
+								easing: quintOut
+							}}
+						>
+							Unread Messages ({friendsList[
+								friendsList.findIndex((friend) => friend.id === profile.id)
+							]?.unread || 0})
+						</div>
+					{/if}
+					<VirtualScroll
+						bind:this={messagesContainer}
+						data={messages}
+						key="id"
+						on:top={preappendPreviousMessages}
+						let:data={item}
+					>
+						<MessageComponent
+							message={item}
+							{unreadMessageI}
+							index={messages.findIndex((msg) => msg.id === item.id)}
+							unreadCount={friendsList[friendsList.findIndex((friend) => friend.id === profile.id)]
+								?.unread || 0}
+							{handleLyntClick}
+							{myId}
+							bind:unreadTop
+						/>
+					</VirtualScroll>
+					{#if messagesLoading}
+						<LoadingSpinner />
+					{/if}
 
-				<!--<Button class="absolute right-2 bottom-2 rounded-md p-2 aspect-square" on:click={() => {
+					<!--<Button class="absolute right-2 bottom-2 rounded-md p-2 aspect-square" on:click={() => {
 					messagesContainer.scrollToBottom();
 					markAsRead();
 				}}>
 					<MoveDown/>
 				</Button>-->
-			</div>
-			<div class="p-2 bg-input rounded-t-lg w-full h-72" class:hidden={!imagePreview}>
-				<div class="relative bg-no-repeat w-full h-full bg-center bg-contain" style:background-image={`url(${imagePreview})`}>
-					<Button variant="ghost" class="absolute top-0 right-2 w-16 h-16" on:click={() => {
-						imagePreview = null;
-				                fileinput.value = "";
-					        image = null;
-					}}><X/></Button>
 				</div>
+				<div class="h-72 w-full rounded-t-lg bg-input p-2" class:hidden={!imagePreview}>
+					<div
+						class="relative h-full w-full bg-contain bg-center bg-no-repeat"
+						style:background-image={`url(${imagePreview})`}
+					>
+						<Button
+							variant="ghost"
+							class="absolute right-2 top-0 h-16 w-16"
+							on:click={() => {
+								imagePreview = null;
+								fileinput.value = '';
+								image = null;
+							}}><X /></Button
+						>
+					</div>
+				</div>
+				<div
+					class="mb-1 mt-2 flex max-h-32 flex-row items-center justify-center gap-1 rounded-xl bg-secondary px-1 text-secondary-foreground"
+				>
+					<Button
+						variant="ghost"
+						class="aspect-square h-[41px] w-[41px] p-1"
+						on:click={() => fileinput.click()}
+					>
+						<Image />
+					</Button>
+					<DivInput
+						class="h-fit max-h-32 w-full overflow-y-auto border-none pt-6"
+						placeholder="Message @{profile.handle}"
+						characterCountOnNewLine={true}
+						bind:lynt={messageValue}
+						on:focus={handleFocus}
+						on:submit={sendMessage}
+					/>
+					<Button
+						variant="ghost"
+						class="aspect-square h-[41px] w-[41px] p-1"
+						on:click={sendMessage}
+						disabled={sending}
+					>
+						<Send />
+					</Button>
+					<input
+						style="display:none"
+						type="file"
+						accept=".jpg, .jpeg, .png, .gif"
+						on:change={onFileSelected}
+						bind:this={fileinput}
+					/>
+				</div>
+			</div>
 			</div>
 			<div class="mb-1 mt-2 flex flex-row gap-1 items-center rounded-xl p-1 bg-secondary text-secondary-foreground">
 				<Button variant="ghost" class="aspect-square p-1 w-[41px] h-[41px]" on:click={() => fileinput.click()}>

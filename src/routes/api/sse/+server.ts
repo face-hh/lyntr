@@ -1,5 +1,3 @@
-// src/routes/api/sse/+server.ts
-
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { addConnection, removeConnection } from '$lib/sse';
