@@ -109,7 +109,7 @@
 
 	$: if (contentElement) {
 		// this shouldn't have any XSS vulnerabilities. Or at least, hopefully...
-		const sanitizedContent = DOMPurify.sanitize(content);
+		const sanitizedContent: string = DOMPurify.sanitize(content);
 		const links = sanitizedContent.match(/[A-z|A-Z|a-z]+:\/\/[^\s]+/gm);
 		if (links)
 			for (const link of links) {
