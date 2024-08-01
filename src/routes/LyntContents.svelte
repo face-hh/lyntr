@@ -13,6 +13,7 @@
 	import { toast } from 'svelte-sonner';
 	import Report from './Report.svelte';
 	import DOMPurify from 'dompurify';
+	import { page } from '$app/stores';
 
 	function getTimeElapsed(date: Date | string) {
 		if (typeof date === 'string') date = new Date(date);
@@ -77,7 +78,8 @@
 	let contentElement: HTMLSpanElement | null = null;
 	content = content!;
 	let clickingExternalLink = false;
-	let openExternalLink = false;
+	// I can just use this in the listener and that should work.
+	let externalLink: URL | null = null;
 
 	const formattedDate = formatDateTooltip(createdAt);
 
@@ -112,22 +114,30 @@
 
 	$: if (contentElement) {
 		// this shouldn't have any XSS vulnerabilities. Or at least, hopefully...
-		const sanitizedContent: string = DOMPurify.sanitize(content);
+		const sanitizedContent: string = DOMPurify.sanitize(content, {
+			USE_PROFILES: {
+				html: true
+			},
+		});
 		const links = sanitizedContent.match(/[A-z|A-Z|a-z]+:\/\/[^\s]+/gm);
 		if (links)
 			for (const link of links) {
+				const linkHTML = `<a href="${link}" target="_blank">${link}</a>`;
+				console.log("link", link, "linkHTML", linkHTML);
+				// FIXME: it may "double replace" the link, which isn't good.
 				contentElement.innerHTML = contentElement.innerHTML.replace(
 					link,
-					`<a href="${link}" class="post-link" target="_blank">${link}</a>`
+					linkHTML
 				);
-				const a = contentElement.querySelector("a");
-				a?.addEventListener("click", async (e) => {
-					e.preventDefault();
-					if (new URL(a.href).host !== window.location.host) {
+				console.log("innerHTML after replace", contentElement.innerHTML)
+				const a = contentElement.querySelectorAll('a');
+				a.forEach(el => el.addEventListener("click", (e) => {
+					if (new URL(el.href).host !== $page.url.host) {
+						e.preventDefault();
+						externalLink = new URL(link);
 						clickingExternalLink = true;
 					}
-					return false;
-				})
+				}))
 			}
 	}
 </script>
@@ -140,7 +150,7 @@
 	{/if}
 
 	{#if clickingExternalLink}
-	<AlertDialog.Root>
+	<AlertDialog.Root open={clickingExternalLink}>
 		<AlertDialog.Content>
 			<AlertDialog.Header>
 				<AlertDialog.Title class="mb-2 text-2xl font-bold"
@@ -148,11 +158,19 @@
 				>
 				<AlertDialog.Description>
 					This link leads to a external website.
+					Are you sure you want to open it?
 				</AlertDialog.Description>
 			</AlertDialog.Header>
 			<AlertDialog.Footer>
-				<AlertDialog.Action on:click={() => openExternalLink = true}>Open</AlertDialog.Action>
-				<AlertDialog.Action on:click={() => openExternalLink = false}>Return to Lyntr</AlertDialog.Action>
+				<AlertDialog.Action on:click={() => {
+					if (!externalLink)
+						return console.error("externalLink is null");
+					window.open(externalLink)
+					externalLink = null
+				}}>Open</AlertDialog.Action>
+				<AlertDialog.Action class="bg-primary" on:click={() => {
+					clickingExternalLink = false
+				}}>Return to Lyntr</AlertDialog.Action>
 			</AlertDialog.Footer>
 		</AlertDialog.Content>
 	</AlertDialog.Root>
