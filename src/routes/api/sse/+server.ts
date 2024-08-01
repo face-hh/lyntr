@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // src/routes/api/sse/+server.ts
 
 import { json } from '@sveltejs/kit';
