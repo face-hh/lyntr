@@ -84,6 +84,7 @@
 	let image: File | null = null;
 	let imagePreview: string | null = null;
 	let fileinput: HTMLInputElement;
+	let buttonDisabled = false;
 
 	$: messages &&
 		(async () => {
@@ -227,7 +228,7 @@
 	});
 
 	async function sendMessage() {
-		if (messageValue.trim() === '' && (imagePreview === null || fileinput.value === '')) return;
+		if (messageValue.trim() === '' && (imagePreview === null || fileinput.value === '') || buttonDisabled) return;
 
 		sending = true;
 		const formData = new FormData();
@@ -484,6 +485,7 @@
 						charactersBeforeCount={200}
 						maxLength={2000}
 						bind:lynt={messageValue}
+						bind:isOverLimit={buttonDisabled}
 						on:focus={handleFocus}
 						on:submit={sendMessage}
 					/>
@@ -491,7 +493,7 @@
 						variant="ghost"
 						class="aspect-square h-[41px] w-[41px] p-1"
 						on:click={sendMessage}
-						disabled={sending}
+						disabled={sending || buttonDisabled}
 					>
 						<Send />
 					</Button>

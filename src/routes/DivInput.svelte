@@ -7,10 +7,12 @@
 	export let charactersBeforeCount = 0;
 
 	let className: string = "";
-	export { className as class };
+	let isOverLimit = false;
 
 	$: characterCount = lynt.length;
 	$: isOverLimit = characterCount > maxLength;
+
+	export { isOverLimit, className as class };
 
 	const dispatch = createEventDispatcher<{
 	        input: Event;
