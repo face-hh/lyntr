@@ -78,7 +78,7 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
 			)
 			.orderBy(desc(messages.id))
 			.limit(30)
-			.offset(previous * 30)
+			.offset(previous * 30 + 1)
 			.as('sq');
 		const msgs = db
 			.select({

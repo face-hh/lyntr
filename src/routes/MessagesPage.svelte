@@ -97,7 +97,6 @@
 				}
 				if (messagesContainer) {
 					await tick();
-					messagesContainer.scrollToBottom();
 				}
 			}
 		})();
@@ -212,8 +211,14 @@
                         if (data.type === 'message') {
                                 const msg = data.data;
 				messages = [...messages, msg];
+
+				await tick();
+				messagesContainer.scrollToBottom();
                         }
                 };
+
+		await tick();
+		messagesContainer.scrollToBottom();
 	});
 
 	onDestroy(() => {
@@ -267,6 +272,7 @@
 		await tick();
 		textarea.style.height = "1px";
 		textarea.style.height = (4+textarea.scrollHeight)+"px"
+		messagesContainer.scrollToBottom();
 	}
 
 	async function preappendPreviousMessages() {
