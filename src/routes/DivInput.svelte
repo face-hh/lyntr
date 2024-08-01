@@ -56,7 +56,7 @@
 		tabindex="0"
 		bind:innerText={lynt}
 		{placeholder}
-		class="overflow-wrap-anywhere w-full pb-6 outline-none"
+		class="overflow-wrap-anywhere outline-none"
 		on:paste={handlePaste}
 		on:keydown={interfere}
 		on:input={handleInput}
