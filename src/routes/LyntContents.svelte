@@ -112,10 +112,9 @@
 		const mentions = sanitizedContent.match(/@[a-zA-Z0-9_-]+/gm);
 		if (mentions)
 			for (const mention of mentions) {
-				const username = mention.substring(1);
 				contentElement.innerHTML = contentElement.innerHTML.replace(
 					mention,
-					`<a href="/${mention}" target="_blank">${username}</a>`
+					`<a href="/${mention}" target="_blank">${mention}</a>`
 				);
 			}
 	}
