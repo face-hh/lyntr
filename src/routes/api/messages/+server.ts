@@ -44,27 +44,23 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
 		}
 
 		const parent = alias(users, 'parent');
-		let msgs = await db
+		let sq = db
 			.select({
 				id: messages.id,
-				sender: {
-					id: users.id,
-					username: users.username,
-					handle: users.handle,
-					iq: users.iq,
-					verified: users.verified
-				},
-				receiver: {
-					id: parent.id,
-					username: parent.username,
-					handle: parent.handle,
-					iq: parent.iq,
-					verified: parent.verified
-				},
 				content: messages.content,
 				image: messages.image,
 				read: messages.read,
-				created_at: messages.created_at
+				created_at: messages.created_at,
+				sender_id: sql<string>`${users.id}`.as('sender_id'),
+				sender_username: sql<string>`${users.username}`.as('sender_username'),
+				sender_handle: sql<string>`${users.handle}`.as('sender_handle'),
+				sender_iq: sql<number>`${users.iq}`.as('sender_iq'),
+				sender_verified: sql<boolean>`${users.verified}`.as('sender_verified'),
+				receiver_id: sql<string>`${parent.id}`.as('receiver_id'),
+				receiver_username: sql<string>`${parent.username}`.as('receiver_username'),
+				receiver_handle: sql<string>`${parent.handle}`.as('receiver_handle'),
+				receiver_iq: sql<number>`${parent.iq}`.as('receiver_iq'),
+				receiver_verified: sql<boolean>`${parent.verified}`.as('receiver_verified')
 			})
 			.from(messages)
 			.leftJoin(users, eq(messages.sender_id, users.id))
@@ -75,10 +71,35 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
 					or(eq(messages.sender_id, other_id), eq(messages.receiver_id, other_id))
 				)
 			)
-			.orderBy(asc(messages.created_at), desc(messages.id))
-			.limit(30);
+			.orderBy(desc(messages.id))
+			.limit(30)
+			.as('sq');
+		const msgs = db
+			.select({
+				id: sq.id,
+				content: sq.content,
+				image: sq.image,
+				read: sq.read,
+				created_at: sq.created_at,
+				sender: {
+					id: sq.sender_id,
+					username: sq.sender_username,
+					handle: sq.sender_handle,
+					iq: sq.sender_iq,
+					verified: sq.sender_verified
+				},
+				receiver: {
+					id: sq.receiver_id,
+					username: sq.receiver_username,
+					handle: sq.receiver_handle,
+					iq: sq.receiver_iq,
+					verified: sq.receiver_verified
+				}
+			})
+			.from(sq)
+			.orderBy(asc(sq.created_at));
 
-		return json({ messages: msgs }, { status: 200 });
+		return json({ messages: await msgs }, { status: 200 });
 	} catch (error) {
 		console.error('Authentication error:', error);
 		return json({ error: 'Authentication failed' }, { status: 401 });
