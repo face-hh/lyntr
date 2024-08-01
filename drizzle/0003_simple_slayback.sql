@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS "created_at_idx" ON "messages" USING btree ("created_at");
