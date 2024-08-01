@@ -113,7 +113,10 @@
 		const links = sanitizedContent.match(/[A-z|A-Z|a-z]+:\/\/[^\s]+/gm);
 		if (links)
 			for (const link of links) {
-				contentElement.innerHTML = contentElement.innerHTML.replace(link, `<a href="${link}" target="_blank">${link}</a>`);
+				contentElement.innerHTML = contentElement.innerHTML.replace(
+					link,
+					`<a href="${link}" target="_blank">${link}</a>`
+				);
 			}
 	}
 </script>
