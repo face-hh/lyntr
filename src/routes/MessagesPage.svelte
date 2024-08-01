@@ -19,7 +19,7 @@
 </script>
 
 <script lang="ts">
-	import { onMount, tick } from 'svelte';
+	import { onMount, onDestroy, tick } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { cdnUrl, currentPage } from './stores';
 	import { toast } from 'svelte-sonner';
@@ -176,6 +176,8 @@
 		loadingNextFriends = false;
 	}
 
+	let eventSource: EventSource | undefined = undefined;
+
 	onMount(async () => {
 		messagesLoading = true;
 
@@ -197,6 +199,21 @@
 		}
 
 		messagesLoading = false;
+
+		eventSource = new EventSource('/api/sse');
+                eventSource.onmessage = async (event) => {
+                        const data = JSON.parse(event.data);
+                        if (data.type === 'message') {
+                                const msg = data.data;
+				messages = [...messages, msg];
+                        }
+                };
+	});
+
+	onDestroy(() => {
+		if (eventSource) {
+			eventSource.close();
+		}
 	});
 
 	async function handleKeyPress(event: KeyboardEvent) {

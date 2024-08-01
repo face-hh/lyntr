@@ -138,6 +138,7 @@ export const POST: RequestHandler = async ({ request, cookies, url }) => {
 			return json({ error: 'Failed to post message' }, { status: 500 });
 		}
 
+		sendMessage({ type: 'message', data: msg }, other_id);
 		return json({ message: msg }, { status: 200 });
 	} catch (error) {
 		console.error('Authentication error:', error);
