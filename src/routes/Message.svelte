@@ -48,7 +48,7 @@
 			</div>
 			<span class="whitespace-pre-wrap break-all">{message.content}</span>
 			{#if message.image}
-				<img src={cdnUrl(message.image)} alt="" class="max-w-full max-h-[400px] overflow-hidden" />
+				<img src={cdnUrl(message.image)} alt="" class="max-w-full max-h-[400px] overflow-hidden rounded-lg" />
 			{/if}
 		</div>
 
