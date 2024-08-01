@@ -4,14 +4,14 @@
     "description": "A social media platform with an IQ test. See if you can beat other people in IQ.",
     "icons": [
         {
-            "src": "/android-chrome-192x192.png",
-            "sizes": "192x192",
-            "type": "image/png"
-        },
-        {
             "src": "/logo.svg",
             "type": "image/svg+xml",
             "sizes": "150x150"
+        },
+        {
+            "src": "/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
         },
         {
             "src": "/android-chrome-512x512.png",
