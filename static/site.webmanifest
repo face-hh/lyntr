@@ -1,6 +1,7 @@
 {
-    "name": "",
-    "short_name": "",
+    "name": "Lyntr: Social Media with an IQ test",
+    "short_name": "Lyntr",
+    "description": "A social media platform with an IQ test. See if you can beat other people in IQ.",
     "icons": [
         {
             "src": "/android-chrome-192x192.png",
