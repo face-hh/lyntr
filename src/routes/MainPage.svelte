@@ -22,6 +22,7 @@
 	import MessagesPage from './MessagesPage.svelte';
 	import { goto } from '$app/navigation';
 	import TopTab from './TopTab.svelte';
+	import DivInput from './DivInput.svelte';
 
 	export let username: string;
 	export let handle: string;
@@ -220,6 +221,7 @@
 			body: JSON.stringify({ id: selectedLynt?.id, content: comment })
 		});
 		comment = '';
+		postCommentDisabled = true;
 
 		if (response.status !== 201) {
 			toast(
@@ -378,7 +380,7 @@
 							<div class="flex w-full items-center gap-2 rounded-xl bg-border p-3">
 								<Reply size={32} />
 
-								<div
+								<!--<div
 									contenteditable="true"
 									role="textbox"
 									spellcheck="true"
@@ -388,7 +390,8 @@
 									placeholder="Reply..."
 									on:paste={handlePaste}
 									on:input={handleInput}
-								/>
+								/>-->
+								<DivInput placeholder="Reply..." class="overflow-wrap-anywhere w-full text-lg outline-none" bind:lynt={comment} on:input={handleInput} />
 
 								<Button on:click={postComment} disabled={postCommentDisabled}>Post</Button>
 							</div>
