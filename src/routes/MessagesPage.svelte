@@ -15,6 +15,40 @@
 		created_at: string;
 		image: string | null;
 		read: boolean;
+		referenced_lynt: {
+			id: string;
+			content: string;
+			userId: string;
+			createdAt: number;
+			views: number;
+			reposted: boolean;
+			likeCount: number;
+			likedByFollowed: boolean;
+
+			repostCount: number;
+			commentCount: number;
+			likedByUser: boolean;
+			repostedByUser: boolean;
+			handle: string;
+			userCreatedAt: number;
+			username: string;
+			iq: number;
+			bio: string;
+			verified: boolean;
+			has_image: boolean;
+
+			parentId: string | null;
+			parentContent: string | null;
+			parentUserHandle: string | null;
+			parentUserUsername: string | null;
+			parentUserVerified: boolean | null;
+			parentHasImage: boolean | null;
+			parentUserBio: string | null;
+			parentUserIq: number | null;
+			parentUserId: string | null;
+			parentCreatedAt: number | null;
+			parentUserCreatedAt: number | null;
+		};
 	};
 </script>
 
@@ -26,11 +60,11 @@
 	import Avatar from './Avatar.svelte';
 	import LoadingSpinner from './LoadingSpinner.svelte';
 	import { Badge } from '$lib/components/ui/badge/index.js';
-	//import { Input } from '$lib/components/ui/input';
+	import { Input } from '$lib/components/ui/input';
 	//import { Textarea } from '$lib/components/ui/textarea';
 	import DivInput from './DivInput.svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { Send, MoveDown, Image, X } from 'lucide-svelte';
+	import { Asterisk, Send, MoveDown, Image, X } from 'lucide-svelte';
 	import VirtualScroll from 'svelte-virtual-scroll-list';
 	import * as Tooltip from '@/components/ui/tooltip';
 	import { mode } from 'mode-watcher';
@@ -38,9 +72,47 @@
 	import { Separator } from '$lib/components/ui/separator';
 	import { fly } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
+	//import * as Popover from "$lib/components/ui/popover";
+	import * as Dialog from '$lib/components/ui/dialog';
+	import Search from './Search.svelte';
+	import Lynt from './Lynt.svelte';
 
 	export let profileHandle: string;
-	export let handleLyntClick;
+	export let handleLyntClick: (id: string) => void;
+	export let getLynt: (id: string) => {
+		id: string;
+		content: string;
+		userId: string;
+		createdAt: number;
+		views: number;
+		reposted: boolean;
+		likeCount: number;
+		likedByFollowed: boolean;
+
+		repostCount: number;
+		commentCount: number;
+		likedByUser: boolean;
+		repostedByUser: boolean;
+		handle: string;
+		userCreatedAt: number;
+		username: string;
+		iq: number;
+		bio: string;
+		verified: boolean;
+		has_image: boolean;
+
+		parentId: string | null;
+		parentContent: string | null;
+		parentUserHandle: string | null;
+		parentUserUsername: string | null;
+		parentUserVerified: boolean | null;
+		parentHasImage: boolean | null;
+		parentUserBio: string | null;
+		parentUserIq: number | null;
+		parentUserId: string | null;
+		parentCreatedAt: number | null;
+		parentUserCreatedAt: number | null;
+	};
 	export let myId: string;
 	export let isSelf: boolean = false;
 	export let loading: boolean = true;
@@ -65,6 +137,7 @@
 	let messagesLoading = false;
 	let messagesFarBack = true;
 	let messagesPage = 0;
+	let referenceMenu = false;
 
 	let friendsList: {
 		id: string;
@@ -83,8 +156,18 @@
 
 	let image: File | null = null;
 	let imagePreview: string | null = null;
+	let referencedLyntId: string | null = null;
+	let referencedLynt: ReturnType<typeof getLynt> | null = null;
 	let fileinput: HTMLInputElement;
 	let buttonDisabled = false;
+
+	$: if (referencedLyntId === null) {
+		referencedLynt = null;
+	} else {
+		getLynt(referencedLyntId).then((lynt) => {
+			referencedLynt = lynt;
+		});
+	}
 
 	$: messages &&
 		(async () => {
@@ -228,12 +311,19 @@
 	});
 
 	async function sendMessage() {
-		if (messageValue.trim() === '' && (imagePreview === null || fileinput.value === '') || buttonDisabled) return;
+		if (
+			(messageValue.trim() === '' && (imagePreview === null || fileinput.value === '')) ||
+			buttonDisabled
+		)
+			return;
 
 		sending = true;
 		const formData = new FormData();
 		if (image !== null) {
 			formData.append('image', fileinput.files[0]);
+		}
+		if (referencedLyntId !== null) {
+			formData.append('lynt', referencedLyntId);
 		}
 		formData.append('other_id', profile.id);
 		formData.append('content', messageValue);
@@ -249,6 +339,7 @@
 				imagePreview = null;
 				fileinput.value = '';
 				image = null;
+				referencedLyntId = null;
 
 				messages = [...messages, (await response.json()).message];
 			} else {
@@ -363,6 +454,27 @@
 		</div>
 		<Separator orientation="vertical" class="hidden md:block" />
 		{#if profile}
+			<Dialog.Root bind:open={referenceMenu}>
+				<Dialog.Trigger />
+				<Dialog.Content
+					class="flex h-full max-h-[80%] w-full max-w-full flex-col items-center gap-2 overflow-y-auto overflow-x-hidden !px-1 py-6 md:max-w-[650px]"
+				>
+					<Dialog.Header class="!text-center">
+						<Dialog.Title>Reference A Lynt</Dialog.Title>
+					</Dialog.Header>
+					<div class="w-full">
+						<Search
+							userId={myId}
+							handleLyntClick={(id) => {
+								referencedLyntId = id;
+								referenceMenu = false;
+							}}
+							hideTitle={true}
+							small={true}
+						/>
+					</div>
+				</Dialog.Content>
+			</Dialog.Root>
 			<div class="mt-2 flex w-full flex-col gap-2 px-1">
 				<!--<span class="text-2xl text-center py-2">Private Messages With {profile.username}</span>-->
 				<div
@@ -453,7 +565,11 @@
 					<MoveDown/>
 				</Button>-->
 				</div>
-				<div class="h-72 w-full rounded-t-lg bg-input p-2" class:hidden={!imagePreview}>
+				<div
+					class="h-72 w-full rounded-t-lg bg-input p-2"
+					class:hidden={!imagePreview}
+					class:rounded-b-lg={!referencedLyntId}
+				>
 					<div
 						class="relative h-full w-full bg-contain bg-center bg-no-repeat"
 						style:background-image={`url(${imagePreview})`}
@@ -470,7 +586,23 @@
 					</div>
 				</div>
 				<div
-					class="mb-1 mt-2 flex max-h-32 flex-row items-center justify-center gap-1 rounded-xl bg-secondary px-1 text-secondary-foreground"
+					class="relative h-72 w-full overflow-x-hidden overflow-y-scroll rounded-b-lg bg-input p-1"
+					class:hidden={!referencedLyntId}
+					class:rounded-t-lg={!image}
+				>
+					{#if referencedLyntId && referencedLynt}
+						<Lynt {...referencedLynt} {handleLyntClick} {myId} />
+					{/if}
+					<Button
+						variant="ghost"
+						class="absolute right-2 top-0 h-16 w-16"
+						on:click={() => {
+							referencedLyntId = null;
+						}}><X /></Button
+					>
+				</div>
+				<div
+					class="mb-1 mt-2 flex max-h-32 flex-row items-center justify-center gap-1 rounded-xl bg-secondary p-1 text-secondary-foreground"
 				>
 					<Button
 						variant="ghost"
@@ -479,8 +611,15 @@
 					>
 						<Image />
 					</Button>
+					<Button
+						variant="ghost"
+						class="aspect-square h-[41px] w-[41px] p-1"
+						on:click={() => (referenceMenu = true)}
+					>
+						<Asterisk />
+					</Button>
 					<DivInput
-						class="h-fit max-h-32 w-full overflow-y-auto border-none pt-6"
+						class="h-fit max-h-32 w-full overflow-y-auto border-none"
 						placeholder="Message @{profile.handle}"
 						charactersBeforeCount={200}
 						maxLength={2000}

@@ -14,6 +14,8 @@
 
 	export let handleLyntClick;
 	export let userId;
+	export let hideTitle = false;
+	export let small = false;
 
 	async function performSearch() {
 		if (!searchQuery.trim()) return;
@@ -47,8 +49,8 @@
 	}
 </script>
 
-<div class="mx-auto flex h-full w-full flex-col items-center mt-5">
-	<h1 class="mb-4 text-2xl font-bold">Search Lynts</h1>
+<div class="mx-auto flex h-full w-full flex-col items-center mt-5 {small ? "max-w-[400px]" : ""} md:max-w-[600px]">
+	<h1 class="mb-4 text-2xl font-bold {hideTitle ? 'hidden' : ''}">Search Lynts</h1>
 	<div class="mb-4 flex w-full p-1">
 		<Input
 			type="text"
@@ -68,7 +70,7 @@
 				{#if searchResults.length > 0}
 					<div class="flex flex-col gap-4 px-1">
 						{#each searchResults as lynt}
-							<Lynt {...lynt} myId={userId} on:lyntClick={handleLyntClick} />
+							<Lynt {...lynt} myId={userId} lyntClick={handleLyntClick} {small} />
 						{/each}
 					</div>
 				{:else}

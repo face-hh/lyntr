@@ -7,6 +7,7 @@
 	import * as Popover from "$lib/components/ui/popover";
 	import { Button } from "$lib/components/ui/button";
 	import { Copy } from 'lucide-svelte';
+	import Lynt from './Lynt.svelte';
 
 	import dayjs from 'dayjs';
 	import utc from 'dayjs/plugin/utc';
@@ -58,13 +59,16 @@
 			<!--<div class="text-elipsis flex flex-row gap-1 overflow-hidden truncate text-sm">
 				<span class="font-bold">{message.sender.username}</span>
 			</div>-->
-			<span class="whitespace-pre-wrap break-all">{message.content}</span>
+			<span class="whitespace-pre-wrap break-all text-left">{message.content}</span>
 			{#if message.image}
 				<img
 					src={cdnUrl(message.image)}
 					alt=""
 					class="max-h-[400px] max-w-full overflow-hidden rounded-lg"
 				/>
+			{/if}
+			{#if message.referenced_lynt && message.referenced_lynt.id}
+				<Lynt lyntClick={handleLyntClick} {myId} {...message.referenced_lynt} small={true} />
 			{/if}
 		</div>
 

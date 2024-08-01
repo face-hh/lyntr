@@ -31,11 +31,11 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 			.trim();
 		let whereClause = ilike(lynts.content, `%${cleanedQuery}%`);
 
-		const match = query.match(/from:@([^ ]+)/);
-		if (match) {
+		const fm = query.match(/from:@([^ ]+)/);
+		if (fm) {
 			console.log(match[1]);
 			whereClause = and(
-				eq(users.handle, match[1].replace(/^@/, '')),
+				eq(users.handle, fm[1].replace(/^@/, '')),
 				whereClause
 			);
 		}
