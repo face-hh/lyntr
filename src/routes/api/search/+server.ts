@@ -26,6 +26,20 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 
 		const userId = jwtPayload.userId;
 
+		let cleanedQuery = query
+			.replace(/from:@([^ ]+)/g, '')
+			.trim();
+		let whereClause = ilike(lynts.content, `%${cleanedQuery}%`);
+
+		const match = query.match(/from:@([^ ]+)/);
+		if (match) {
+			console.log(match[1]);
+			whereClause = and(
+				eq(users.handle, match[1].replace(/^@/, '')),
+				whereClause
+			);
+		}
+
 		const searchResults = await db
 			.select({
 				id: lynts.id,
@@ -112,7 +126,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 			.from(lynts)
 			.leftJoin(likes, eq(likes.lynt_id, lynts.id))
 			.leftJoin(users, eq(lynts.user_id, users.id))
-			.where(ilike(lynts.content, `%${query}%`))
+			.where(whereClause)
 			.groupBy(lynts.id, users.id)
 			.orderBy(desc(lynts.created_at))
 			.limit(50)
