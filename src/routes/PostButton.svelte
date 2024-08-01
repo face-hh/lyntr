@@ -14,7 +14,7 @@
 
 	let lynt = '';
 	let opened = false;
-    let postDisabled = true;
+	let postDisabled = true;
 
 	let image: File | null = null;
 	let imagePreview: string | null = null;
@@ -33,8 +33,7 @@
 	};
 
 	async function handlePost() {
-
-		if (lynt.length == 0) {
+		if (lynt.trim() == '') {
 			toast("Cannot post an empty lynt.");
 			return;
 		}
@@ -47,7 +46,7 @@
 			formData.append('image', image, image.name);
 		}
 
-        postDisabled = true;
+	        postDisabled = true;
 		const response = await fetch('api/lynt', {
 			method: 'POST',
 			body: formData
@@ -63,7 +62,7 @@
 		} else {
 			toast(`Something happened! Error: ${response.status} | ${response.statusText}`);
 		}
-        postDisabled = false;
+		postDisabled = false;
 	}
 
 	function handleInput(event: CustomEvent<Event>) {
