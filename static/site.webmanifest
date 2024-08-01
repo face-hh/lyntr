@@ -11,7 +11,7 @@
         {
             "src": "/logo.svg",
             "type": "image/svg+xml",
-            "sizes": "512x512"
+            "sizes": "150x150"
         },
         {
             "src": "/android-chrome-512x512.png",
