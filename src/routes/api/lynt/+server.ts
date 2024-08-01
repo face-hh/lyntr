@@ -56,9 +56,11 @@ export const POST: RequestHandler = async ({
 	const imageFile = formData.get('image') as File | null;
 	const reposted = formData.get('reposted') as string;
 
+	const hasImageOrRepost = imageFile != null || reposted != null;
+	
 	if (!content) content = '';
 
-	if (content.length > 280 || (content.trim() == '' && imageFile == null)) {
+	if (content.length > 280 || (content.trim() == '' && !hasImageOrRepost)) {
 		return json({ error: 'Invalid content' }, { status: 400 });
 	}
 
