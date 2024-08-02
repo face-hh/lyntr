@@ -178,9 +178,6 @@
 						(msg) => msg.sender.id !== myId && !msg.read
 					).length;
 				}
-				if (messagesContainer) {
-					await tick();
-				}
 			}
 		})();
 
@@ -296,12 +293,16 @@
 				messages = [...messages, msg];
 
 				await tick();
-				messagesContainer.scrollToBottom();
+				if (messagesContainer) {
+					messagesContainer.scrollToBottom();
+				}
 			}
 		};
 
 		await tick();
-		messagesContainer.scrollToBottom();
+		if (messagesContainer) {
+			messagesContainer.scrollToBottom();
+		}
 	});
 
 	onDestroy(() => {
@@ -352,7 +353,9 @@
 		sending = false;
 
 		await tick();
-		messagesContainer.scrollToBottom();
+		if (messagesContainer) {
+			messagesContainer.scrollToBottom();
+		}
 	}
 
 	async function preappendPreviousMessages() {
