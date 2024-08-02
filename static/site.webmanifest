@@ -26,6 +26,7 @@
             "sizes": "378x819",
             "form_factor": "narrow"
         },
+        // TODO: Mobile screenshot with light theme
         {
             "src": "/screenshots/banner.png",
             "type": "image/png",
