@@ -23,13 +23,13 @@
         {
             "src": "/screenshots/banner_mobile.png",
             "type": "image/png",
-            "sizes": "378x819",
+            "sizes": "412x883",
             "form_factor": "narrow"
         },
         {
             "src": "/screenshots/banner_mobile_white.png",
             "type": "image/png",
-            "sizes": "378x819",
+            "sizes": "412x883",
             "form_factor": "narrow"
         },
         {
