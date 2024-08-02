@@ -30,13 +30,13 @@
         {
             "src": "/screenshots/banner.png",
             "type": "image/png",
-            "sizes": "1920x914",
+            "sizes": "1400x963",
             "form_factor": "wide"
         },
         {
             "src": "/screenshots/banner_white.png",
             "type": "image/png",
-            "sizes": "1920x914",
+            "sizes": "1400x963",
             "form_factor": "wide"
         }
     ],
