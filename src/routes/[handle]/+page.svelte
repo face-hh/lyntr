@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ModeWatcher } from 'mode-watcher';
+	import { ModeWatcher, mode } from 'mode-watcher';
 
 	import '../../app.css';
 
@@ -59,7 +59,11 @@
 	$: handle = $page.params.handle.replace(/^@/, '');
 </script>
 
-<ModeWatcher defaultMode={'light'} />
+<svelte:head>
+	<meta name="theme-color" content={$mode === 'dark' ? '#0C0A09' : '#F1F0E9'} />
+</svelte:head>
+
+<ModeWatcher defaultMode={'system'} />
 
 <Toaster />
 

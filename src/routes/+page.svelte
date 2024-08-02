@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ModeWatcher } from 'mode-watcher';
+	import { ModeWatcher, mode } from 'mode-watcher';
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import { Toaster } from '$lib/components/ui/sonner';
@@ -76,7 +76,11 @@
 	$: lyntOpened = $page.url.searchParams.get('id');
 </script>
 
-<ModeWatcher defaultMode={'light'} />
+<svelte:head>
+	<meta name="theme-color" content={$mode === 'dark' ? '#0C0A09' : '#F1F0E9'} />
+</svelte:head>
+
+<ModeWatcher defaultMode={'system'} />
 <Toaster />
 
 {#if loading}
