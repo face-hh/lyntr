@@ -68,11 +68,11 @@ export const POST: RequestHandler = async ({ request, cookies, url }) => {
 			return json({ error: "You can't message yourself" }, { status: 400 });
 		}
 
-		if ((content.trim() === '' && !imageData) && !referencedLyntId) {
+		if (((!content || content.trim() === '') && !imageData) && !referencedLyntId) {
 			return json({ error: 'Empty Content' }, { status: 400 });
 		}
 
-		if (content.length > 2000) {
+		if (content && content.length > 2000) {
 			return json({ error: 'Message is too long' }, { status: 400 });
 		}
 
@@ -123,7 +123,7 @@ export const POST: RequestHandler = async ({ request, cookies, url }) => {
 			.values({
 				sender_id: user_id,
 				receiver_id: other_id,
-				content,
+				content: content || "",
 				image,
 				referencedLyntId: referencedLyntId || null
 			})
