@@ -52,7 +52,7 @@
 		"@tailwindcss/line-clamp": "^0.4.4",
 		"@tensorflow/tfjs-node": "^4.20.0",
 		"@types/ws": "^8.5.11",
-		"bits-ui": "^0.21.12",
+		"bits-ui": "^0.21.13",
 		"clsx": "^2.1.1",
 		"dayjs": "^1.11.12",
 		"discord.js": "^14.15.3",

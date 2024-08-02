@@ -240,7 +240,7 @@
 			{/if}
 		</div>
 
-		<span class="{smaller || reposted ? "max-w-[250px]" : ""} md:max-w-[490px] whitespace-pre-wrap break-words text-lg">{truncated}</span>
+		<span class="{smaller || reposted ? "max-w-[250px]" : ""} md:max-w-[490px] whitespace-pre-wrap text-pretty break-words text-lg overflow-x-hidden">{truncated}</span>
 
 		{#if needsReadMore}
 			<span class="mt-2 text-sm text-muted-foreground hover:underline">Click to Read more...</span>
