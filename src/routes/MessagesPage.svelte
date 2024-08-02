@@ -424,7 +424,7 @@
 					}}
 				>
 					<button
-						class="flex w-full flex-row items-center justify-center gap-2 rounded-full bg-secondary p-1.5 {profile &&
+						class="flex w-full flex-row items-center justify-center gap-2 rounded-full bg-secondary p-1.5 mb-1 {profile &&
 						profile.id === friend.id
 							? 'bg-secondary/50'
 							: ''}"

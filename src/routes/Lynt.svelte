@@ -281,7 +281,7 @@
 					}}
 				>
 					<button
-						class="flex w-72 flex-row items-center rounded-full bg-secondary p-1.5 mx-auto"
+						class="flex w-72 flex-row items-center rounded-full bg-secondary p-1.5 mx-auto mb-1"
 						on:click={async () => {
 							await sendTo(friend.id);
 						}}
