@@ -40,7 +40,7 @@
         }
     ],
     "theme_color": "#0C0A09",
-    "background_color": "#F1F0E9",
+    "background_color": "#0C0A09",
     "start_url": "/?source=pwa",
     "display": "standalone"
 }
