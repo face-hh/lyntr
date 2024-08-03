@@ -3,6 +3,7 @@ import { followers, likes, lynts, users } from '@/server/schema';
 import { json } from '@sveltejs/kit';
 import { and, desc, eq, sql } from 'drizzle-orm';
 import { Feed } from 'feed';
+import { cdnUrl } from '../../../stores';
 
 export async function GET({ url, request }: { url: URL; request: Request }) {
 	const host = url.host;
@@ -63,6 +64,7 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
 				title: `Post`,
 				id: post.id,
 				link: `https://${host}/?id=${post.id}`,
+				image: post.has_image ? cdnUrl(post.id) : undefined,
 				date: post.createdAt!,
 				author: [
 					{
