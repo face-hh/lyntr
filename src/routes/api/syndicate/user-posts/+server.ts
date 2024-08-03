@@ -83,10 +83,11 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
 ${post.content}`;
 				console.log(content);
 			}
+			const postLink = `${host.startsWith('localhost') ? 'http' : 'https'}://${host}/?id=${post.id}`;
 			feed.addItem({
 				title: `${post.reposted ? 'Re p' : 'P'}ost`,
-				id: post.id,
-				link: `${host.startsWith('localhost') ? 'http' : 'https'}://${host}/?id=${post.id}`,
+				id: postLink,
+				link: postLink,
 				image: post.has_image ? cdnUrl(post.id) : undefined,
 				date: post.createdAt!,
 				author: post.reposted
