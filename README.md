@@ -56,13 +56,6 @@ DATABASE_URL="postgresql://postgres.USERNAME:PASSWORD/options"
 If you clicked `Copy` on the Connect page, you should already have the `USERNAME`. Simply replace `PASSWORD` with the one you put at:
 > For the **database password**, you could generate a random password or input yours. **Make sure to save it.**
 
-Now simply split the `DATABASE_URL` components:
-```python
-DB_HOST="LOCATION.pooler.supabase.com" # Change "LOCATION"
-DB_USER="postgres.USERNAME" # Change "USERNAME"
-DB_PASSWORD="PASSWORD" # Change "PASSWORD"
-DB_NAME="postgres" # Can be left like this
-```
 ![New project - 6](github-assets/supabase6.png)
 
 Now run the following:
