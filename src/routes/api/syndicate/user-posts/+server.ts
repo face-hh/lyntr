@@ -4,14 +4,16 @@ import { json } from '@sveltejs/kit';
 import { and, desc, eq, sql } from 'drizzle-orm';
 import { Feed } from 'feed';
 
-export async function GET({ url }) {
+export async function GET({ url, request }: { url: URL; request: Request }) {
 	const host = url.host;
 	const userId = url.searchParams.get('id') || null;
+	const accept = request.headers.get("Accept") ?? "application/rss+xml";
 
 	if (!userId) {
 		return json({ error: 'User ID is required' }, { status: 400 });
 	}
-    console.debug("Getting user handle");
+
+	console.debug("Getting user handle");
 	const handle = await db
 		.select({ handle: users.handle })
 		.from(users)
@@ -19,7 +21,7 @@ export async function GET({ url }) {
 		.limit(1)
 		.then((result) => result[0].handle);
 
-    console.debug("Got user handle:", handle);
+	console.debug("Got user handle:", handle);
 
 	try {
 		const feed = new Feed({
@@ -33,16 +35,20 @@ export async function GET({ url }) {
 			copyright: `All rights reserved ${new Date().getFullYear()}, Lyntr`
 		});
 
-        console.log("Getting posts...");
+		console.log("Getting posts...");
 		const posts = await db
-            .select(
-                {
-                    id: lynts.id,
-                    content: lynts.content,
-                    createdAt: lynts.created_at,
-                    username: users.username
-                }
-            )
+			.select(
+				{
+					id: lynts.id,
+					content: lynts.content,
+					createdAt: lynts.created_at,
+					username: users.username,
+					has_image: lynts.has_image,
+					reposted: lynts.reposted,
+					parent: lynts.parent,
+					user_id: lynts.user_id
+				}
+			)
 			.from(lynts)
 			.leftJoin(users, eq(lynts.user_id, users.id))
 			.leftJoin(likes, eq(lynts.id, likes.lynt_id))
@@ -50,13 +56,13 @@ export async function GET({ url }) {
 			.where(eq(users.handle, handle))
 			.orderBy(desc(lynts.created_at))
 			.limit(100);
-        console.log("Got posts!");
+		console.log("Got posts!");
 
 		for (const post of posts) {
 			feed.addItem({
 				title: `Post`,
-				id: `https://${host}/api/syndicate/user-posts?id=${post.id}`,
-				link: `https://${host}/api/syndicate/user-posts?id=${post.id}`,
+				id: post.id,
+				link: `https://${host}/?id=${post.id}`,
 				date: post.createdAt!,
 				author: [
 					{
@@ -67,14 +73,29 @@ export async function GET({ url }) {
 				content: post.content
 			});
 		}
-
-		return new Response(feed.rss2(), {
-			headers: {
-				'content-type': 'application/rss+xml'
-			}
-		});
-	} catch(err) {
-        console.error("Error while syndicating user posts:", err);
+		switch (accept) {
+			case "application/atom+xml":
+				return new Response(feed.atom1(), {
+					headers: {
+						'content-type': 'application/atom+xml'
+					}
+				})
+			default:
+			case "application/rss+xml":
+				return new Response(feed.rss2(), {
+					headers: {
+						'content-type': 'application/rss+xml'
+					}
+				})
+			case "application/json":
+				return new Response(feed.json1(), {
+					headers: {
+						'content-type': 'application/json'
+					}
+				})
+		}
+	} catch (err) {
+		console.error("Error while syndicating user posts:", err);
 		return new Response('Internal Server Error', { status: 500 });
 	}
 }
