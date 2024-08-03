@@ -1,20 +1,20 @@
 import { db } from '@/server/db';
 import { followers, likes, lynts, users } from '@/server/schema';
 import { json } from '@sveltejs/kit';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import { Feed } from 'feed';
 import { cdnUrl } from '../../../stores';
 
 export async function GET({ url, request }: { url: URL; request: Request }) {
 	const host = url.host;
 	const userId = url.searchParams.get('id') || null;
-	const accept = request.headers.get("Accept") ?? "application/rss+xml";
+	const accept = request.headers.get('Accept') ?? 'application/rss+xml';
 
 	if (!userId) {
 		return json({ error: 'User ID is required' }, { status: 400 });
 	}
 
-	console.debug("Getting user handle");
+	console.debug('Getting user handle');
 	const handle = await db
 		.select({ handle: users.handle })
 		.from(users)
@@ -22,7 +22,7 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
 		.limit(1)
 		.then((result) => result[0].handle);
 
-	console.debug("Got user handle:", handle);
+	console.debug('Got user handle:', handle);
 
 	try {
 		const feed = new Feed({
@@ -36,20 +36,18 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
 			copyright: `All rights reserved ${new Date().getFullYear()}, Lyntr`
 		});
 
-		console.log("Getting posts...");
+		console.log('Getting posts...');
 		const posts = await db
-			.select(
-				{
-					id: lynts.id,
-					content: lynts.content,
-					createdAt: lynts.created_at,
-					username: users.username,
-					has_image: lynts.has_image,
-					reposted: lynts.reposted,
-					parent: lynts.parent,
-					user_id: lynts.user_id
-				}
-			)
+			.select({
+				id: lynts.id,
+				content: lynts.content,
+				createdAt: lynts.created_at,
+				username: users.username,
+				has_image: lynts.has_image,
+				reposted: lynts.reposted,
+				parent: lynts.parent,
+				user_id: lynts.user_id
+			})
 			.from(lynts)
 			.leftJoin(users, eq(lynts.user_id, users.id))
 			.leftJoin(likes, eq(lynts.id, likes.lynt_id))
@@ -57,47 +55,84 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
 			.where(eq(users.handle, handle))
 			.orderBy(desc(lynts.created_at))
 			.limit(100);
-		console.log("Got posts!");
+		console.log('Got posts!');
 
 		for (const post of posts) {
+			const originalPost = post.reposted
+				? await db
+						.select({
+							id: lynts.id,
+							content: lynts.content,
+							parent: lynts.parent,
+							user_id: lynts.user_id
+						})
+						.from(lynts)
+						.where(eq(lynts.id, post.parent!))
+						.limit(1)
+						.then((result) => result[0])
+				: null;
+			const originalPostAuthor = post.reposted ? await db
+				.select({ username: users.username })
+				.from(users)
+				.where(eq(users.id, originalPost!.user_id!))
+				.limit(1)
+				.then((result) => result[0].username) : null;
+			let content = post.content;
+			if (post.reposted && originalPost) {
+				content = `> ${originalPost.content}\n
+${post.content}`;
+				console.log(content);
+			}
 			feed.addItem({
-				title: `Post`,
+				title: `${post.reposted ? 'Re p' : 'P'}ost`,
 				id: post.id,
-				link: `https://${host}/?id=${post.id}`,
+				link: `${host.startsWith('localhost') ? 'http' : 'https'}://${host}/?id=${post.id}`,
 				image: post.has_image ? cdnUrl(post.id) : undefined,
 				date: post.createdAt!,
-				author: [
-					{
-						name: post.username!
-					}
-				],
+				author: post.reposted
+					? [
+							{
+								name: post.username!
+							},
+							// add original post author
+							{
+								name: originalPostAuthor!
+							}
+						]
+					: [
+							{
+								name: post.username!
+							}
+						],
+				// the description is shown as a "preview" in the NewsFlash app.
 				description: post.content,
-				content: post.content
+				// the content is shown in a panel to the right in the NewsFlash app.
+				content
 			});
 		}
 		switch (accept) {
-			case "application/atom+xml":
+			case 'application/atom+xml':
 				return new Response(feed.atom1(), {
 					headers: {
-						'content-type': 'application/atom+xml'
+						'Content-Type': 'application/atom+xml'
 					}
-				})
+				});
 			default:
-			case "application/rss+xml":
+			case 'application/rss+xml':
 				return new Response(feed.rss2(), {
 					headers: {
-						'content-type': 'application/rss+xml'
+						'Content-Type': 'application/rss+xml'
 					}
-				})
-			case "application/json":
+				});
+			case 'application/json':
 				return new Response(feed.json1(), {
 					headers: {
-						'content-type': 'application/json'
+						'Content-Type': 'application/json'
 					}
-				})
+				});
 		}
 	} catch (err) {
-		console.error("Error while syndicating user posts:", err);
+		console.error('Error while syndicating user posts:', err);
 		return new Response('Internal Server Error', { status: 500 });
 	}
 }
