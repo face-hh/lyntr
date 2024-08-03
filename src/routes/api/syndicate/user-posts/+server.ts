@@ -78,6 +78,8 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
 				.limit(1)
 				.then((result) => result[0].username) : null;
 			let content = post.content;
+			// TODO: the newline isn't showed in the Newsflash app,
+			//       it seems to work if you use media:description instead of content.
 			if (post.reposted && originalPost) {
 				content = `> ${originalPost.content}\n
 ${post.content}`;
