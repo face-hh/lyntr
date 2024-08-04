@@ -7,7 +7,7 @@
 	import Avatar from './Avatar.svelte';
 	import { Button } from '@/components/ui/button';
 	import { Label } from '@/components/ui/label';
-	import { Brain, Calendar } from 'lucide-svelte';
+	import { Brain, Calendar, Rss } from 'lucide-svelte';
 	import { Separator } from '@/components/ui/separator';
 	import FollowListPopup from './FollowListPopup.svelte';
 	import ProfileSettings from './ProfileSettings.svelte';
@@ -197,6 +197,7 @@
 									</Tooltip.Content>
 								</Tooltip.Root>
 							{/if}
+							<a href="/api/syndicate/user-posts/?id={profile.id}"><Rss/></a>
 						</div>
 						<p class="text-xl text-muted-foreground">@{profile.handle}</p>
 						<div class="w-24 w-full">
