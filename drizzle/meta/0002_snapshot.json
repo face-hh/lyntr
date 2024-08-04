@@ -1,5 +1,5 @@
 {
-  "id": "21fcd44a-68e7-43c9-9074-039eb3a29464",
+  "id": "e7adf0f7-93ff-45de-874b-0599733b1908",
   "prevId": "b2855ae0-cf08-4251-ad0f-ea64d0cf1b7f",
   "version": "7",
   "dialect": "postgresql",
@@ -318,7 +318,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "bigserial",
           "primaryKey": true,
           "notNull": true
         },
@@ -346,6 +346,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "referenced_lynt_id": {
+          "name": "referenced_lynt_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "read": {
           "name": "read",
           "type": "boolean",
@@ -361,7 +367,23 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "created_at_idx": {
+          "name": "created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "messages_sender_id_users_id_fk": {
           "name": "messages_sender_id_users_id_fk",
@@ -382,6 +404,19 @@
           "tableTo": "users",
           "columnsFrom": [
             "receiver_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "messages_referenced_lynt_id_lynts_id_fk": {
+          "name": "messages_referenced_lynt_id_lynts_id_fk",
+          "tableFrom": "messages",
+          "tableTo": "lynts",
+          "columnsFrom": [
+            "referenced_lynt_id"
           ],
           "columnsTo": [
             "id"

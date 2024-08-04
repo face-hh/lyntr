@@ -19,22 +19,8 @@
     {
       "idx": 2,
       "version": "7",
-      "when": 1722452189844,
-      "tag": "0002_chilly_xavin",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1722474758481,
-      "tag": "0003_simple_slayback",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1722546782550,
-      "tag": "0004_lonely_spitfire",
+      "when": 1722730351277,
+      "tag": "0002_goofy_prism",
       "breakpoints": true
     }
   ]

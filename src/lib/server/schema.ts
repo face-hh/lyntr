@@ -1,4 +1,4 @@
-import { boolean, date, pgTable, serial, timestamp, varchar, integer, type AnyPgColumn, primaryKey, text, uuid, uniqueIndex, index } from 'drizzle-orm/pg-core';
+import { boolean, date, pgTable, bigserial, timestamp, varchar, integer, type AnyPgColumn, primaryKey, text, uuid, uniqueIndex, index } from 'drizzle-orm/pg-core';
 import { drizzle } from 'drizzle-orm/node-postgres';
 
 export const users = pgTable('users', {
@@ -28,7 +28,7 @@ export const lynts = pgTable('lynts', {
 });
 
 export const messages = pgTable('messages', {
-    id: serial('id').primaryKey(),
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
     sender_id: text('sender_id').references(() => users.id),
     receiver_id: text('receiver_id').references(() => users.id),
     content: text('content').notNull(),
