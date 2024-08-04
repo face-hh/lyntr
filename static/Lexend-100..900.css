@@ -2,53 +2,53 @@
   font-family: 'Lexend';
   font-style: normal;
   font-weight: 100;
-  src: url(https://fonts.gstatic.com/s/lexend/v19/wlptgwvFAVdoq2_F94zlCfv0bz1WCzsX_LA.ttf) format('truetype');
+  src: url(/fonts/lexend-100.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Lexend';
   font-style: normal;
   font-weight: 200;
-  src: url(https://fonts.gstatic.com/s/lexend/v19/wlptgwvFAVdoq2_F94zlCfv0bz1WC7sW_LA.ttf) format('truetype');
+  src: url(/fonts/lexend-200.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Lexend';
   font-style: normal;
   font-weight: 300;
-  src: url(https://fonts.gstatic.com/s/lexend/v19/wlptgwvFAVdoq2_F94zlCfv0bz1WC2UW_LA.ttf) format('truetype');
+  src: url(/fonts/lexend-300.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Lexend';
   font-style: normal;
   font-weight: 400;
-  src: url(https://fonts.gstatic.com/s/lexend/v19/wlptgwvFAVdoq2_F94zlCfv0bz1WCzsW_LA.ttf) format('truetype');
+  src: url(/fonts/lexend-400.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Lexend';
   font-style: normal;
   font-weight: 500;
-  src: url(https://fonts.gstatic.com/s/lexend/v19/wlptgwvFAVdoq2_F94zlCfv0bz1WCwkW_LA.ttf) format('truetype');
+  src: url(/fonts/lexend-500.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Lexend';
   font-style: normal;
   font-weight: 600;
-  src: url(https://fonts.gstatic.com/s/lexend/v19/wlptgwvFAVdoq2_F94zlCfv0bz1WC-UR_LA.ttf) format('truetype');
+  src: url(/fonts/lexend-600.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Lexend';
   font-style: normal;
   font-weight: 700;
-  src: url(https://fonts.gstatic.com/s/lexend/v19/wlptgwvFAVdoq2_F94zlCfv0bz1WC9wR_LA.ttf) format('truetype');
+  src: url(/fonts/lexend-700.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Lexend';
   font-style: normal;
   font-weight: 800;
-  src: url(https://fonts.gstatic.com/s/lexend/v19/wlptgwvFAVdoq2_F94zlCfv0bz1WC7sR_LA.ttf) format('truetype');
+  src: url(/fonts/lexend-800.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Lexend';
   font-style: normal;
   font-weight: 900;
-  src: url(https://fonts.gstatic.com/s/lexend/v19/wlptgwvFAVdoq2_F94zlCfv0bz1WC5IR_LA.ttf) format('truetype');
+  src: url(/fonts/lexend-900.ttf) format('truetype');
 }
