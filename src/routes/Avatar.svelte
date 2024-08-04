@@ -38,5 +38,5 @@
 		? 'border-2 border-solid border-primary'
 		: ''} {editable ? 'cursor-pointer' : ''} text-center"
 	on:click={handleClick}
-        on:error|once={(e) => e.target.src = "/default.png"}
+        on:error|once={(e) => e.target.src = "/default.webp"}
 />
