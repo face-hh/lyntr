@@ -106,9 +106,7 @@
 			if (scrollTop + clientHeight >= scrollHeight - 5 && !loadingBottomFeed) {
 				loadingBottomFeed = true;
 
-				fetchFeed(true);
-
-				loadingBottomFeed = false;
+				fetchFeed(true).then(() => {loadingBottomFeed = false;});
 			}
 		}
 	}
@@ -124,6 +122,10 @@
 	}
 
 	async function getLynt(lyntOpened: string) {
+		let find_in_feed = feed.find((element: any) => element.id === lyntOpened)
+		if(find_in_feed != undefined) {
+			return find_in_feed as FeedItem;
+		}
 		const response = await fetch('api/lynt?id=' + lyntOpened, { method: 'GET' });
 
 		if (response.status !== 200) toast('Error loading lynt!');
