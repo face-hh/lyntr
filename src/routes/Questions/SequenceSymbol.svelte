@@ -22,11 +22,11 @@
 	</div>
 	<div class="flex items-center space-x-2">
 		<RadioGroup.Item value="wrong3" id="r3" on:click={() => ($isButtonDisabled = false)} />
-		<Label for="r2">●</Label>
+		<Label for="r3">●</Label>
 	</div>
 	<div class="flex items-center space-x-2">
 		<RadioGroup.Item value="idfk" id="r4" on:click={() => ($isButtonDisabled = false)} />
-		<Label for="r2">i have no fucking idea</Label>
+		<Label for="r4">i have no fucking idea</Label>
 	</div>
 	<RadioGroup.Input name="spacing" />
 </RadioGroup.Root>
