@@ -1,0 +1,74 @@
+<script lang="ts">
+	import { ModeWatcher, mode } from 'mode-watcher';
+
+	import '../../app.css';
+
+	import { onMount } from 'svelte';
+	import { Toaster } from '$lib/components/ui/sonner';
+	import LoadingSpinner from '../LoadingSpinner.svelte';
+	import AccountCreator from '../AccountCreator.svelte';
+	import { supabase } from '@/supabase';
+	import MainPage from '../MainPage.svelte';
+
+	let authenticated: boolean = false;
+	let loading: boolean = true;
+	let noAccount: boolean = false;
+	let userData = {
+		username: '',
+		handle: '',
+		created_at: '',
+		iq: 90,
+		id: ''
+	};
+
+	async function checkAuthAndProfileStatus() {
+		const { data, error } = await supabase.auth.getSession();
+		if (data.session?.access_token) authenticated = true;
+		try {
+			const response = await fetch('/api/me', {
+				method: 'GET',
+				credentials: 'include'
+			});
+			console.log(response.status);
+			if (response.status === 200) {
+				const res = await response.json();
+				userData = {
+					username: res.username,
+					handle: res.handle,
+					created_at: res.created_at,
+					iq: res.iq,
+					id: res.id
+				};
+
+				noAccount = false;
+			} else noAccount = true;
+		} catch (error) {
+			console.error('Error checking auth and profile status:', error);
+			noAccount = false;
+		} finally {
+			loading = false;
+		}
+	}
+
+	onMount(() => {
+		checkAuthAndProfileStatus();
+	});
+
+	$: handle = userData.handle;
+</script>
+
+<svelte:head>
+	<meta name="theme-color" content={$mode === 'dark' ? '#0C0A09' : '#F1F0E9'} />
+</svelte:head>
+
+<ModeWatcher defaultMode={'system'} />
+
+<Toaster />
+
+{#if loading}
+	<LoadingSpinner />
+{:else if noAccount}
+	<AccountCreator />
+{:else}
+	<MainPage {...userData} profileOpened={handle} />
+{/if}
