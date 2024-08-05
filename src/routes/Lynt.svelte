@@ -162,13 +162,13 @@
 
 <button on:click|stopPropagation={() => openLynt(id)} class="mb-2 w-full text-left">
 	<div
-		class="flex w-full gap-3 rounded-xl bg-lynt-foreground p-3 transition-colors hover:bg-border"
+		class="flex w-full gap-3 overflow-hidden rounded-xl bg-lynt-foreground p-3 transition-colors hover:bg-border"
 	>
 		<a href="/@{handle}" class="inline-block max-h-[40px] min-w-[40px]">
 			<Avatar size={10} src={cdnUrl(userId, 'small')} alt="A profile picture." />
 		</a>
 
-		<div class="flex w-full max-w-[530px] flex-col gap-2 overflow-hidden">
+		<div class="flex w-full max-w-[530px] flex-col gap-2">
 			<!-- Lynt that actually gets displayed. Main lynt -->
 			<LyntContents
 				{truncateContent}
@@ -211,7 +211,7 @@
 					</div>
 				</button>
 			{/if}
-			<div class="mt-2 flex items-center justify-between gap-2 mb-1">
+			<div class="mb-1 mt-2 flex items-center justify-between gap-2">
 				<div class="flex items-center gap-2">
 					<OutlineButton
 						icon={MessageCircle}
