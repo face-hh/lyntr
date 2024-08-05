@@ -50,7 +50,7 @@
 			"name": "My feed",
 			"short_name": "Feed",
 			"description": "",
-			"url": "/feed?source=pwa",
+			"url": "/shortcuts/feed?source=pwa",
 			"icons": [
 				{
 					"src": "/icons/feed.svg",
@@ -62,7 +62,7 @@
 			"name": "What's new?",
 			"short_name": "Notifications",
 			"description": "",
-			"url": "/notifications?source=pwa",
+			"url": "/shortcuts/notifications?source=pwa",
 			"icons": [
 				{
 					"src": "/icons/notification.svg",
@@ -74,7 +74,7 @@
 			"name": "My profile",
 			"short_name": "Profile",
 			"description": "",
-			"url": "/my-profile?source=pwa",
+			"url": "/shortcuts/my-profile?source=pwa",
 			"icons": [
 				{
 					"src": "/icons/profile.svg",
