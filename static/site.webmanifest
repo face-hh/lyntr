@@ -45,6 +45,20 @@
             "form_factor": "wide"
         }
     ],
+    "shortcuts": [
+        {
+            "name": "Feed",
+            "path": "/feed?source=pwa"
+        },
+        {
+            "name": "Notifications",
+            "path": "/notifications?source=pwa"
+        },
+        {
+            "name": "Profile",
+            "path": "/my-profile?source=pwa"
+        }
+    ],
     "theme_color": "#0C0A09",
     "background_color": "#0C0A09",
     "start_url": "/?source=pwa",
