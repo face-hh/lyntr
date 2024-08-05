@@ -11,7 +11,8 @@ import { minioClient } from '@/server/minio';
 import { deleteLynt, lyntObj, uploadCompressed } from '../util';
 import { sendMessage } from '@/sse';
 
-const ratelimits = new Map();
+const ratelimits = new Map<string, number>();
+const COOLDOWN_PERIOD = 5000; // 5 seconds in milliseconds
 
 export const POST: RequestHandler = async ({
 	request,
@@ -40,15 +41,15 @@ export const POST: RequestHandler = async ({
 		return json({ error: 'Authentication failed' }, { status: 401 });
 	}
 
-	const ratelimit = ratelimits.get(userId);
+	const now = Date.now();
+	const lastRequest = ratelimits.get(userId);
 
-	if (!ratelimit) {
-		ratelimits.set(userId, Date.now());
-	} else if (Math.round((Date.now() - ratelimit) / 1000) < 5) {
-		return json({ error: 'You are ratelimited.' }, { status: 429 });
-	} else {
-		ratelimits.delete(userId);
+	if (lastRequest && now - lastRequest < COOLDOWN_PERIOD) {
+		const remainingTime = Math.ceil((COOLDOWN_PERIOD - (now - lastRequest)) / 1000);
+		return json({ error: `You are rate limited. Try again in ${remainingTime} seconds.` }, { status: 429 });
 	}
+
+	ratelimits.set(userId, now);
 
 	const formData = await request.formData();
 

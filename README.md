@@ -65,6 +65,10 @@ npx drizzle-kit migrate
 npx drizzle-kit push
 ```
 
+And follow [this guide on how to enable the Discord auth in Supabase](https://supabase.com/docs/guides/auth/social-login/auth-discord), until the code part. It should look something like this.
+![image](https://github.com/user-attachments/assets/a8bd3043-3cae-4d46-b42c-0a576bcf59f5)
+
+
 ## MinIO
 We need Min.io for images. This and the next step can be omitted if you don't need *Image support* / *reporting*.
 
