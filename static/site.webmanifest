@@ -47,8 +47,8 @@
 	],
 	"shortcuts": [
 		{
-			"name": "Feed",
-			"short_name": "",
+			"name": "My feed",
+			"short_name": "Feed",
 			"description": "",
 			"url": "/feed?source=pwa",
 			"icons": [
@@ -59,8 +59,8 @@
 			]
 		},
 		{
-			"name": "Notifications",
-			"short_name": "",
+			"name": "What's new?",
+			"short_name": "Notifications",
 			"description": "",
 			"url": "/notifications?source=pwa",
 			"icons": [
@@ -71,8 +71,8 @@
 			]
 		},
 		{
-			"name": "Profile",
-			"short_name": "",
+			"name": "My profile",
+			"short_name": "Profile",
 			"description": "",
 			"url": "/my-profile?source=pwa",
 			"icons": [
