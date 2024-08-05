@@ -50,7 +50,7 @@
 			"name": "My feed",
 			"short_name": "Feed",
 			"description": "Check out what's new and trending on your feed.",
-			"url": "/shortcuts/feed?source=pwa",
+			"url": "/?utm_source=pwa&utm_shortcut=true",
 			"icons": [
 				{
 					"src": "/icons/feed.svg",
@@ -62,7 +62,7 @@
 			"name": "What's new?",
 			"short_name": "Notifications",
 			"description": "See what happened while you were away.",
-			"url": "/shortcuts/notifications?source=pwa",
+			"url": "/notifications?utm_source=pwa&utm_shortcut=true",
 			"icons": [
 				{
 					"src": "/icons/notification.svg",
@@ -74,7 +74,7 @@
 			"name": "My profile",
 			"short_name": "Profile",
 			"description": "See your profile and edit your profile settings.",
-			"url": "/shortcuts/my-profile?source=pwa",
+			"url": "/my_profile?utm_source=pwa&utm_shortcut=true",
 			"icons": [
 				{
 					"src": "/icons/profile.svg",
@@ -85,6 +85,6 @@
 	],
 	"theme_color": "#0C0A09",
 	"background_color": "#0C0A09",
-	"start_url": "/?source=pwa",
+	"start_url": "/?utm_source=pwa",
 	"display": "standalone"
 }
