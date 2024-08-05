@@ -62,7 +62,6 @@ function startBot() {
             }
         }
     });
-
     client.on('interactionCreate', async interaction => {
         try {
             if (!interaction.isButton()) return;
@@ -73,18 +72,16 @@ function startBot() {
             const report = reportData.get(messageId);
 
             if (!report) {
-                if (interaction.isRepliable()) {
-                    await interaction.reply({ content: 'Error: Report data not found', ephemeral: true });
-                }
+                await interaction.reply({ content: 'Error: Report data not found', ephemeral: true });
                 return;
             }
+
+            // Defer the reply immediately
+            await interaction.deferUpdate();
 
             await handleButtonPress(interaction, report.lyntId, report.userId);
         } catch (error) {
             console.error('Error handling interaction:', error);
-            if (interaction.isRepliable()) {
-                await interaction.reply({ content: 'An error occurred while processing your request', ephemeral: true });
-            }
         }
     });
 
@@ -277,7 +274,7 @@ async function handleButtonPress(interaction: any, lyntId: string, userId: strin
             resultMessage = 'Unknown action';
         }
 
-        await interaction.update({
+        await interaction.editReply({
             content: resultMessage,
             embeds: interaction.message.embeds,
             components: []
@@ -286,7 +283,7 @@ async function handleButtonPress(interaction: any, lyntId: string, userId: strin
     } catch (error) {
         console.error('Error handling button press:', error);
 
-        await interaction.update({
+        await interaction.editReply({
             content: 'An error occurred while processing your request',
             embeds: interaction.message.embeds,
             components: []
