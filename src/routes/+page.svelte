@@ -25,6 +25,18 @@
 		const { data } = await supabase.auth.getSession();
 		if (data.session?.access_token) {
 			authenticated = true;
+
+			if (localStorage.getItem('user-data')) {
+				try {
+					const data = JSON.parse(localStorage.getItem('user-data')!);
+					loading = false;
+					noAccount = false;
+					userData = data;
+				} catch (error) {
+					console.error('Failed to load user data from cache', error);
+				}
+			}
+
 			const {
 				data: { user }
 			} = await supabase.auth.getUser();
@@ -49,6 +61,8 @@
 							iq: res.iq,
 							id: res.id
 						};
+
+						localStorage.setItem('user-data', JSON.stringify(userData));
 						// The new token is automatically set as a cookie by the server
 						noAccount = false;
 					} else {
