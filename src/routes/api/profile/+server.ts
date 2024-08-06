@@ -28,7 +28,7 @@ let questions: Question[] = [
 	{
 		id: 'CatQuestion',
 		condition: (input: any) => {
-			return Boolean(input) === true ? -2 : 1;
+			return sanitizeBool(input) === true ? -2 : 1;
 		}
 	},
 	{
@@ -82,7 +82,7 @@ let questions: Question[] = [
 	{
 		id: 'Dexerto',
 		condition: (input: any) => {
-			return Boolean(input) == true ? -25 : 25;
+			return sanitizeBool(input) == true ? -25 : 25;
 		}
 	},
 	{
@@ -100,19 +100,19 @@ let questions: Question[] = [
 	{
 		id: 'AudioRick',
 		condition: (input: any) => {
-			return Boolean(input) ? -13 : 5;
+			return sanitizeBool(input) ? -13 : 5;
 		}
 	},
 	{
 		id: 'Degree',
 		condition: (input: any) => {
-			return Boolean(input) ? 0 : -5;
+			return sanitizeBool(input) ? 0 : -5;
 		}
 	},
 	{
 		id: 'AudioAgeOfWar',
 		condition: (input: any) => {
-			return Boolean(input) ? 15 : -5;
+			return sanitizeBool(input) ? 15 : -5;
 		}
 	},
 	{
@@ -124,19 +124,19 @@ let questions: Question[] = [
 	{
 		id: 'Kubernete',
 		condition: (input: any) => {
-			return Boolean(input) ? -3 : 0;
+			return sanitizeBool(input) ? -3 : 0;
 		}
 	},
 	{
 		id: 'ReactionImage',
 		condition: (input: any) => {
-			return Boolean(input) ? -10 : 5;
+			return sanitizeBool(input) ? -10 : 5;
 		}
 	},
 	{
 		id: 'GimmickAccount',
 		condition: (input: any) => {
-			return Boolean(input) ? -5 : 5;
+			return sanitizeBool(input) ? -5 : 5;
 		}
 	}
 ];
@@ -447,4 +447,8 @@ function sanitizeNum(input: string) {
 	if (num < 0) num = 0;
 
 	return num;
+}
+
+function sanitizeBool(input: string) {
+	return input === 'true'
 }
