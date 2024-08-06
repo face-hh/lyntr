@@ -3,8 +3,9 @@ import type { RequestHandler } from '@sveltejs/kit';
 
 import { verifyAuthJWT, deleteJWT, createAuthJWT } from '@/server/jwt';
 import { db } from '@/server/db';
-import { users } from '@/server/schema';
+import { users, lynts } from '@/server/schema';
 import { eq } from 'drizzle-orm';
+import { deleteLynt } from '../util';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	const admin = request.headers.get('Authorization');
@@ -29,6 +30,21 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		if (!updatedUser) {
 			return json({ error: 'User not found' }, { status: 404 });
 		}
+
+        setTimeout(async () => {
+            try {
+                const userLynts = await db
+                    .select({ id: lynts.id })
+                    .from(lynts)
+                    .where(eq(lynts.user_id, userId));
+
+                for (const lynt of userLynts) {
+                    await deleteLynt(lynt.id);
+                }
+			} catch (error) {
+                console.error('Error deleting lynts:', error);
+            }
+        }, 0);
 
 		const token = cookies.get('authToken');
 		if (token) {
