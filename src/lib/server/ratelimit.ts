@@ -8,9 +8,9 @@ export const normalRatelimit = new Ratelimit({
 	analytics: false
 });
 
-// 1 request per 5 seconds
+// 1 request per 15 seconds
 export const sensitiveRatelimit = new Ratelimit({
 	redis: Redis.fromEnv(),
-	limiter: Ratelimit.slidingWindow(1, '5 s'),
+	limiter: Ratelimit.slidingWindow(1, '15 s'),
 	analytics: false
 });
