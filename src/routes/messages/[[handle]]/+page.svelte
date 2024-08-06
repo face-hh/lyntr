@@ -5,11 +5,11 @@
 
 	import { onMount } from 'svelte';
 	import { Toaster } from '$lib/components/ui/sonner';
-	import LoadingSpinner from '../LoadingSpinner.svelte';
-	import Auth from '../Auth.svelte';
-	import AccountCreator from '../AccountCreator.svelte';
+	import LoadingSpinner from '../../LoadingSpinner.svelte';
+	import Auth from '../../Auth.svelte';
+	import AccountCreator from '../../AccountCreator.svelte';
 	import { page } from '$app/stores';
-	import MainPage from '../MainPage.svelte';
+	import MainPage from '../../MainPage.svelte';
 	import Cookies from 'js-cookie';
 
 	let authenticated: boolean = false;
@@ -56,7 +56,7 @@
 		checkAuthAndProfileStatus();
 	});
 
-	$: handle = $page.params.handle.replace(/^@/, '');
+	$: otherId = $page.params.handle?.replace(/^@/, '') || undefined;
 </script>
 
 <ModeWatcher defaultMode={'light'} />
@@ -70,5 +70,7 @@
 {:else if noAccount}
 	<AccountCreator />
 {:else}
-	<MainPage {...userData} otherId={handle} />
+	{#key otherId}
+		<MainPage {...userData} {otherId} />
+	{/key}
 {/if}
