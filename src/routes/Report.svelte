@@ -4,6 +4,7 @@
 	import { Label } from '@/components/ui/label';
 	import { Textarea } from '@/components/ui/textarea';
 	import { Flag } from 'lucide-svelte';
+	import { toast } from 'svelte-sonner';
 
 	let min = 50;
 	let max = 2000;
@@ -45,6 +46,11 @@
 				});
 
 				if (!response.ok) {
+					if (response.status == 429)
+						throw new Error(
+							'Woah, slow down! You are being ratelimited. Please try again in a bit.'
+						);
+
 					throw new Error('Failed to submit report');
 				}
 

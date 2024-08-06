@@ -1,4 +1,5 @@
 import { verifyAuthJWT } from '@/server/jwt';
+import { sensitiveRatelimit } from '@/server/ratelimit';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 
@@ -14,6 +15,12 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		reporterId = decodedToken.userId;
 	} catch (error) {
 		return json({ error: 'Invalid token' }, { status: 401 });
+	}
+
+	const { success } = await sensitiveRatelimit.limit(reporterId);
+
+	if (!success) {
+		return json({ error: 'You are being ratelimited.' }, { status: 429 });
 	}
 
 	try {

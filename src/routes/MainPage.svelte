@@ -203,6 +203,8 @@
 		comment = '';
 
 		if (response.status !== 201) {
+			if (response.status == 429)
+				return toast('Woah, slow down! You are being ratelimited. Please try again in a bit.');
 			toast(
 				`Something went wrong while commenting on this lynt. Error: ${response.status} | ${response.statusText}`
 			);
@@ -273,7 +275,11 @@
 						<Notifications {handleLyntClick} />
 					{:else if page.startsWith('profile')}
 						{#key page}
-							<ProfilePage myId={id} profileHandle={page.replace('profile', '')} {handleLyntClick} />
+							<ProfilePage
+								myId={id}
+								profileHandle={page.replace('profile', '')}
+								{handleLyntClick}
+							/>
 						{/key}
 					{:else if page === 'home'}
 						<div class="min-w-1/3 mt-5 flex h-full flex-col md:px-1">
