@@ -221,3 +221,7 @@
 		</Card.Content>
 	</Card.Root>
 </div>
+
+<svelte:head>
+	<title>Notifications | Lyntr</title>
+</svelte:head>
