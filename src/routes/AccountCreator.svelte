@@ -5,10 +5,9 @@
 	import { Separator } from '@/components/ui/separator';
 	import { Label } from '@/components/ui/label';
 
-	import { supabase } from '@/supabase';
-
 	import IQTest from './IQTest.svelte';
 	import { toast } from 'svelte-sonner';
+	import { PUBLIC_DISCORD_CLIENT_ID } from '$env/static/public';
 
 	let loading = false;
 	let nickname = '';
@@ -17,7 +16,11 @@
 	let totalIQ: number | null;
 
 	async function authLogin() {
-		await supabase.auth.signInWithOAuth({ provider: 'discord' });
+		const callbackUrl = new URL(window.location.href);
+		callbackUrl.search = '';
+		callbackUrl.pathname = '/api/callback';
+
+		window.location.href = `https://discord.com/oauth2/authorize?client_id=${PUBLIC_DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(callbackUrl.toString())}&scope=identify+email`;
 	}
 
 	let allQuestionsCompleted = localStorage.getItem('current_question') === '20' ? true : false;
@@ -37,19 +40,10 @@
 		}
 
 		try {
-			const { data, error } = await supabase.auth.getSession();
-
-			if (error) {
-				alert('Error fetching session:' + error.message);
-				location.reload();
-				return;
-			}
-
 			const response = await fetch('/api/profile', {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${data.session?.access_token}`
+					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
 					username: nickname,

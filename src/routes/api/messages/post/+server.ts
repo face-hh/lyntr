@@ -10,6 +10,7 @@ import { uploadCompressed, lyntObj } from '../../util';
 import { cdnUrl } from '../../../stores';
 import { minioClient } from '@/server/minio';
 import { sendMessage } from '@/sse';
+import { isImageNsfw, NSFW_ERROR } from '@/moderation';
 
 const ratelimits = new Map();
 
@@ -112,8 +113,13 @@ export const POST: RequestHandler = async ({ request, cookies, url }) => {
 		let image = null;
 
 		if (imageData) {
+			const inputBuffer = Buffer.from(await imageData.arrayBuffer());
+			if (await isImageNsfw(inputBuffer)) {
+				return NSFW_ERROR;
+			}
+
 			const fileName = user_id + '_' + String(idGenerator.getUniqueID());
-			await uploadCompressed(Buffer.from(await imageData.arrayBuffer()), fileName, minioClient);
+			await uploadCompressed(inputBuffer, fileName, minioClient);
 			image = fileName;
 		}
 
