@@ -1,5 +1,4 @@
-FROM node:20-alpine
-
+FROM node:lts-bullseye
 WORKDIR /app
 
 COPY . .
