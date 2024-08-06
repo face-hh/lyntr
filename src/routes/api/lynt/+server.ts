@@ -117,7 +117,11 @@ export const POST: RequestHandler = async ({
 			lyntValues.has_image = true;
 		}
 
-		const [newLynt] = await db.insert(lynts).values(lyntValues).returning();
+		const lyntobj = lyntObj(userId);
+		const [newLynt] = await db
+			.insert(lynts)
+			.values(lyntValues)
+			.returning({ ...lyntobj, parent: lynts.parent });
 
 		sendMessage(newLynt);
 
