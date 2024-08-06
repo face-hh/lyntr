@@ -7,7 +7,6 @@ import { eq, sql, isNull, not, and } from 'drizzle-orm';
 import sanitizeHtml from 'sanitize-html';
 import { Snowflake } from 'nodejs-snowflake';
 import { createNotification } from '@/server/notifications';
-<<<<<<< HEAD
 import { lyntObj, uploadCompressed } from '../util';
 import { minioClient } from '@/server/minio';
 
