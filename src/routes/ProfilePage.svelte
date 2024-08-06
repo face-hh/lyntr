@@ -276,7 +276,7 @@
 				</blockquote>
 			</div>
 
-			<div class="flex flex-col gap-3 max-w-[600px]">
+			<div class="flex flex-col gap-3">
 				<Separator class="mt-3" />
 				<TopTab {tabs} {currentTab} onTabChange={handleTabChange}/>
 				<Separator />
