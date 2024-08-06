@@ -9,7 +9,6 @@ import { Snowflake } from 'nodejs-snowflake';
 import { createNotification } from '@/server/notifications';
 import { lyntObj } from '../util';
 
-const ratelimits = new Map();
 
 export const POST: RequestHandler = async ({
 	request,
@@ -38,8 +37,7 @@ export const POST: RequestHandler = async ({
 		console.error('Authentication error:', error);
 		return json({ error: 'Authentication failed' }, { status: 401 });
 	}
-	const ratelimit = ratelimits.get(userId);
-
+CF-Connecting-IP
 	if (!ratelimit) {
 		ratelimits.set(userId, Date.now());
 	} else if (Math.round((Date.now() - ratelimit) / 1000) < 5) {

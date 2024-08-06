@@ -12,6 +12,7 @@ import { deleteLynt, uploadAvatar } from '../util';
 import { readFileSync } from 'fs';
 import sanitizeHtml from 'sanitize-html';
 import { isImageNsfw, NSFW_ERROR } from '@/moderation';
+import { sensitiveRatelimit } from '@/server/ratelimit';
 
 interface Question {
 	id: string;
@@ -150,6 +151,13 @@ export const POST: RequestHandler = async ({
 	request: Request;
 	cookies: Cookies;
 }) => {
+	const { success } = await sensitiveRatelimit.limit(
+		request.headers.get('CF-Connecting-IP') ?? '127.0.0.1'
+	);
+	if (!success) {
+		return json({ error: 'You are being ratelimited.' });
+	}
+
 	const discordToken = cookies.get('temp-discord-token');
 	const meRes = await fetch('https://discord.com/api/v10/users/@me', {
 		headers: {
@@ -176,11 +184,7 @@ export const POST: RequestHandler = async ({
 		);
 	}
 
-	const existingUser = await db
-		.select()
-		.from(users)
-		.where(eq(users.email, meBody.email))
-		.limit(1);
+	const existingUser = await db.select().from(users).where(eq(users.email, meBody.email)).limit(1);
 
 	if (existingUser.length > 0) {
 		return json({ error: 'Email already in use' }, { status: 409 });
