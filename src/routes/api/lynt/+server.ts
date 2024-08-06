@@ -123,7 +123,7 @@ export const POST: RequestHandler = async ({
 			.values(lyntValues)
 			.returning({ ...lyntobj, parent: lynts.parent });
 
-		sendMessage(newLynt);
+		sendMessage(uniqueLyntId);
 
 		return json(newLynt, { status: 201 });
 	} catch (error) {
