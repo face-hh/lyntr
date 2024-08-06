@@ -3,7 +3,6 @@ import type { RequestHandler } from '@sveltejs/kit';
 import { db } from '@/server/db';
 import { users } from '@/server/schema';
 import { eq } from 'drizzle-orm';
-import { supabase } from '@/supabase';
 import { createAuthJWT, verifyAuthJWT } from '@/server/jwt';
 
 export const POST: RequestHandler = async ({ request, url, cookies }) => {
@@ -45,6 +44,10 @@ export const POST: RequestHandler = async ({ request, url, cookies }) => {
 			secure: true,
 			sameSite: 'strict',
 			maxAge: 31536000 // 1 year
+		});
+
+		cookies.delete('temp-discord-token', {
+			path: '/'
 		});
 
 		return json({}, { status: 200 });

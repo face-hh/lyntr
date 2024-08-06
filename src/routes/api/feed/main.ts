@@ -20,6 +20,7 @@ export async function mainFeed(userId: string, limit = 20, excludePosts: string[
 		.as('like_counts');
 
 	let whereConditions = and(
+		eq(users.banned, false),
 		or(isNull(lynts.parent), eq(lynts.reposted, true)),
 		sql`${lynts.created_at} > now() - interval '30 days'`
 	);
