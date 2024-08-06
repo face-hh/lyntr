@@ -121,7 +121,7 @@
 	  <Button class="ml-4" on:click={markRead}>Mark All as Read</Button>
 	</div>
 	
-	<Card.Root class="mx-auto w-full max-w-2xl bg-border">
+	<Card.Root class="mx-auto w-full bg-border">
 	  <Card.Header>
 		<Card.Title>Recent Activity</Card.Title>
 		<Card.Description>Your latest 50 notifications</Card.Description>
