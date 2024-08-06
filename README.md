@@ -15,7 +15,7 @@ First, we need to setup the `.env` file with the right secrets.
 - Rename `.env.example` to `.env`
 
 ## Database
-Firstly we have to setup the database we are going to use supabase here but you should be able to use any postgres databases. Head to https://supabase.com and **create an account.**
+Firstly we have to setup the database we are going to use supabase here but you should be able to use any postgres database. Head to https://supabase.com and **create an account.**
 
 ![New project](github-assets/supabase1.png)
 
