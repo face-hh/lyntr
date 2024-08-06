@@ -2,19 +2,19 @@
 	import * as AlertDialog from '@/components/ui/alert-dialog';
 	import { Button } from '@/components/ui/button';
 	import Label from '@/components/ui/label/label.svelte';
-	import { supabase } from '@/supabase';
 	import { mode } from 'mode-watcher';
+	import { PUBLIC_DISCORD_CLIENT_ID } from '$env/static/public';
 
 	let loading = false;
 
 	const handleLogin = async () => {
 		try {
 			loading = true;
-			const { error } = await supabase.auth.signInWithOAuth({
-				provider: 'discord'
-			});
+			const callbackUrl = new URL(window.location.href);
+			callbackUrl.search = '';
+			callbackUrl.pathname = '/api/callback';
 
-			if (error) throw error;
+			window.location.href = `https://discord.com/oauth2/authorize?client_id=${PUBLIC_DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(callbackUrl.toString())}&scope=identify+email`;
 		} catch (error) {
 			if (error instanceof Error) {
 				alert(error.message);

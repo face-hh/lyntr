@@ -57,7 +57,7 @@ export const notifications = pgTable('notifications', {
 });
 
 export const history = pgTable('history', {
-    id: text('id').primaryKey(),
+    id: uuid('id').primaryKey().defaultRandom(),
     user_id: text('user_id').references(() => users.id),
     lynt_id: text('lynt_id').references(() => lynts.id),
     createdAt: timestamp('created_at').defaultNow(),

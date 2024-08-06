@@ -4,11 +4,13 @@ secrets:
 
 services:
   minio:
+    networks:
+      - lynternet
     image: minio/minio
     container_name: minio
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - '9000:9000'
+      - '9001:9001'
     volumes:
       - ./minio-data:/data
     environment:
@@ -17,11 +19,36 @@ services:
     command: server --console-address :9001 /data
   website:
     restart: unless-stopped
+    platform: linux/x86_64
     build:
       context: .
       dockerfile: ./Dockerfile
+    ports:
+      - '6000-6002:5999'
     environment:
       - PUBLIC_SERVER_HOST=http://localhost:5999
-    network_mode: host
     secrets:
       - serverEnv
+    deploy:
+      mode: replicated
+      replicas: 3
+    networks:
+      - lynternet
+  db:
+    image: postgres:16.2-alpine
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=${PG_PWD}
+      - POSTGRES_USER=lyntr
+      - POSTGRES_DB=lyntrdb
+    volumes:
+      - ./pg/data:/var/lib/postgresql/data
+      - ./pg/postgresql.conf:/etc/postgresql.conf
+    command: ['postgres', '-c', 'config_file=/etc/postgresql.conf']
+    networks:
+      - lynternet
+
+networks:
+  lynternet:
