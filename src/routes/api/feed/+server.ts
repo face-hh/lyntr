@@ -8,7 +8,7 @@ import { handleFeed } from './handle';
 import { followingFeed } from './following';
 import { newFeed } from './new';
 import { mainFeed } from './main';
-import { likedFeed } from "./liked"
+import { likedFeed } from './liked';
 
 async function updateViewsAndHistory(userId: string, lyntIds: string[]) {
 	for (const lyntId of lyntIds) {
@@ -21,7 +21,6 @@ async function updateViewsAndHistory(userId: string, lyntIds: string[]) {
 			await trx
 				.insert(history)
 				.values({
-					id: sql`uuid_generate_v4()`,
 					user_id: userId,
 					lynt_id: lyntId,
 					createdAt: sql`now()`
@@ -70,9 +69,9 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
 				return json({ error: 'User not found' }, { status: 404 });
 			}
 			if (type === 'Liked') {
-				result = await likedFeed(user.id)
+				result = await likedFeed(user.id);
 			} else {
-				result = await handleFeed(user.id, userId)
+				result = await handleFeed(user.id, userId);
 			}
 		} else if (type === 'Following') {
 			result = await followingFeed(userId);
