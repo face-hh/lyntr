@@ -3,6 +3,14 @@ secrets:
     file: ./.env
 
 services:
+  bot:
+    build:
+      context: ./src/misc/
+      dockerfile: ./Dockerfile
+    restart: always
+    secrets:
+      - serverEnv
+
   minio:
     networks:
       - lynternet
