@@ -10,6 +10,10 @@ services:
     restart: always
     secrets:
       - serverEnv
+    ports:
+      - '5444:5444'
+    networks:
+      - lynternet
 
   minio:
     networks:
