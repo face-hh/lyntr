@@ -88,9 +88,8 @@
 		if (currentTab === tabs[2]) {
 			const eventSource = new EventSource('/api/sse');
 			eventSource.onmessage = async (event) => {
-				const newLyntId = JSON.parse(event.data);
-
-				await renderLyntAtTop(newLyntId);
+				// Render the entire lynt data to not fetch the lynt each time
+				await renderLyntAtTop(JSON.parse(event.data));
 			};
 		}
 	}
@@ -228,9 +227,8 @@
 		}
 	});
 
-	async function renderLyntAtTop(lyntId: string) {
-		const lyntData = await getLynt(lyntId);
-		feed = [lyntData].concat(feed);
+	async function renderLyntAtTop(lynt: FeedItem) {
+		feed = [lynt].concat(feed);
 	}
 	function handlePaste(event: ClipboardEvent) {
 		event.preventDefault();
