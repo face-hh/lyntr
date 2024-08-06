@@ -14,8 +14,8 @@ Light mode - Lyntr
 First, we need to setup the `.env` file with the right secrets.
 - Rename `.env.example` to `.env`
 
-## Supabase
-Firstly we have to setup the database. Head to https://supabase.com and **create an account.**
+## Database
+Firstly we have to setup the database we are going to use supabase here but you should be able to use any postgres databases. Head to https://supabase.com and **create an account.**
 
 ![New project](github-assets/supabase1.png)
 
@@ -33,15 +33,8 @@ Then click **Create new project**. It will take a few minutes, so in the meantim
 ![New project - 3](github-assets/supabase3.png)
 On this page we can see the **Project API keys** and **Project configuration** sections.
 
-- Copy the `anon public` secret and put it in your `.env`:
-```python
-PUBLIC_SUPABASE_ANON_KEY="ey........................"
-```
-- Copy the `Project Configuration` > `URL`:
-```python
-PUBLIC_SUPABASE_URL="https://.....supabase.co"
-```
 - Copy the `Project Configuration` > `JWT Secret`:
+- You could also generate one with password sites or `node -e "console.log(require('crypto').randomBytes(32).toString(hex));"`
 ```python
 JWT_SECRET="..........x............x........."
 ```
@@ -65,9 +58,20 @@ npx drizzle-kit migrate
 npx drizzle-kit push
 ```
 
-And follow [this guide on how to enable the Discord auth in Supabase](https://supabase.com/docs/guides/auth/social-login/auth-discord), until the code part. It should look something like this.
-![image](https://github.com/user-attachments/assets/a8bd3043-3cae-4d46-b42c-0a576bcf59f5)
+## Discord
+Now that the database is set up you will need to create a application on the [Discord Developer Portal](https://discord.com/developers/docs/intro)
 
+You can then copy the client id and client secrets into the corresponding lines of your env:
+```python
+PUBLIC_DISCORD_CLIENT_ID=""
+DISCORD_CLIENT_SECRET=""
+```
+
+## Ratelimits
+For ratelimits we use [upstash redis](https://upstash.com/).
+
+Create a redis and then copy these values into your env.
+![upstash redis](github-assets/redis.png)
 
 ## MinIO
 We need Min.io for images. This and the next step can be omitted if you don't need *Image support* / *reporting*.
