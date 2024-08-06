@@ -293,3 +293,13 @@
 {:else}
 	<p>Profile not found.</p>
 {/if}
+
+<svelte:head>
+	{#if loading}
+		<title>Loading... | Lyntr</title>
+	{:else if profile}
+		<title>{profile.username} (@{profile.handle}) | Lyntr</title>
+	{:else}
+		<title>Profile not found | Lyntr</title>
+	{/if}
+</svelte:head>
