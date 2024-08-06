@@ -32,6 +32,8 @@ services:
     deploy:
       mode: replicated
       replicas: 3
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     networks:
       - lynternet
   db:
