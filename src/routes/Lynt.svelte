@@ -168,7 +168,7 @@
 			<Avatar size={10} src={cdnUrl(userId, 'small')} alt="A profile picture." />
 		</a>
 
-		<div class="flex w-full flex-col gap-2 overflow-hidden">
+		<div class="flex w-full max-w-[530px] flex-col gap-2 overflow-hidden">
 			<!-- Lynt that actually gets displayed. Main lynt -->
 			<LyntContents
 				{truncateContent}
