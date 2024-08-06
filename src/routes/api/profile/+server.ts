@@ -155,7 +155,7 @@ export const POST: RequestHandler = async ({
 		request.headers.get('CF-Connecting-IP') ?? '127.0.0.1'
 	);
 	if (!success) {
-		return json({ error: 'You are being ratelimited.' });
+		return json({ error: 'You are being ratelimited.' }, { status: 429 });
 	}
 
 	const discordToken = cookies.get('temp-discord-token');

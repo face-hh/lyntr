@@ -44,6 +44,8 @@ export const verifyAuthJWT = async (token: string) => {
 			throw error(403, 'You are banned.');
 		}
 
+		
+
 		return payload as JWTPayload;
 	} catch (error) {
 		throw error;

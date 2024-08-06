@@ -45,7 +45,7 @@ export const POST: RequestHandler = async ({
 
 	const { success } = await sensitiveRatelimit.limit(userId);
 	if (!success) {
-		return json({ error: 'You are being ratelimited.' });
+		return json({ error: 'You are being ratelimited.' }, { status: 429 });
 	}
 
 	try {
