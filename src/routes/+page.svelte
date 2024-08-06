@@ -6,9 +6,10 @@
 	import LoadingSpinner from './LoadingSpinner.svelte';
 	import Auth from './Auth.svelte';
 	import AccountCreator from './AccountCreator.svelte';
-	import { supabase } from '@/supabase';
 	import { page } from '$app/stores';
 	import MainPage from './MainPage.svelte';
+	import Cookies from 'js-cookie';
+	import { Cookie } from 'lucide-svelte';
 
 	let authenticated: boolean = false;
 	let loading: boolean = true;
@@ -22,64 +23,50 @@
 	};
 
 	async function checkAuthAndProfileStatus() {
-		const { data } = await supabase.auth.getSession();
-		if (data.session?.access_token) {
+		if (Cookies.get('temp-discord-token')) {
 			authenticated = true;
-
-			if (localStorage.getItem('user-data')) {
-				try {
-					const data = JSON.parse(localStorage.getItem('user-data')!);
-					loading = false;
-					noAccount = false;
-					userData = data;
-				} catch (error) {
-					console.error('Failed to load user data from cache', error);
-				}
+		}
+		if (localStorage.getItem('user-data')) {
+			try {
+				const data = JSON.parse(localStorage.getItem('user-data')!);
+				loading = false;
+				noAccount = false;
+				userData = data;
+				authenticated = true;
+			} catch (error) {
+				console.error('Failed to load user data from cache', error);
 			}
+		}
 
-			const {
-				data: { user }
-			} = await supabase.auth.getUser();
+		try {
+			const loginResponse = await fetch(`api/me`, {
+				method: 'GET',
+				credentials: 'include'
+			});
 
-			if (user?.email) {
-				try {
-					const loginResponse = await fetch(`api/login?email=${encodeURIComponent(user.email)}`, {
-						method: 'GET',
-						credentials: 'include',
-						headers: {
-							Authorization: `Bearer ${data.session.access_token}`
-						}
-					});
+			if (loginResponse.status === 200) {
+				// User exists in the database
+				const res = await loginResponse.json();
+				userData = {
+					username: res.username,
+					handle: res.handle,
+					created_at: res.created_at,
+					iq: res.iq,
+					id: res.id
+				};
 
-					if (loginResponse.status === 200) {
-						// User exists in the database
-						const res = await loginResponse.json();
-						userData = {
-							username: res.username,
-							handle: res.handle,
-							created_at: res.created_at,
-							iq: res.iq,
-							id: res.id
-						};
-
-						localStorage.setItem('user-data', JSON.stringify(userData));
-						// The new token is automatically set as a cookie by the server
-						noAccount = false;
-					} else {
-						// User doesn't exist in the database
-						noAccount = true;
-					}
-				} catch (error) {
-					console.error('Error checking user status:', error);
-					noAccount = true;
-				}
+				localStorage.setItem('user-data', JSON.stringify(userData));
+				// The new token is automatically set as a cookie by the server
+				noAccount = false;
 			} else {
-				console.error('No email found for authenticated user');
+				// User doesn't exist in the database
 				noAccount = true;
 			}
-		} else {
-			authenticated = false;
+		} catch (error) {
+			console.error('Error checking user status:', error);
+			noAccount = true;
 		}
+
 		loading = false;
 	}
 

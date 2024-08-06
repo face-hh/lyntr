@@ -5,10 +5,9 @@
 	import { Separator } from '@/components/ui/separator';
 	import { Label } from '@/components/ui/label';
 
-	import { supabase } from '@/supabase';
-
 	import IQTest from './IQTest.svelte';
 	import { toast } from 'svelte-sonner';
+	import { PUBLIC_DISCORD_CLIENT_ID } from '$env/static/public';
 
 	let loading = false;
 	let nickname = '';
@@ -16,9 +15,13 @@
 	let iqReport: string | null;
 	let totalIQ: number | null;
 
-        async function authLogin() {
-                await supabase.auth.signInWithOAuth({ provider: 'discord' });
-        }
+	async function authLogin() {
+		const callbackUrl = new URL(window.location.href);
+		callbackUrl.search = '';
+		callbackUrl.pathname = '/api/callback';
+
+		window.location.href = `https://discord.com/oauth2/authorize?client_id=${PUBLIC_DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(callbackUrl.toString())}&scope=identify+email`;
+	}
 
 	let allQuestionsCompleted = localStorage.getItem('current_question') === '20' ? true : false;
 
@@ -37,19 +40,10 @@
 		}
 
 		try {
-			const { data, error } = await supabase.auth.getSession();
-
-			if (error) {
-				alert('Error fetching session:' + error.message);
-				location.reload();
-				return;
-			}
-
 			const response = await fetch('/api/profile', {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${data.session?.access_token}`
+					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
 					username: nickname,
@@ -78,7 +72,11 @@
 	<div class="flex flex-col gap-6 p-1 md:flex-row">
 		<div class="flex flex-col items-center gap-2">
 			<div class="inline-flex items-center gap-2">
-				<img src="logo.svg" alt="Lyntr" class="pointer-events-none w-32 h-32 md:h-40 md:w-40 select-none" />
+				<img
+					src="logo.svg"
+					alt="Lyntr"
+					class="pointer-events-none h-32 w-32 select-none md:h-40 md:w-40"
+				/>
 				<Label class="select-none text-8xl">Lyntr.</Label>
 			</div>
 
@@ -155,10 +153,14 @@
 					</AlertDialog.Root>
 				{/if}
 			</div>
-			<span class="mt-4 text-sm text-left">Already have an account on Lyntr? <button class="text-primary font-bold" on:click={authLogin}>Log in</button></span>
-		
+			<span class="mt-4 text-left text-sm"
+				>Already have an account on Lyntr? <button
+					class="font-bold text-primary"
+					on:click={authLogin}>Log in</button
+				></span
+			>
 		</div>
-        <Separator class="h-[1px] w-full md:h-full md:w-[1px]" />
+		<Separator class="h-[1px] w-full md:h-full md:w-[1px]" />
 		<div class="w-full rounded-md border-2 border-primary p-4 md:min-w-[400px] md:max-w-[400px]">
 			<IQTest on:questionsCompleted={handleQuestionsCompleted} />
 		</div>
