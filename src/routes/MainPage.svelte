@@ -262,9 +262,10 @@
 
 			<div class="flex h-full w-full flex-col items-center gap-1 md:flex-row md:items-start">
 				<div
-					class="flex h-full w-full flex-col overflow-hidden md:px-1 {lyntOpened && selectedLynt
-						? 'hidden max-w-[600px] md:flex'
-						: 'max-w-screen-2xl'}"
+					class="flex h-full w-full max-w-[600px] flex-col overflow-hidden md:px-1 {lyntOpened &&
+					selectedLynt
+						? 'hidden md:flex'
+						: ''}"
 				>
 					{#if page === 'search'}
 						<Search userId={id} {handleLyntClick} />
@@ -272,11 +273,7 @@
 						<Notifications {handleLyntClick} />
 					{:else if page.startsWith('profile')}
 						{#key page}
-							<ProfilePage
-								myId={id}
-								profileHandle={page.replace('profile', '')}
-								{handleLyntClick}
-							/>
+							<ProfilePage myId={id} profileHandle={page.replace('profile', '')} {handleLyntClick} />
 						{/key}
 					{:else if page === 'home'}
 						<div class="min-w-1/3 mt-5 flex h-full flex-col md:px-1">
@@ -300,7 +297,7 @@
 					{/if}
 				</div>
 				{#if lyntOpened && selectedLynt}
-					<div class="mb-2 h-full w-full pb-10">
+					<div class="mb-2 h-full w-full max-w-[530px] pb-10">
 						<button
 							class="flex w-full justify-end p-2 md:justify-start"
 							on:click={() => {
