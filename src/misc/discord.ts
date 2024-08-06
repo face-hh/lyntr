@@ -4,7 +4,7 @@ import { config } from 'dotenv';
 import fetch from 'node-fetch';
 import type { MessageActionRowComponentBuilder } from 'discord.js';
 
-config({ path: "C:\\Users\\Face\\Documents\\GitHub\\lyntr\\.env" });
+config({ path: "../../.env" });
 
 const app = express();
 app.use(express.json());
