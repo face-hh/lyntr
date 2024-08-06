@@ -26,6 +26,9 @@ services:
     network_mode: host
     secrets:
       - serverEnv
+    deploy:
+      mode: replicated
+      replicas: 3
   db:
     image: postgres:16.2-alpine
     restart: always
