@@ -362,9 +362,11 @@
 </div>
 
 <svelte:head>
-	{#if selectedLynt}
-		<title>{selectedLynt.username} on Lyntr: "{selectedLynt.content}"</title>
+	{#if page === 'home'}
+		{#if selectedLynt}
+			<title>{selectedLynt.username} on Lyntr: "{selectedLynt.content}"</title>
+		{:else}
+			<title>Lyntr</title>
+		{/if}
 	{:else}
-		<title>Lyntr</title>
-	{/if}
 </svelte:head>
