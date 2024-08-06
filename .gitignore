@@ -1,5 +1,7 @@
 node_modules
 
+/pg/data
+
 # Output
 .output
 .vercel

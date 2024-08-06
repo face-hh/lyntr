@@ -4,7 +4,7 @@ import { config } from 'dotenv';
 import fetch from 'node-fetch';
 import type { MessageActionRowComponentBuilder } from 'discord.js';
 
-config({ path: "C:\\Users\\Face\\Documents\\GitHub\\lyntr\\.env" });
+config({ path: "../../.env" });
 
 const app = express();
 app.use(express.json());
@@ -43,34 +43,46 @@ function startBot() {
         const args = message.content.split(' ')
 
         if (args[0] === '!verify' && args[1]) {
-            const response = await fetch(`${API_BASE_URL}/api/verify?handle=${args[1]}`, {
-                method: "POST",
-                headers: {
-                    'Authorization': process.env.ADMIN_KEY!
-                },
-            })
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/verify?handle=${args[1]}`, {
+                    method: "POST",
+                    headers: {
+                        'Authorization': process.env.ADMIN_KEY!
+                    },
+                });
 
-            if (response.status === 200) {
-                message.reply("Success")
-            } else {
-                message.reply(`oh no error: ${response.status} | ${response.statusText}`)
+                if (response.ok) {
+                    message.reply("Success");
+                } else {
+                    message.reply(`Error: ${response.status} | ${response.statusText}`);
+                }
+            } catch (error) {
+                console.error('Error verifying user:', error);
+                message.reply("An error occurred while verifying the user.");
             }
         }
-    })
+    });
     client.on('interactionCreate', async interaction => {
-        if (!interaction.isButton()) return;
+        try {
+            if (!interaction.isButton()) return;
 
-        const { message } = interaction;
+            const { message } = interaction;
 
-        const messageId = message.id;
-        const report = reportData.get(messageId);
+            const messageId = message.id;
+            const report = reportData.get(messageId);
 
-        if (!report) {
-            await interaction.reply({ content: 'Error: Report data not found', ephemeral: true });
-            return;
+            if (!report) {
+                await interaction.reply({ content: 'Error: Report data not found', ephemeral: true });
+                return;
+            }
+
+            // Defer the reply immediately
+            await interaction.deferUpdate();
+
+            await handleButtonPress(interaction, report.lyntId, report.userId);
+        } catch (error) {
+            console.error('Error handling interaction:', error);
         }
-
-        await handleButtonPress(interaction, report.lyntId, report.userId);
     });
 
     client.login(DISCORD_TOKEN);
@@ -81,29 +93,34 @@ async function sendReport(text: string, lyntId: string, userId: string, reporter
         throw new Error('Discord bot is not ready');
     }
 
-    const channel = await client.channels.fetch(CHANNEL_ID);
+    try {
+        const channel = await client.channels.fetch(CHANNEL_ID);
 
-    if (!(channel instanceof TextChannel)) {
-        throw new Error('Invalid channel');
+        if (!(channel instanceof TextChannel)) {
+            throw new Error('Invalid channel');
+        }
+
+        const reportedLynt = await fetchLyntInfo(lyntId);
+        const reportedUser = await fetchUserInfo(userId);
+        const reporter = await fetchUserInfo(reporterId);
+
+        const a = await createReportEmbed(text, reportedLynt, reportedUser, reporter);
+
+        const row = createActionRow();
+
+        const sentMessage = await channel.send({
+            embeds: [a.embed],
+            files: a.files,
+            components: [row]
+        });
+
+        reportData.set(sentMessage.id, { lyntId, userId });
+
+        return { success: true, message: 'Report sent to Discord' };
+    } catch (error) {
+        console.error('Error sending report:', error);
+        return { success: false, message: 'Failed to send report' };
     }
-
-    const reportedLynt = await fetchLyntInfo(lyntId);
-    const reportedUser = await fetchUserInfo(userId);
-    const reporter = await fetchUserInfo(reporterId);
-
-    const a = await createReportEmbed(text, reportedLynt, reportedUser, reporter);
-
-    const row = createActionRow();
-
-    const sentMessage = await channel.send({
-        embeds: [a.embed],
-        files: a.files,
-        components: [row]
-    });
-
-    reportData.set(sentMessage.id, { lyntId, userId });
-
-    return { success: true, message: 'Report sent to Discord' };
 }
 
 async function createReportEmbed(text: string, reportedLynt: LyntInfo, reportedUser: UserInfo, reporter: UserInfo) {
@@ -140,7 +157,6 @@ async function createReportEmbed(text: string, reportedLynt: LyntInfo, reportedU
         const lyntImageUrl = `http://${process.env.MINIO_ENDPOINT}:9000/${process.env.S3_BUCKET_NAME}/${reportedLynt.id}.webp`;
         embed.setThumbnail(`attachment://${reportedLynt.id}.webp`);
 
-        // Fetch lynt image
         try {
             const lyntImageResponse = await fetch(lyntImageUrl);
             if (lyntImageResponse.ok) {
@@ -174,22 +190,33 @@ function createActionRow() {
 }
 
 async function fetchLyntInfo(lyntId: string): Promise<LyntInfo> {
-    const response = await fetch(`${API_BASE_URL}/api/lynt?id=${lyntId}`, {
-        headers: { "Authorization": ADMIN_KEY }
-    });
-    if (!response.ok) {
-        throw new Error(`Failed to fetch lynt info: ${response.statusText}`);
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/lynt?id=${lyntId}`, {
+            headers: { "Authorization": ADMIN_KEY }
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to fetch lynt info: ${response.statusText}`);
+        }
+        return response.json();
+    } catch (error) {
+        console.error('Error fetching lynt info:', error);
+        return { id: lyntId, content: 'Error fetching lynt info', has_image: false };
     }
-    return response.json();
 }
 
 async function fetchUserInfo(userId: string): Promise<UserInfo> {
-    const response = await fetch(`${API_BASE_URL}/api/profile?id=${userId}`);
-    if (!response.ok) {
-        throw new Error(`Failed to fetch user info: ${response.statusText}`);
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/profile?id=${userId}`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch user info: ${response.statusText}`);
+        }
+        return response.json();
+    } catch (error) {
+        console.error('Error fetching user info:', error);
+        return { id: userId, handle: 'Unknown', username: 'Unknown' };
     }
-    return response.json();
 }
+
 app.post('/report', async (req: express.Request, res: express.Response) => {
     try {
         const { text, userId, lyntId, reporterId } = req.body;
@@ -247,7 +274,7 @@ async function handleButtonPress(interaction: any, lyntId: string, userId: strin
             resultMessage = 'Unknown action';
         }
 
-        await interaction.update({
+        await interaction.editReply({
             content: resultMessage,
             embeds: interaction.message.embeds,
             components: []
@@ -256,7 +283,7 @@ async function handleButtonPress(interaction: any, lyntId: string, userId: strin
     } catch (error) {
         console.error('Error handling button press:', error);
 
-        await interaction.update({
+        await interaction.editReply({
             content: 'An error occurred while processing your request',
             embeds: interaction.message.embeds,
             components: []

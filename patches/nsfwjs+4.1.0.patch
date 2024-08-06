@@ -1,0 +1,43 @@
+diff --git a/node_modules/nsfwjs/dist/esm/index.js b/node_modules/nsfwjs/dist/esm/index.js
+index 0360912..de2ad28 100644
+--- a/node_modules/nsfwjs/dist/esm/index.js
++++ b/node_modules/nsfwjs/dist/esm/index.js
+@@ -43,8 +43,8 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+     }
+     return to.concat(ar || Array.prototype.slice.call(from));
+ };
+-import * as tf from "@tensorflow/tfjs";
+-import { NSFW_CLASSES } from "./nsfw_classes";
++const tf =  require("@tensorflow/tfjs");
++const { NSFW_CLASSES } = require("./nsfw_classes.js");
+ var availableModels = {
+     MobileNetV2: { path: "mobilenet_v2", numOfWeightBundles: 1 },
+     MobileNetV2Mid: {
+@@ -139,7 +139,7 @@ function loadModel(modelName) {
+         });
+     });
+ }
+-export function load(modelOrUrl, options) {
++module.exports.load = function load(modelOrUrl, options) {
+     var _a;
+     if (options === void 0) { options = { size: IMAGE_SIZE }; }
+     return __awaiter(this, void 0, void 0, function () {
+@@ -339,7 +339,7 @@ var NSFWJS = (function () {
+     };
+     return NSFWJS;
+ }());
+-export { NSFWJS };
++module.exports.NSFWJS = NSFWJS;
+ function getTopKClasses(logits, topK) {
+     return __awaiter(this, void 0, void 0, function () {
+         var values, valuesAndIndices, i, topkValues, topkIndices, i, topClassesAndProbs, i;
+diff --git a/node_modules/nsfwjs/dist/esm/nsfw_classes.js b/node_modules/nsfwjs/dist/esm/nsfw_classes.js
+index bcbbfb1..8b2c6e5 100644
+--- a/node_modules/nsfwjs/dist/esm/nsfw_classes.js
++++ b/node_modules/nsfwjs/dist/esm/nsfw_classes.js
+@@ -1,4 +1,4 @@
+-export var NSFW_CLASSES = {
++module.exports.NSFW_CLASSES = {
+     0: 'Drawing',
+     1: 'Hentai',
+     2: 'Neutral',
