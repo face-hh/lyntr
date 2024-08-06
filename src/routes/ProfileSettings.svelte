@@ -50,6 +50,10 @@
 		if (pfpRes.status === 200) {
 			opened = false;
 		} else {
+			if (pfpRes.status == 400) {
+				toast(`Uploading photo failed. ${(await pfpRes.json()).error}`);
+				return;
+			}
 			toast(
 				`Uploading photo failed. Common cause is file size being over 8MB. Error code: ${pfpRes.status} | ${pfpRes.statusText}`
 			);

@@ -12,6 +12,7 @@ import { minioClient } from '@/server/minio';
 import { deleteLynt, uploadAvatar } from '../util';
 import { readFileSync } from 'fs';
 import sanitizeHtml from 'sanitize-html';
+import { isImageNsfw, NSFW_ERROR } from '@/moderation';
 
 interface Question {
 	id: string;
@@ -219,6 +220,10 @@ export const POST: RequestHandler = async ({
 			})
 			.returning();
 
+		if (await isImageNsfw(inputBuffer)) {
+			return NSFW_ERROR;
+		}
+
 		uploadAvatar(inputBuffer, uniqueUserId, minioClient);
 
 		const iqObject = {
@@ -262,7 +267,7 @@ export const GET: RequestHandler = async ({ url }) => {
                 (SELECT COUNT(*) FROM ${followers} WHERE user_id = u.id) AS followers_count,
                 (SELECT COUNT(*) FROM ${followers} WHERE follower_id = u.id) AS following_count
             FROM ${users} u
-            WHERE ${userHandle ? sql`u.handle = ${userHandle}` : sql`u.id = ${userId}`}
+            WHERE ${userHandle ? sql`u.handle = ${userHandle}` : sql`u.id = ${userId}`} AND u.banned = false
             LIMIT 1
         `;
 
@@ -414,7 +419,8 @@ export const DELETE: RequestHandler = async ({ request, cookies }) => {
 
 		// Clear the auth cookie
 		cookies.delete('_TOKEN__DO_NOT_SHARE', {
-			path: '/', httpOnly: true,
+			path: '/',
+			httpOnly: true,
 			secure: true,
 			sameSite: 'strict',
 			maxAge: 31536000 // 1 year
@@ -432,9 +438,9 @@ function santize(input: string) {
 }
 
 function sanitizeNum(input: string) {
-	let num = parseInt(input)
+	let num = parseInt(input);
 
 	if (num < 0) num = 0;
 
-	return num
+	return num;
 }
