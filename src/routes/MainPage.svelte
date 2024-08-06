@@ -99,8 +99,7 @@
 			eventSource.onmessage = async (event) => {
 				const data = JSON.parse(event.data);
 				if (data.type === 'lynt_add') {
-					const newLyntId = data.data;
-					await renderLyntAtTop(newLyntId);
+					await renderLyntAtTop(data.data);
 				}
 			};
 		}
@@ -253,6 +252,8 @@
 		postCommentDisabled = true;
 
 		if (response.status !== 201) {
+			if (response.status == 429)
+				return toast('Woah, slow down! You are being ratelimited. Please try again in a bit.');
 			toast(
 				`Something went wrong while commenting on this lynt. Error: ${response.status} | ${response.statusText}`
 			);
@@ -278,9 +279,8 @@
 		}
 	});
 
-	async function renderLyntAtTop(lyntId: string) {
-		const lyntData = await getLynt(lyntId);
-		feed = [lyntData].concat(feed);
+	async function renderLyntAtTop(lynt: FeedItem) {
+		feed = [lynt].concat(feed);
 	}
 
 	function goHome() 

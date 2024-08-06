@@ -84,6 +84,8 @@
 		});
 
 		if (response.status !== 200) {
+			if (response.status == 429)
+				return toast('Woah, slow down! You are being ratelimited. Please try again in a bit.');
 			toast(
 				`Oh no! Something went wrong while liking the lynt. Error: ${response.status} | ${response.statusText}`
 			);
@@ -101,6 +103,8 @@
 		});
 
 		if (response.status !== 200) {
+			if (response.status == 429)
+				return toast('Woah, slow down! You are being ratelimited. Please try again in a bit.');
 			toast(
 				`Oh no! Something went wrong while liking the lynt. Error: ${response.status} | ${response.statusText}`
 			);
