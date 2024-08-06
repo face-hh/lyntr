@@ -30,7 +30,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			return json({ error: 'Text must be between 50 and 2000 characters' }, { status: 400 });
 		}
 
-		fetch('http://localhost:5444/report', {
+		fetch('http://docker.host.internal:5444/report', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ text, userId, lyntId, reporterId })
