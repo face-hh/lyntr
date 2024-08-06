@@ -11,8 +11,7 @@ import { cdnUrl } from '../../../stores';
 import { minioClient } from '@/server/minio';
 import { sendMessage } from '@/sse';
 import { isImageNsfw, NSFW_ERROR } from '@/moderation';
-
-const ratelimits = new Map();
+import { normalRatelimit } from '@/server/ratelimit';
 
 export const POST: RequestHandler = async ({ request, cookies, url }) => {
 	const authCookie = cookies.get('_TOKEN__DO_NOT_SHARE');
@@ -45,15 +44,10 @@ export const POST: RequestHandler = async ({ request, cookies, url }) => {
 		}
 
 		const user_id = user[0].id;
-
-		const ratelimit = ratelimits.get(user_id);
-		if (!ratelimit) {
-			ratelimits.set(user_id, Date.now());
-		} else if (Math.round((Date.now() - ratelimit) / 1000) < 5) {
-			return json({ error: 'You are ratelimited.' }, { status: 429 });
-		} else {
-			ratelimits.delete(user_id);
-		}
+		const { success } = await normalRatelimit.limit(user_id);
+		if (!success) {
+		        return json({ error: 'You are being ratelimited.' }, { status: 429 });
+	        }
 
 		const formData = await request.formData();
 		const imageData = formData.get('image') as File;

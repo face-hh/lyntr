@@ -7,10 +7,11 @@ import { eq, sql, isNull, not, and } from 'drizzle-orm';
 import sanitizeHtml from 'sanitize-html';
 import { Snowflake } from 'nodejs-snowflake';
 import { createNotification } from '@/server/notifications';
+<<<<<<< HEAD
 import { lyntObj, uploadCompressed } from '../util';
 import { minioClient } from '@/server/minio';
 
-const ratelimits = new Map();
+import { sensitiveRatelimit } from '@/server/ratelimit';
 
 export const POST: RequestHandler = async ({
 	request,
@@ -39,14 +40,10 @@ export const POST: RequestHandler = async ({
 		console.error('Authentication error:', error);
 		return json({ error: 'Authentication failed' }, { status: 401 });
 	}
-	const ratelimit = ratelimits.get(userId);
 
-	if (!ratelimit) {
-		ratelimits.set(userId, Date.now());
-	} else if (Math.round((Date.now() - ratelimit) / 1000) < 5) {
-		return json({ error: 'You are ratelimited.' }, { status: 429 });
-	} else {
-		ratelimits.delete(userId);
+	const { success } = await sensitiveRatelimit.limit(userId);
+	if (!success) {
+		return json({ error: 'You are being ratelimited.' }, { status: 429 });
 	}
 
 	const formData = await request.formData();

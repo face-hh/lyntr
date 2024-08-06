@@ -3,6 +3,18 @@ secrets:
     file: ./.env
 
 services:
+  bot:
+    build:
+      context: ./src/misc/
+      dockerfile: ./Dockerfile
+    restart: always
+    secrets:
+      - serverEnv
+    ports:
+      - '5444:5444'
+    networks:
+      - lynternet
+
   minio:
     networks:
       - lynternet
@@ -32,6 +44,8 @@ services:
     deploy:
       mode: replicated
       replicas: 3
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     networks:
       - lynternet
   db:

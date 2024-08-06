@@ -30,11 +30,11 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			return json({ error: 'Text must be between 50 and 2000 characters' }, { status: 400 });
 		}
 
-		fetch('http://localhost:5444/report', {
+		fetch('http://bot:5444/report', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ text, userId, lyntId, reporterId })
-		}).catch(error => console.error('Error sending report:', error));
+		}).catch((error) => console.error('Error sending report:', error));
 
 		return json({ message: 'Report received successfully' }, { status: 200 });
 	} catch (error) {

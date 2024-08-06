@@ -5,8 +5,7 @@ import { followers } from '@/server/schema';
 import { eq, and } from 'drizzle-orm';
 import { verifyAuthJWT } from '@/server/jwt';
 import { createNotification } from '@/server/notifications';
-
-const ratelimits = new Map();
+import { sensitiveRatelimit } from '@/server/ratelimit';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	const token = cookies.get('_TOKEN__DO_NOT_SHARE');
@@ -22,14 +21,10 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 	const { userId: authenticatedUserId } = payload;
 	const { userId: targetUserId } = await request.json();
 
-	const ratelimit = ratelimits.get(authenticatedUserId);
+	const { success } = await sensitiveRatelimit.limit(authenticatedUserId);
 
-	if (!ratelimit) {
-		ratelimits.set(authenticatedUserId, Date.now());
-	} else if (Math.round((Date.now() - ratelimit) / 1000) < 10) {
+	if (!success) {
 		return json({ error: 'You are ratelimited.' }, { status: 429 });
-	} else {
-		ratelimits.delete(authenticatedUserId);
 	}
 
 	if (authenticatedUserId === targetUserId) {
