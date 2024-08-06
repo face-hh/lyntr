@@ -7,7 +7,6 @@ import { verifyAuthJWT, createAuthJWT } from '@/server/jwt';
 import { db } from '@/server/db';
 import { followers, likes, lynts, notifications, users, history } from '@/server/schema';
 import { eq, inArray, sql } from 'drizzle-orm';
-import { supabase } from '@/supabase';
 import { minioClient } from '@/server/minio';
 import { deleteLynt, uploadAvatar } from '../util';
 import { readFileSync } from 'fs';
@@ -151,17 +150,22 @@ export const POST: RequestHandler = async ({
 	request: Request;
 	cookies: Cookies;
 }) => {
-	const supabaseToken = request.headers.get('Authorization')?.split('Bearer ')[1];
+	const discordToken = cookies.get('temp-discord-token');
+	const meRes = await fetch('https://discord.com/api/v10/users/@me', {
+		headers: {
+			Authorization: 'Bearer ' + discordToken
+		}
+	});
 
-	const { data, error } = await supabase.auth.getUser(supabaseToken);
-
-	if (error || !data.user || !supabaseToken) {
-		throw new Error('Invalid Supabase token');
+	if (!meRes.ok) {
+		throw new Error('Invalid Discord token');
 	}
+
+	const meBody = await meRes.json();
 
 	const body = await request.json();
 
-	if (!body.handle || !body.username || !data.user.email) {
+	if (!body.handle || !body.username || !meBody.email) {
 		return json({ error: 'Invalid request - missing fields.' }, { status: 400 });
 	}
 
@@ -175,7 +179,7 @@ export const POST: RequestHandler = async ({
 	const existingUser = await db
 		.select()
 		.from(users)
-		.where(eq(users.email, data.user.email))
+		.where(eq(users.email, meBody.email))
 		.limit(1);
 
 	if (existingUser.length > 0) {
@@ -215,7 +219,7 @@ export const POST: RequestHandler = async ({
 				handle: cleanedHandle,
 				iq: totalIQ,
 				token: jwt,
-				email: data.user?.email,
+				email: meBody.email,
 				username: body.username.replace('\n', ' ')
 			})
 			.returning();
