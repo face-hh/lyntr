@@ -6,7 +6,6 @@ FROM base AS install
 RUN mkdir -p /temp/prod
 COPY package.json bun.lockb /temp/prod/
 COPY ./discord.ts /temp/prod/discord.ts
-COPY ../../.env /temp/prod/.env
 RUN cd /temp/prod && bun install --frozen-lockfile --production --verbose
 
 FROM base AS release
