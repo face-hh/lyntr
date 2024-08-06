@@ -7,6 +7,8 @@ import { json, redirect, type RequestHandler } from '@sveltejs/kit';
 import { config } from 'dotenv';
 import { eq } from 'drizzle-orm';
 
+import { PUBLIC_DISCORD_CLIENT_ID } from '$env/static/public';
+
 export const GET: RequestHandler = async ({ request, url, cookies }) => {
 	try {
 		const code = url.searchParams.get('code');
@@ -43,6 +45,35 @@ export const GET: RequestHandler = async ({ request, url, cookies }) => {
 
 		if (meRes.status != 200) return json({ errror: 'Invalid user' }, { status: 400 });
 		const meBody = await meRes.json();
+
+		try {
+			const roleconnectionsRes = await fetch(`https://discord.com/api/v10/applications/${PUBLIC_DISCORD_CLIENT_ID}/role-connections/metadata`, {
+				method: 'PUT',
+				body: JSON.stringify(
+					[
+						{ 
+							type : 7, // BOOLEAN_EQUAL the metadata value (integer) is equal to the guild's configured value (integer; 1)
+							key : "lyntr_user", // Unique key name to identify this metadata.
+							name : "Registered Lyntr user", // / Human-readable name for the metadata.
+							description : "The user has created an account on Lyntr" // Description of what this metadata represents.
+						}
+					]
+				),
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					"Content-Type": "application/json"
+				}
+			});
+	
+			if (roleconnectionsRes.status != 200) {
+				console.log("roleconnectionsRes status is ", roleconnectionsRes.status);
+			} else {
+				const roleconnectionsBody = await roleconnectionsRes.json();
+			} 
+			
+		} catch (error) {
+			console.error(error)
+		}
 
 		const existingUser = await db
 			.select()
