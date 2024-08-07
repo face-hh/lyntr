@@ -75,7 +75,7 @@ export const POST: RequestHandler = async ({
 			return json({ error: 'Invalid reposted lynt ID' }, { status: 400 });
 		}
 
-		let newId = (await db.insert(lynts).values(lyntValues).returning())[0].id || null;
+		let newId = (await db.insert(lynts).values(lyntValues).returning())[0].id || '';
 		let [newLynt] = await db
 			.select(lyntObj(userId))
 			.from(lynts)

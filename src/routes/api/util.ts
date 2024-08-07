@@ -1,17 +1,22 @@
 import { db } from '@/server/db';
 import { lynts, likes, followers, users, notifications, history } from '@/server/schema';
-import { and, eq, inArray, sql } from 'drizzle-orm';
+import { and, eq, inArray, Placeholder, sql } from 'drizzle-orm';
 import sharp from 'sharp';
 
-export const lyntObj = (userId: string) => {
+/**
+ * If no user_id is provided, the SQL placeholder `user_id` is used.
+ */
+export const lyntObj = (
+	userId: string | Placeholder<'user_id', string> = sql.placeholder('user_id')
+) => {
 	return {
 		id: lynts.id,
 		content: lynts.content,
 		userId: lynts.user_id,
 		createdAt: lynts.created_at,
 		views: sql<number>`(
-            SELECT COUNT(*) 
-            FROM ${history} 
+            SELECT COUNT(*)
+            FROM ${history}
             WHERE ${history.lynt_id} = ${lynts.id}
         )`.as('views'),
 		reposted: lynts.reposted,
