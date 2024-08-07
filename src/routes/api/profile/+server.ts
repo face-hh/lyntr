@@ -142,7 +142,7 @@ let questions: Question[] = [
 	}
 ];
 
-const inputBuffer = readFileSync('static/default.webp');
+const inputBuffer = readFileSync('static/default.png');
 
 export const POST: RequestHandler = async ({
 	request,
