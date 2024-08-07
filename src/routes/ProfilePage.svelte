@@ -184,7 +184,7 @@
 						<Avatar size={40} src={avatar} alt={profile.username} border={true} />
 						<div class="flex flex-col gap-2">
 							<div class="inline-flex items-center gap-2">
-								<Label class="text-2xl font-bold text-primary">{profile.username}</Label>
+								<Label class="text-2xl font-bold text-primary break-all">{profile.username}</Label>
 								{#if profile.verified}
 									<Tooltip.Root>
 										<Tooltip.Trigger>
