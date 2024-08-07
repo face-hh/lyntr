@@ -10,6 +10,11 @@ Light mode - Lyntr
 
 ![Lyntr.com - white](github-assets/banner_white.png)
 
+# Issues
+PLEASE before you make a issue read all the open and closed issues, use the search make sure a similar issue hasn't been posted by someone else before you make a new issue!
+
+If you have anything to add to a issue you can do so. Anymore information about a particular issue will be helpful!
+
 # Self-host
 First, we need to setup the `.env` file with the right secrets.
 - Rename `.env.example` to `.env`
