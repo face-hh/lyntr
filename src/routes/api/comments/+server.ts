@@ -6,6 +6,7 @@ import { lynts, likes, users, followers } from '@/server/schema';
 import { sql, desc, and, eq, not, exists } from 'drizzle-orm';
 
 import { lyntObj } from '../util';
+import { userRepliesQuery } from './userReplies';
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
 	const lyntId = url.searchParams.get('id');
@@ -29,26 +30,10 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		const userId = jwtPayload.userId;
 
 		// First, get the comments that the user has replied to
-		const userReplies = await db
-			.select(lyntObj(userId))
-			.from(lynts)
-			.leftJoin(likes, eq(likes.lynt_id, lynts.id))
-			.leftJoin(users, eq(lynts.user_id, users.id))
-			.where(
-				and(
-					eq(lynts.parent, lyntId),
-					eq(lynts.reposted, false),
-					exists(
-						db
-							.select()
-							.from(lynts)
-							.where(and(eq(lynts.parent, lynts.id), eq(lynts.user_id, userId)))
-					)
-				)
-			)
-			.groupBy(lynts.id, users.id)
-			.orderBy(desc(lynts.created_at))
-			.execute();
+		const userReplies = await userRepliesQuery.execute({
+			user_id: userId,
+			lynt_id: lyntId
+		});
 
 		// Then, get the most liked comments
 		let mostLikedComments: {
@@ -90,7 +75,6 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 				.where(and(eq(lynts.parent, lyntId), eq(lynts.reposted, false), notInClause))
 				.groupBy(lynts.id, users.id)
 				.orderBy(desc(sql`count(distinct ${likes.user_id})`), desc(lynts.created_at))
-				// .limit(50 - userReplies.length)
 				.execute();
 		}
 		const comments = [...userReplies, ...mostLikedComments];
