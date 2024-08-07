@@ -5,6 +5,7 @@ import { db } from './server/db';
 import { lynts, users } from './server/schema';
 import { eq } from 'drizzle-orm';
 import { config } from 'dotenv';
+import { deleteLynt } from '../routes/api/util';
 
 config({ path: '.env' });
 
@@ -58,6 +59,6 @@ export async function moderate(content: string, lyntId: string, userId: string) 
 		await db.update(users).set({ banned: true }).where(eq(users.id, userId));
 		console.log(`Moderation service requested ban on ${userId}`);
 	} else if (action == 'delete') {
-		await db.delete(lynts).where(eq(lynts.id, userId));
+		await deleteLynt(lyntId);
 	}
 }
