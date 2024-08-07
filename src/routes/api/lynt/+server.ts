@@ -100,9 +100,12 @@ export const POST: RequestHandler = async ({
 			lyntValues.has_image = true;
 		}
 
-		const [newLynt] = await db.insert(lynts).values(lyntValues).returning();
+		const [newLynt] = await db
+			.insert(lynts)
+			.values(lyntValues)
+			.returning();
 
-		sendMessage({ type: 'lynt_add', data: newLynt });
+		sendMessage({ type: 'lynt_add', data: uniqueLyntId });
 
 		return json(newLynt, { status: 201 });
 	} catch (error) {

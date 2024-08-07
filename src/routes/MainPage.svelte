@@ -279,7 +279,8 @@
 		}
 	});
 
-	async function renderLyntAtTop(lynt: FeedItem) {
+	async function renderLyntAtTop(lyntId: string) {
+		const lynt = await getLynt(lyntId)
 		feed = [lynt].concat(feed);
 	}
 
