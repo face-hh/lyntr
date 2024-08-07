@@ -68,7 +68,9 @@
 				/>
 			{/if}
 			{#if message.referenced_lynt && message.referenced_lynt.id}
+			<div class="max-w-[390px] md:max-w-[600px]">
 				<Lynt lyntClick={handleLyntClick} {myId} {...message.referenced_lynt} small={true} />
+			</div>
 			{/if}
 		</div>
 
