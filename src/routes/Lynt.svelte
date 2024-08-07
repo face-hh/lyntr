@@ -320,7 +320,7 @@
 	</Sheet.Content>
 </Sheet.Root>
 
-<button on:click|stopPropagation={() => openLynt(id)} class="mb-2 w-full text-left">
+<div on:click|stopPropagation={() => openLynt(id)} class="mb-2 w-full text-left">
 	<div
 		class="flex w-full gap-3 overflow-hidden rounded-xl bg-lynt-foreground p-3 transition-colors hover:bg-border"
 	>
@@ -349,7 +349,7 @@
 			/>
 
 			{#if reposted && parentId}
-				<button on:click|stopPropagation={() => openLynt(parentId)}>
+				<div on:click|stopPropagation={() => openLynt(parentId)}>
 					<div class="rounded-lg border-2 border-primary p-4 drop-shadow max-w-full overflow-x-hidden">
 						{#if parentUserHandle}
 							<!-- reposted lynt -->
@@ -374,7 +374,7 @@
 							/>
 						{/if}
 					</div>
-				</button>
+				</div>
 			{/if}
 			<div class="mb-1 mt-2 flex items-center justify-between gap-2">
 				<div class="flex items-center gap-2">
@@ -478,7 +478,7 @@
 			</div>
 		</div>
 	</div>
-</button>
+</div>
 {#if connect}
 	<div class="relative left-6 h-4 w-0.5 bg-border" />
 {:else}
