@@ -202,7 +202,7 @@
 									</Tooltip.Root>
 								{/if}
 							</div>
-							<p class="text-xl text-muted-foreground">@{profile.handle}</p>
+							<p class="text-xl text-muted-foreground break-all">@{profile.handle}</p>
 							<div class="w-24 w-full">
 								{#if isSelf}
 									<ProfileSettings
