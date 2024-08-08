@@ -10,7 +10,7 @@ import sharp from 'sharp';
 import { minioClient } from '@/server/minio';
 import { deleteLynt, lyntObj, uploadCompressed } from '../util';
 import { sendMessage } from '@/sse';
-import { isImageNsfw, NSFW_ERROR } from '@/moderation';
+import { isImageNsfw, moderate, NSFW_ERROR } from '@/moderation';
 import { sensitiveRatelimit } from '@/server/ratelimit';
 
 export const POST: RequestHandler = async ({
@@ -100,10 +100,8 @@ export const POST: RequestHandler = async ({
 			lyntValues.has_image = true;
 		}
 
-		const [newLynt] = await db
-			.insert(lynts)
-			.values(lyntValues)
-			.returning();
+		const [newLynt] = await db.insert(lynts).values(lyntValues).returning();
+		await moderate(content, newLynt.id, userId);
 
 		sendMessage({ type: 'lynt_add', data: uniqueLyntId });
 

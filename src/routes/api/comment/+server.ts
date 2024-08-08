@@ -11,6 +11,7 @@ import { lyntObj, uploadCompressed } from '../util';
 import { minioClient } from '@/server/minio';
 
 import { sensitiveRatelimit } from '@/server/ratelimit';
+import { moderate } from '@/moderation';
 
 export const POST: RequestHandler = async ({
 	request,
@@ -91,7 +92,9 @@ export const POST: RequestHandler = async ({
 			return json({ error: 'Invalid reposted lynt ID' }, { status: 400 });
 		}
 
-		let newId = (await db.insert(lynts).values(lyntValues).returning())[0].id || null;
+		let newId = (await db.insert(lynts).values(lyntValues).returning())[0].id;
+		await moderate(content, newId, userId);
+
 		let [newLynt] = await db
 			.select(lyntObj(userId))
 			.from(lynts)
