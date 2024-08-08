@@ -59,7 +59,7 @@
 			<!--<div class="text-elipsis flex flex-row gap-1 overflow-hidden truncate text-sm">
 				<span class="font-bold">{message.sender.username}</span>
 			</div>-->
-			<span class="whitespace-pre-wrap break-all text-left">{message.content}</span>
+			<span class="whitespace-pre-wrap break-word text-left">{message.content}</span>
 			{#if message.image}
 				<img
 					src={cdnUrl(message.image)}
