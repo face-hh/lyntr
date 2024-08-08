@@ -114,7 +114,7 @@
 
 	<div class="flex w-full flex-col text-left">
 		<div class="flex w-full items-center justify-between gap-1 {smaller ? 'max-w-[300px]' : ''}">
-			<div class="flex flex-grow items-center gap-1 overflow-hidden">
+			<div class="flex flex-grow items-center gap-1">
 				<HoverCard.Root>
 					<HoverCard.Trigger
 						rel="noreferrer noopener"
