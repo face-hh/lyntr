@@ -6,7 +6,6 @@ import { lynts, users } from './server/schema';
 import { eq } from 'drizzle-orm';
 import { config } from 'dotenv';
 import { deleteLynt } from '../routes/api/util';
-import { fileTypeFromBuffer } from 'file-type';
 import sharp from 'sharp';
 
 config({ path: '.env' });
