@@ -32,7 +32,7 @@
 
 {#if index === unreadMessageI}
 	<div
-		class="text-center"
+		class="flex flex-col gap-2 text-center"
 		use:inview={{}}
 		on:inview_change={(event) => {
 			const { inView } = event.detail;
@@ -40,7 +40,7 @@
 		}}
 	>
 		<div class="mt-4 w-full rounded-md border-t-4 border-solid border-t-border"></div>
-		<span class="px-2 py-1">Unread Messages ({unreadCount})</span>
+		<span>Unread Messages ({unreadCount})</span>
 	</div>
 {/if}
 
@@ -48,7 +48,7 @@
 <Popover.Root bind:open={open}>
 	<Popover.Trigger>
 	<div
-		class="mt-2 flex w-fit max-w-full flex-row gap-2 rounded-3xl px-2 py-2 {message.sender.id ===
+		class="mt-1 flex w-fit max-w-full flex-row gap-2 rounded-3xl px-3 py-2 {message.sender.id ===
 		myId
 			? 'bg-input/70'
 			: 'bg-input'}"

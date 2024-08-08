@@ -486,14 +486,12 @@
 					class="min-h-18 flex w-full flex-row items-center justify-center gap-2 rounded-md bg-secondary/50 p-2"
 				>
 					<div class="flex flex-row items-center gap-2">
-						<div class="mr-4">
 							<Avatar
 								size={10}
 								src={cdnUrl(profile.id, 'big')}
 								alt={profile.username}
 								border={true}
 							/>
-						</div>
 						<div class="flex flex-col">
 							<div class="flex flex-row gap-2">
 								<span class="text-lg font-bold">{profile.username}</span>
