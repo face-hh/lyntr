@@ -368,5 +368,5 @@
 		{:else}
 			<title>Lyntr</title>
 		{/if}
-	{:else}
+	{/if}
 </svelte:head>
