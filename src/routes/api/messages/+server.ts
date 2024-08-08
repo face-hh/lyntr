@@ -7,6 +7,11 @@ import { eq, and, asc, desc, sql, or, count } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { lyntObj } from '../util';
 
+function removeDuplicates(arr: any[], key: string) {
+    const ids = arr.map((a) => a[key]);
+    return arr.filter((a, index) => !ids.includes(a[key], index + 1));
+}
+
 export const GET: RequestHandler = async ({ request, cookies, url }) => {
 	const authCookie = cookies.get('_TOKEN__DO_NOT_SHARE');
 
@@ -82,7 +87,7 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
 			.limit(30)
 			.offset(previous * 30)
 			.as('sq');
-		const msgs = db
+		const msgs = await db
 			.select({
 				id: sq.id,
 				content: sq.content,
@@ -111,7 +116,7 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
 	                .leftJoin(users, eq(lynts.user_id, users.id))
 			.orderBy(asc(sq.created_at));
 
-		return json({ messages: await msgs }, { status: 200 });
+		return json({ messages: removeDuplicates(msgs, 'id') }, { status: 200 });
 	} catch (error) {
 		console.error('Authentication error:', error);
 		return json({ error: 'Authentication failed' }, { status: 401 });

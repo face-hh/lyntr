@@ -172,6 +172,8 @@
 	$: messages &&
 		(async () => {
 			if (profile) {
+				console.log(messages);
+
 				const i = friendsList.findIndex((friend) => friend.id === profile.id);
 				if (i >= 0 && friendsList[i]) {
 					friendsList[i].unread = messages.filter(
