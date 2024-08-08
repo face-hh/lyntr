@@ -93,6 +93,7 @@
 					: ''
 				: ''} { item.visibleOnDesktop ? 'hidden md:flex' : ''}"
 			on:click={() => handleNavClick(item.page)}
+			nav={true}
 		/>
 	{/each}
 </div>
