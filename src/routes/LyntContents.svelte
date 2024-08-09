@@ -220,7 +220,7 @@
 							class="flex items-center gap-3 rounded-lg p-3 text-sm hover:bg-lynt-foreground"
 						>
 							<Copy class="h-5 w-5 text-muted-foreground" />
-							<span>Copy Text</span>
+							<span>Copy</span>
 						</button>
 						{#if isAuthor}
 							<button
@@ -231,8 +231,7 @@
 								<span>Delete</span>
 							</button>
 						{:else}
-							<Report profile={true} {userId} lyntId={postId} />
-							<Report profile={false} {userId} lyntId={postId} />
+							<Report {userId} lyntId={postId} />
 						{/if}
 					</Popover.Content>
 				</Popover.Root>
