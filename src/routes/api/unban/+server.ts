@@ -19,7 +19,7 @@ export const POST: RequestHandler = async ({ request, cookies, url }) => {
 	try {
 		const [updatedUser] = await db
 			.update(users)
-			.set({ verified: true })
+			.set({ banned: false })
 			.where(eq(users.handle, handle))
 			.returning();
 
@@ -29,7 +29,7 @@ export const POST: RequestHandler = async ({ request, cookies, url }) => {
 
 		return json(
 			{
-				message: 'User verified successfully.'
+				message: 'User unbanned successfully.'
 			},
 			{ status: 200 }
 		);

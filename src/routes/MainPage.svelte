@@ -290,12 +290,19 @@
 		goto('/');
 	}
 
+
 	function handleInput(event: Event) {
 		if (comment.trim() == '' && image == null) {
 			postCommentDisabled = true;
 		} else {
 			postCommentDisabled = false;
 		}
+	}
+
+	function getStats(){
+		if(!selectedLynt) return "💬 0   🔁 0   ❤️ 0   👁️ 0"
+
+		return `💬 ${selectedLynt.commentCount.toLocaleString()}   🔁 ${selectedLynt.repostCount.toLocaleString()}   ❤️ ${selectedLynt.likeCount.toLocaleString()}   👁️ ${selectedLynt.views.toLocaleString()}`
 	}
 
 </script>
@@ -464,6 +471,31 @@
 	{#if page === 'home'}
 		{#if selectedLynt}
 			<title>{selectedLynt.username} on Lyntr: "{selectedLynt.content}"</title>
+			<meta
+				property="og:title"
+				content="{selectedLynt.username} (@{selectedLynt.handle}) on Lyntr with {selectedLynt.iq} IQ"
+			/>
+			<meta property="og:site_name" content={getStats()} />
+			
+			<meta content="#eae7db" data-react-helmet="true" name="theme-color" />
+			<meta name="twitter:card" content="summary_large_image">
+
+			<meta property="og:type" content="website" />
+			{#if selectedLynt.has_image}
+				<meta property="og:image" content="https://cdn.lyntr.com/lyntr/{selectedLynt.id}.webp" />
+			{/if}
+			<meta property="og:url" content="https://lyntr.com/?id={selectedLynt.id}" />
+
+			{#if selectedLynt.parentId}
+				<meta property="og:description" content={selectedLynt.content} />
+			{:else}
+				<meta
+					property="og:description"
+					content="{selectedLynt.content}\nQuoting {selectedLynt.parentUserUsername} (@{selectedLynt.parentUserHandle}) with {selectedLynt.parentUserIq} IQ\n{selectedLynt.parentContent}"
+				/>
+			{/if}
+
+			<meta name="description" content="Lyntr is a micro-blogging social media with an IQ test." />
 		{:else}
 			<title>Lyntr</title>
 		{/if}

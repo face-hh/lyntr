@@ -92,7 +92,6 @@
 	let contentElement: HTMLSpanElement | null = null;
 	content = content!;
 	let clickingExternalLink = false;
-	// I can just use this in the listener and that should work.
 	let externalLink: URL | null = null;
 
 	const formattedDate = formatDateTooltip(createdAt);

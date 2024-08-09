@@ -73,6 +73,25 @@ function startBot() {
 				message.reply('An error occurred while verifying the user.');
 			}
 		}
+		if (args[0] === '!unban' && args[1]) {
+			try {
+				const response = await fetch(`${API_BASE_URL}/api/unban?handle=${args[1]}`, {
+					method: 'POST',
+					headers: {
+						Authorization: process.env.ADMIN_KEY!
+					}
+				});
+
+				if (response.ok) {
+					message.reply('Success');
+				} else {
+					message.reply(`Error: ${response.status} | ${response.statusText}`);
+				}
+			} catch (error) {
+				console.error('Error unbanning user:', error);
+				message.reply('An error occurred while unbanning the user.');
+			}
+		}
 	});
 	client.on('interactionCreate', async (interaction) => {
 		try {
