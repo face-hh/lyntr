@@ -108,7 +108,11 @@
 		<meta name="twitter:card" content="summary_large_image" />
 
 		<meta property="og:type" content="website" />
-		<meta property="og:image" content="https://cdn.lyntr.com/lyntr/{data.lynt.id}.webp" />
+
+		{#if data.lynt.has_image}
+			<meta property="og:image" content="https://cdn.lyntr.com/lyntr/{data.lynt.id}.webp" />
+		{/if}
+
 		<meta property="og:url" content="https://lyntr.com/?id={data.lynt.id}" />
 
 		{#if data.lynt.parentUserHandle === null}
@@ -125,6 +129,12 @@
 			/>
 		{/if}
 
-		<meta name="description" content="Lyntr is a micro-blogging social media with an IQ test." />
+	{:else}
+		<meta property="og:title" content="Lyntr"/>
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="https://lyntr.com/" />
+		<meta property="og:description" content="Lyntr is a micro-blogging social media with an IQ test." />
+		<meta property="og:image" content="https://lyntr.com/logo.png" />
 	{/if}
+	<meta name="description" content="Lyntr is a micro-blogging social media with an IQ test." />
 </svelte:head>
