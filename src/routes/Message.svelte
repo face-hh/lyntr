@@ -51,10 +51,10 @@
 	<Popover.Trigger class="px-1">
 		<EllipsisVertical size={16} />
 	</Popover.Trigger>
-	<Popover.Content class="flex flex-col gap-1 w-64" align="start" overlap={true} side="top">
-		<span class="text-sm text-muted-foreground">{dayjs.utc(message.created_at).tz().fromNow()}</span>
+	<Popover.Content class="flex flex-col gap-1 w-52 rounded-xl p-0" overlap={true} side="top">
+		<span class="text-sm text-muted-foreground px-6 pt-4 pb-2">{dayjs.utc(message.created_at).tz().fromNow()}</span>
 		<div class="bg-secondary w-full h-[1px]"></div>
-		<Button variant="ghost" class="flex justify-between gap-1" on:click={() => {
+		<Button variant="ghost" class="flex justify-between gap-1 pb-4" on:click={(e) => {
 			navigator.clipboard.writeText(message.content);
 			open = false;
 		}}>Copy <Copy size={20} /></Button>
@@ -62,7 +62,7 @@
 </Popover.Root>
 </div>
 	<div
-		class="mt-2 w-fit flex max-w-[350px] md:max-w-screen-72 lg:max-w-md flex-row gap-2 rounded-3xl px-3 py-2 {message.sender.id === myId
+		class="mt-2 w-fit flex max-w-[360px] md:max-w-screen-72 lg:max-w-md flex-row gap-2 rounded-3xl px-3 py-2 {message.sender.id === myId
 			? 'bg-primary/80'
 			: 'bg-input'}"
 	>
