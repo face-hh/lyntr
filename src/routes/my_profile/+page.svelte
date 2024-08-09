@@ -6,11 +6,9 @@
 	import { onMount } from 'svelte';
 	import { Toaster } from '$lib/components/ui/sonner';
 	import LoadingSpinner from '../LoadingSpinner.svelte';
-	import Auth from '../Auth.svelte';
 	import AccountCreator from '../AccountCreator.svelte';
-	import { page } from '$app/stores';
+	import { supabase } from '@/supabase';
 	import MainPage from '../MainPage.svelte';
-	import Cookies from 'js-cookie';
 
 	let authenticated: boolean = false;
 	let loading: boolean = true;
@@ -24,14 +22,14 @@
 	};
 
 	async function checkAuthAndProfileStatus() {
-		if (Cookies.get('temp-discord-token'))
-			authenticated = true;
+		const { data, error } = await supabase.auth.getSession();
+		if (data.session?.access_token) authenticated = true;
 		try {
 			const response = await fetch('/api/me', {
 				method: 'GET',
 				credentials: 'include'
 			});
-
+			console.log(response.status);
 			if (response.status === 200) {
 				const res = await response.json();
 				userData = {
@@ -56,7 +54,7 @@
 		checkAuthAndProfileStatus();
 	});
 
-	$: handle = $page.params.handle.replace(/^@/, '');
+	$: handle = userData.handle;
 </script>
 
 <svelte:head>
@@ -69,8 +67,6 @@
 
 {#if loading}
 	<LoadingSpinner />
-{:else if !authenticated}
-	<Auth />
 {:else if noAccount}
 	<AccountCreator />
 {:else}
