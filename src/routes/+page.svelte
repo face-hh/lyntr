@@ -126,5 +126,6 @@
 		{/if}
 
 		<meta name="description" content="Lyntr is a micro-blogging social media with an IQ test." />
+		<title>{data.lynt.username} on Lyntr: "{data.lynt.content}"</title>
 	{/if}
 </svelte:head>
