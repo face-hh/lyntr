@@ -52,7 +52,8 @@ export const GET: RequestHandler = async ({ request, url, cookies }) => {
 
 		if (existingUser.length > 0) {
 			const jwt = await createAuthJWT({
-				userId: existingUser[0].id
+				userId: existingUser[0].id,
+				timestamp: Date.now()
 			});
 			cookies.set('_TOKEN__DO_NOT_SHARE', jwt, {
 				path: '/',

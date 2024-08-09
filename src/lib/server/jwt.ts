@@ -10,6 +10,7 @@ config({ path: '.env' });
 
 export type JWTPayload = {
 	userId: string;
+	timestamp: number;
 };
 
 export const createAuthJWT = async (data: JWTPayload) => {
