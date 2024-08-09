@@ -3,7 +3,8 @@
 	import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 	import { Input } from '@/components/ui/input';
 	import { Button } from '@/components/ui/button';
-	import { cdnUrl } from './stores';
+	import { cdnUrl, currentPage as current_page } from './stores';
+	import { goto } from '$app/navigation';
 
 	import Avatar from './Avatar.svelte';
 
@@ -100,7 +101,14 @@
 										>{user.iq}</span
 									>
 								</div>
-								<p class="text-sm text-muted-foreground">@{user.handle}</p>
+								<p class="text-sm text-muted-foreground">
+									<button
+										on:click={() => {
+											current_page.set(`profile${user.handle}`);
+											goto(`/@${user.handle}`, { replaceState: true, noScroll: true });
+										}}>@{user.handle}</button
+									>
+								</p>
 							</div>
 						</div>
 					{/each}
