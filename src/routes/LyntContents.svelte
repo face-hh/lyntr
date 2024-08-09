@@ -112,7 +112,7 @@
 	}
 
 	function handleCopy() {
-		toast('Link copied to clipboard!');
+		toast('Content copied to clipboard!');
 		navigator.clipboard.writeText(content)
 	}
 
@@ -364,13 +364,7 @@
 			{/if}
 		</div>
 
-
 		<span bind:this={contentElement} class="{smaller || reposted ? "max-w-[250px]" : ""} md:max-w-[490px] whitespace-pre-wrap text-pretty break-words text-lg overflow-x-hidden">{truncated}</span>
-
-	
-
-
-
 
 		{#if needsReadMore}
 			<span class="mt-2 text-sm text-muted-foreground hover:underline">Click to Read more...</span>
@@ -378,7 +372,5 @@
 	</div>
 </div>
 {#if has_image}
-
-	<img class="avatar mt-2 max-h-[600px] object-contain" src={cdnUrl(postId)} alt="ok" />
-
+	<img class="avatar mt-2 max-h-[600px] object-contain overflow-hidden max-w-[90%]" src={cdnUrl(postId)} alt="ok" />
 {/if}
