@@ -380,6 +380,11 @@
 				property="og:title"
 				content="{selectedLynt.username} (@{selectedLynt.handle}) on Lyntr with {selectedLynt.iq} IQ"
 			/>
+			<meta property="og:site_name" content={getStats()} />
+			
+			<meta content="#eae7db" data-react-helmet="true" name="theme-color" />
+			<meta name="twitter:card" content="summary_large_image">
+
 			<meta property="og:type" content="website" />
 			{#if selectedLynt.has_image}
 				<meta property="og:image" content="https://cdn.lyntr.com/lyntr/{selectedLynt.id}.webp" />
@@ -387,11 +392,11 @@
 			<meta property="og:url" content="https://lyntr.com/?id={selectedLynt.id}" />
 
 			{#if selectedLynt.parentId}
-				<meta property="og:description" content="{getStats()}\n{selectedLynt.content}" />
+				<meta property="og:description" content={selectedLynt.content} />
 			{:else}
 				<meta
 					property="og:description"
-					content="{getStats()}\n{selectedLynt.content}\nQuoting {selectedLynt.parentUserUsername} (@{selectedLynt.parentUserHandle}) with {selectedLynt.parentUserIq} IQ\n{selectedLynt.parentContent}"
+					content="{selectedLynt.content}\nQuoting {selectedLynt.parentUserUsername} (@{selectedLynt.parentUserHandle}) with {selectedLynt.parentUserIq} IQ\n{selectedLynt.parentContent}"
 				/>
 			{/if}
 
