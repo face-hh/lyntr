@@ -118,8 +118,12 @@
 		{:else}
 			<meta
 				property="og:description"
-				content="{data.lynt.content}\nQuoting {data.lynt.parentUserUsername} (@{data.lynt
-					.parentUserHandle}) with {data.lynt.parentUserIq} IQ\n{data.lynt.parentContent}"
+				content="{data.lynt.content}
+				
+				Quoting {data.lynt.parentUserUsername} (@{data.lynt
+					.parentUserHandle}) with {data.lynt.parentUserIq} IQ
+				
+				{data.lynt.parentContent}"
 			/>
 		{/if}
 

@@ -15,6 +15,7 @@
 	import DOMPurify from 'dompurify';
 	import { page } from '$app/stores';
 	import { Button } from '@/components/ui/button';
+	import { onMount } from 'svelte';
 
 	function getTimeElapsed(date: Date | string) {
 		if (typeof date === 'string') date = new Date(date);
@@ -76,7 +77,7 @@
 	export let isAuthor: boolean;
 	export let has_image: boolean | null;
 	export let postId: string;
-	let contentElement: HTMLSpanElement | null = null;
+
 	content = content!;
 	let clickingExternalLink = false;
 	let externalLink: URL | null = null;
@@ -97,7 +98,7 @@
 
 	function handleCopy() {
 		toast('Link copied to clipboard!');
-		navigator.clipboard.writeText(content)
+		navigator.clipboard.writeText(content);
 	}
 
 	function truncateContentFunc(
@@ -117,60 +118,26 @@
 
 	$: ({ truncated, needsReadMore } = truncateContentFunc(content));
 
-	$: if (contentElement) {
-		const sanitizedContent = DOMPurify.sanitize(contentElement.innerHTML, {
-			USE_PROFILES: { html: true },
+	let processedContent = '';
+
+	$: {
+		const linkRegex = /(https?:\/\/\S+)/g;
+		const linkedContent = content.replace(
+			linkRegex,
+			(url) => `<a href="${url}" data-external-link>${url}</a>`
+		);
+		processedContent = DOMPurify.sanitize(linkedContent, {
 			ALLOWED_TAGS: ['a'],
-			ALLOWED_ATTR: ['href', 'target']
+			ALLOWED_ATTR: ['href', 'data-external-link']
 		});
+	}
 
-		const tempDiv = document.createElement('div');
-		tempDiv.innerHTML = sanitizedContent;
-
-		const linkRegex = /([A-Za-z]+:\/\/[^\s]+)/g;
-
-		tempDiv.childNodes.forEach((node: Node) => {
-			if (node.nodeType === Node.TEXT_NODE && node.textContent) {
-				const fragment = document.createDocumentFragment();
-				let lastIndex = 0;
-				let match: RegExpExecArray | null;
-
-				while ((match = linkRegex.exec(node.textContent)) !== null) {
-					const link = match[0];
-					const precedingText = node.textContent.slice(lastIndex, match.index);
-
-					if (precedingText) {
-						fragment.appendChild(document.createTextNode(precedingText));
-					}
-
-					const anchor = document.createElement('a');
-					anchor.href = link;
-					anchor.textContent = link;
-					anchor.target = '_blank';
-					anchor.rel = 'noopener noreferrer';
-
-					anchor.addEventListener('click', (e: MouseEvent) => {
-						const url = new URL(anchor.href);
-						if (url.host !== window.location.host) {
-							e.preventDefault();
-							handleExternalLink(anchor.href);
-						}
-					});
-
-					fragment.appendChild(anchor);
-					lastIndex = linkRegex.lastIndex;
-				}
-
-				if (lastIndex < node.textContent.length) {
-					fragment.appendChild(document.createTextNode(node.textContent.slice(lastIndex)));
-				}
-
-				node.parentNode?.replaceChild(fragment, node);
-			}
-		});
-
-		contentElement.innerHTML = '';
-		contentElement.appendChild(tempDiv);
+	function handleClick(event: MouseEvent) {
+		const target = event.target as HTMLAnchorElement;
+		if (target.matches('a[data-external-link]')) {
+			event.preventDefault();
+			handleExternalLink(target.href);
+		}
 	}
 
 	function handleExternalLink(url: string) {
@@ -195,7 +162,7 @@
 					</AlertDialog.Title>
 					<AlertDialog.Description class="flex select-none flex-col gap-2">
 						<span>This link leads to an external website.</span>
-						<span class="rounded-md border-[1px] border-solid border-primary p-2 break-all">
+						<span class="break-all rounded-md border-[1px] border-solid border-primary p-2">
 							{externalLink}
 						</span>
 					</AlertDialog.Description>
@@ -344,9 +311,9 @@
 			</div>
 		</div>
 
-		<span bind:this={contentElement} class="max-w-[490px] whitespace-pre-wrap break-words text-lg"
-			>{truncated}</span
-		>
+		<span class="max-w-[490px] whitespace-pre-wrap break-words text-lg" on:click={handleClick}>
+			{@html processedContent}
+		</span>
 
 		{#if needsReadMore}
 			<span class="mt-2 text-sm text-muted-foreground hover:underline">Click to Read more...</span>
