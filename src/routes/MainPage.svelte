@@ -370,6 +370,26 @@
 	{#if page === 'home'}
 		{#if selectedLynt}
 			<title>{selectedLynt.username} on Lyntr: "{selectedLynt.content}"</title>
+			<meta
+				property="og:title"
+				content="{selectedLynt.username} (@{selectedLynt.handle}) on Lyntr with {selectedLynt.iq} IQ"
+			/>
+			<meta property="og:type" content="website" />
+			{#if selectedLynt.has_image}
+				<meta property="og:image" content="https://cdn.lyntr.com/lyntr/{selectedLynt.id}.webp" />
+			{/if}
+			<meta property="og:url" content="https://lyntr.com/?id={selectedLynt.id}" />
+
+			{#if selectedLynt.parentId}
+				<meta property="og:description" content={selectedLynt.content} />
+			{:else}
+				<meta
+					property="og:description"
+					content="💬 {selectedLynt.commentCount.toLocaleString()}   🔁 {selectedLynt.repostCount.toLocaleString()}   ❤️ {selectedLynt.likeCount.toLocaleString()}   👁️ {selectedLynt.views.toLocaleString()}\n{selectedLynt.content}\nQuoting {selectedLynt.parentUserUsername} (@{selectedLynt.parentUserHandle}) with {selectedLynt.parentUserIq} IQ\n{selectedLynt.parentContent}"
+				/>
+			{/if}
+
+			<meta name="description" content="Lyntr is a micro-blogging social media with an IQ test." />
 		{:else}
 			<title>Lyntr</title>
 		{/if}
