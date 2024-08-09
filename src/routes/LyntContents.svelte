@@ -14,6 +14,7 @@
 	import Report from './Report.svelte';
 	import DOMPurify from 'dompurify';
 	import { page } from '$app/stores';
+	import { Button } from '@/components/ui/button';
 
 	function getTimeElapsed(date: Date | string) {
 		if (typeof date === 'string') date = new Date(date);
@@ -35,27 +36,27 @@
 		return `${seconds}s`;
 	}
 	function formatDate(date) {
-    	if (typeof date === 'string') date = new Date(date);
+		if (typeof date === 'string') date = new Date(date);
 
-    	const options = {
-        	year: 'numeric',
-        	month: 'long'
-    	};
-    	return date.toLocaleDateString(undefined, options);
+		const options = {
+			year: 'numeric',
+			month: 'long'
+		};
+		return date.toLocaleDateString(undefined, options);
 	}
 
 	function formatDateTooltip(date) {
-    	date = new Date(date);
-    	
+		date = new Date(date);
+
 		const options = {
-        	hour: '2-digit',
-        	minute: '2-digit',
-        	month: 'short',
-        	day: 'numeric',
-        	year: 'numeric'
+			hour: '2-digit',
+			minute: '2-digit',
+			month: 'short',
+			day: 'numeric',
+			year: 'numeric'
 		};
-		
-    	return date.toLocaleString(undefined, options);
+
+		return date.toLocaleString(undefined, options);
 	}
 
 	let popoverOpened = false;
@@ -113,32 +114,64 @@
 	$: ({ truncated, needsReadMore } = truncateContentFunc(content));
 
 	$: if (contentElement) {
-		// this shouldn't have any XSS vulnerabilities. Or at least, hopefully...
-		const sanitizedContent: string = DOMPurify.sanitize(contentElement.innerHTML, {
-			USE_PROFILES: {
-				html: true
-			},
+		const sanitizedContent = DOMPurify.sanitize(contentElement.innerHTML, {
+			USE_PROFILES: { html: true },
+			ALLOWED_TAGS: ['a'],
+			ALLOWED_ATTR: ['href', 'target']
 		});
-		const links = sanitizedContent.match(/[A-z|A-Z|a-z]+:\/\/[^\s]+/gm);
-		if (links)
-			for (const link of links) {
-				const linkHTML = `<a href="${link}" target="_blank">${link}</a>`;
-				console.log("link", link, "linkHTML", linkHTML);
-				// FIXME: it may "double replace" the link, which isn't good.
-				contentElement.innerHTML = contentElement.innerHTML.replace(
-					link,
-					linkHTML
-				);
-				console.log("innerHTML after replace", contentElement.innerHTML)
-				const a = contentElement.querySelectorAll('a');
-				a.forEach(el => el.addEventListener("click", (e) => {
-					if (new URL(el.href).host !== $page.url.host) {
-						e.preventDefault();
-						externalLink = new URL(link);
-						clickingExternalLink = true;
+
+		const tempDiv = document.createElement('div');
+		tempDiv.innerHTML = sanitizedContent;
+
+		const linkRegex = /([A-Za-z]+:\/\/[^\s]+)/g;
+
+		tempDiv.childNodes.forEach((node: Node) => {
+			if (node.nodeType === Node.TEXT_NODE && node.textContent) {
+				const fragment = document.createDocumentFragment();
+				let lastIndex = 0;
+				let match: RegExpExecArray | null;
+
+				while ((match = linkRegex.exec(node.textContent)) !== null) {
+					const link = match[0];
+					const precedingText = node.textContent.slice(lastIndex, match.index);
+
+					if (precedingText) {
+						fragment.appendChild(document.createTextNode(precedingText));
 					}
-				}))
+
+					const anchor = document.createElement('a');
+					anchor.href = link;
+					anchor.textContent = link;
+					anchor.target = '_blank';
+					anchor.rel = 'noopener noreferrer';
+
+					anchor.addEventListener('click', (e: MouseEvent) => {
+						const url = new URL(anchor.href);
+						if (url.host !== window.location.host) {
+							e.preventDefault();
+							handleExternalLink(anchor.href);
+						}
+					});
+
+					fragment.appendChild(anchor);
+					lastIndex = linkRegex.lastIndex;
+				}
+
+				if (lastIndex < node.textContent.length) {
+					fragment.appendChild(document.createTextNode(node.textContent.slice(lastIndex)));
+				}
+
+				node.parentNode?.replaceChild(fragment, node);
 			}
+		});
+
+		contentElement.innerHTML = '';
+		contentElement.appendChild(tempDiv);
+	}
+
+	function handleExternalLink(url: string) {
+		externalLink = new URL(url);
+		clickingExternalLink = true;
 	}
 </script>
 
@@ -150,30 +183,40 @@
 	{/if}
 
 	{#if clickingExternalLink}
-	<AlertDialog.Root open={clickingExternalLink}>
-		<AlertDialog.Content>
-			<AlertDialog.Header>
-				<AlertDialog.Title class="mb-2 text-2xl font-bold"
-					>Open external website?</AlertDialog.Title
-				>
-				<AlertDialog.Description>
-					This link leads to a external website.
-					Are you sure you want to open it?
-				</AlertDialog.Description>
-			</AlertDialog.Header>
-			<AlertDialog.Footer>
-				<AlertDialog.Action on:click={() => {
-					if (!externalLink)
-						return console.error("externalLink is null");
-					window.open(externalLink)
-					externalLink = null
-				}}>Open</AlertDialog.Action>
-				<AlertDialog.Action class="bg-primary" on:click={() => {
-					clickingExternalLink = false
-				}}>Return to Lyntr</AlertDialog.Action>
-			</AlertDialog.Footer>
-		</AlertDialog.Content>
-	</AlertDialog.Root>
+		<AlertDialog.Root bind:open={clickingExternalLink}>
+			<AlertDialog.Content>
+				<AlertDialog.Header>
+					<AlertDialog.Title class="mb-2 select-none text-2xl font-bold">
+						Leaving Lyntr
+					</AlertDialog.Title>
+					<AlertDialog.Description class="flex select-none flex-col gap-2">
+						<span>This link leads to an external website.</span>
+						<span class="rounded-md border-[1px] border-solid border-primary p-2 break-all">
+							{externalLink}
+						</span>
+					</AlertDialog.Description>
+				</AlertDialog.Header>
+				<AlertDialog.Footer>
+					<Button
+						variant="outline"
+						on:click={() => {
+							clickingExternalLink = false;
+						}}
+					>
+						Return to Lyntr
+					</Button>
+					<Button
+						on:click={() => {
+							if (!externalLink) return console.error('externalLink is null');
+							window.open(externalLink);
+							externalLink = null;
+						}}
+					>
+						Open
+					</Button>
+				</AlertDialog.Footer>
+			</AlertDialog.Content>
+		</AlertDialog.Root>
 	{/if}
 
 	<div class="flex w-full flex-col text-left">
@@ -291,7 +334,9 @@
 			</div>
 		</div>
 
-		<span bind:this={contentElement} class="max-w-[490px] whitespace-pre-wrap break-words text-lg">{truncated}</span>
+		<span bind:this={contentElement} class="max-w-[490px] whitespace-pre-wrap break-words text-lg"
+			>{truncated}</span
+		>
 
 		{#if needsReadMore}
 			<span class="mt-2 text-sm text-muted-foreground hover:underline">Click to Read more...</span>
@@ -299,5 +344,5 @@
 	</div>
 </div>
 {#if has_image}
-		<img class="avatar max-h-[600px] mt-2 object-contain" src={cdnUrl(postId)} alt="ok" />
+	<img class="avatar mt-2 max-h-[600px] object-contain" src={cdnUrl(postId)} alt="ok" />
 {/if}
