@@ -1,4 +1,3 @@
-<!-- src/components/ProfilePage.svelte -->
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
@@ -321,6 +320,12 @@
 		<title>Loading... | Lyntr</title>
 	{:else if profile}
 		<title>{profile.username} (@{profile.handle}) | Lyntr</title>
+		<meta property="og:title" content="{profile.username} (@{profile.handle}) | IQ: {profile.iq}" />
+		<meta property="og:type" content="website" />
+		<meta property="og:image" content="https://cdn.lyntr.com/lyntr/{profile.id}.webp" />
+		<meta property="og:url" content="https://lyntr.com/@{profile.handle}" />
+		<meta property="og:description" content="{profile.bio}" />
+		<meta name="description" content="Lyntr is a micro-blogging social media with an IQ test." />
 	{:else}
 		<title>Profile not found | Lyntr</title>
 	{/if}
