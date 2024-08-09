@@ -2,17 +2,15 @@
 	import * as Tooltip from '@/components/ui/tooltip';
 	import { Label } from '@/components/ui/label';
 	import * as HoverCard from '@/components/ui/hover-card/index.js';
-	import * as AlertDialog from '@/components/ui/alert-dialog';
 	import Avatar from './Avatar.svelte';
 	import { mode } from 'mode-watcher';
 	import { cdnUrl } from './stores';
 
 	import CalendarDays from 'lucide-svelte/icons/calendar-days';
 	import * as Popover from '@/components/ui/popover';
-	import { Ellipsis, Trash, Copy } from 'lucide-svelte';
+	import { Copy, Ellipsis, Trash } from 'lucide-svelte';
 	import { toast } from 'svelte-sonner';
 	import Report from './Report.svelte';
-
 	import { createEventDispatcher } from 'svelte';
 
 
@@ -76,7 +74,7 @@
 	export let verified;
 	export let handle: string;
 	export let createdAt;
-	export let content: string | null;
+	export let content: string;
 	export let iq;
 	export let bio: string | null;
 	export let smaller = false;
@@ -129,69 +127,13 @@
 			needsReadMore: true
 		};
 	}
+	
+	function handleCopy() {
+		toast('Lynt contents copied to clipboard!');
+		navigator.clipboard.writeText(content)
+	}
 
 	$: ({ truncated, needsReadMore } = truncateContentFunc(content));
-
-	$: if (contentElement) {
-		const sanitizedContent = DOMPurify.sanitize(contentElement.innerHTML, {
-			USE_PROFILES: { html: true },
-			ALLOWED_TAGS: ['a'],
-			ALLOWED_ATTR: ['href', 'target']
-		});
-
-		const tempDiv = document.createElement('div');
-		tempDiv.innerHTML = sanitizedContent;
-
-		const linkRegex = /([A-Za-z]+:\/\/[^\s]+)/g;
-
-		tempDiv.childNodes.forEach((node: Node) => {
-			if (node.nodeType === Node.TEXT_NODE && node.textContent) {
-				const fragment = document.createDocumentFragment();
-				let lastIndex = 0;
-				let match: RegExpExecArray | null;
-
-				while ((match = linkRegex.exec(node.textContent)) !== null) {
-					const link = match[0];
-					const precedingText = node.textContent.slice(lastIndex, match.index);
-
-					if (precedingText) {
-						fragment.appendChild(document.createTextNode(precedingText));
-					}
-
-					const anchor = document.createElement('a');
-					anchor.href = link;
-					anchor.textContent = link;
-					anchor.target = '_blank';
-					anchor.rel = 'noopener noreferrer';
-
-					anchor.addEventListener('click', (e: MouseEvent) => {
-						const url = new URL(anchor.href);
-						if (url.host !== window.location.host) {
-							e.preventDefault();
-							handleExternalLink(anchor.href);
-						}
-					});
-
-					fragment.appendChild(anchor);
-					lastIndex = linkRegex.lastIndex;
-				}
-
-				if (lastIndex < node.textContent.length) {
-					fragment.appendChild(document.createTextNode(node.textContent.slice(lastIndex)));
-				}
-
-				node.parentNode?.replaceChild(fragment, node);
-			}
-		});
-
-		contentElement.innerHTML = '';
-		contentElement.appendChild(tempDiv);
-	}
-
-	function handleExternalLink(url: string) {
-		externalLink = new URL(url);
-		clickingExternalLink = true;
-	}
 </script>
 
 <div class={`${$$props.class} flex items-start gap-2`}>
@@ -199,43 +141,6 @@
 		<a href="/@{handle}" class="inline-block max-h-[40px] min-w-[40px]">
 			<Avatar size={10} src={cdnUrl(userId, 'small')} alt="A profile picture." />
 		</a>
-	{/if}
-
-	{#if clickingExternalLink}
-		<AlertDialog.Root bind:open={clickingExternalLink}>
-			<AlertDialog.Content>
-				<AlertDialog.Header>
-					<AlertDialog.Title class="mb-2 select-none text-2xl font-bold">
-						Leaving Lyntr
-					</AlertDialog.Title>
-					<AlertDialog.Description class="flex select-none flex-col gap-2">
-						<span>This link leads to an external website.</span>
-						<span class="rounded-md border-[1px] border-solid border-primary p-2 break-all">
-							{externalLink}
-						</span>
-					</AlertDialog.Description>
-				</AlertDialog.Header>
-				<AlertDialog.Footer>
-					<Button
-						variant="outline"
-						on:click={() => {
-							clickingExternalLink = false;
-						}}
-					>
-						Return to Lyntr
-					</Button>
-					<Button
-						on:click={() => {
-							if (!externalLink) return console.error('externalLink is null');
-							window.open(externalLink);
-							externalLink = null;
-						}}
-					>
-						Open
-					</Button>
-				</AlertDialog.Footer>
-			</AlertDialog.Content>
-		</AlertDialog.Root>
 	{/if}
 
 	<div class="flex w-full flex-col text-left">
@@ -339,13 +244,6 @@
 						</button>
 					</Popover.Trigger>
 					<Popover.Content class="flex w-auto flex-col rounded-lg p-2 shadow-lg">
-						<button
-							on:click={handleCopy}
-							class="flex items-center gap-3 rounded-lg p-3 text-sm hover:bg-lynt-foreground"
-						>
-							<Copy class="h-5 w-5 text-muted-foreground" />
-							<span>Copy</span>
-						</button>
 						{#if isAuthor}
 							<button
 								on:click={handleDelete}
@@ -355,6 +253,14 @@
 								<span>Delete</span>
 							</button>
 						{:else}
+							<button
+								on:click={handleCopy}
+								class="flex items-center gap-3 rounded-lg p-3 text-sm hover:bg-lynt-foreground"
+							>
+								<Copy class="h-5 w-5 text-muted-foreground" />
+								<span>Copy</span>
+							</button>
+
 							<Report {userId} lyntId={postId} />
 						{/if}
 					</Popover.Content>
@@ -363,7 +269,7 @@
 			{/if}
 		</div>
 
-		<span bind:this={contentElement} class="{smaller || reposted ? "max-w-[250px]" : ""} md:max-w-[490px] whitespace-pre-wrap text-pretty break-words text-lg overflow-x-hidden">{truncated}</span>
+		<span class="{smaller || reposted ? "max-w-[250px]" : ""} md:max-w-[490px] whitespace-pre-wrap text-pretty break-words text-lg overflow-x-hidden">{truncated}</span>
 
 		{#if needsReadMore}
 			<span class="mt-2 text-sm text-muted-foreground hover:underline">Click to Read more...</span>

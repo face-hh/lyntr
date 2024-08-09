@@ -2,9 +2,8 @@ import { json } from '@sveltejs/kit';
 import type { Cookies, RequestHandler } from '@sveltejs/kit';
 import { verifyAuthJWT } from '@/server/jwt';
 import { db } from '@/server/db';
-import { lynts, likes, notifications, history, users } from '@/server/schema';
-import { eq, sql, and, or, inArray } from 'drizzle-orm';
-import sanitizeHtml from 'sanitize-html';
+import { lynts, users } from '@/server/schema';
+import { eq, sql } from 'drizzle-orm';
 import { Snowflake } from 'nodejs-snowflake';
 import sharp from 'sharp';
 import { minioClient } from '@/server/minio';
@@ -12,6 +11,7 @@ import { deleteLynt, lyntObj, uploadCompressed } from '../util';
 import { sendMessage } from '@/sse';
 import { isImageNsfw, moderate, NSFW_ERROR } from '@/moderation';
 import { sensitiveRatelimit } from '@/server/ratelimit';
+import { fetchReferencedLynts } from "../util"
 
 export const POST: RequestHandler = async ({
 	request,
@@ -121,14 +121,10 @@ export const GET: RequestHandler = async ({
 	request: Request;
 	cookies: Cookies;
 }) => {
-	let userId: string;
+	let userId: string | null;
 
 	const authCookie = cookies.get('_TOKEN__DO_NOT_SHARE');
 	const admin = request.headers.get('Authorization');
-
-	if (!authCookie && !admin) {
-		return json({ error: 'Missing authentication' }, { status: 401 });
-	}
 
 	if (admin === process.env.ADMIN_KEY && process.env.SUDO_USER_ID) {
 		userId = process.env.SUDO_USER_ID;
@@ -142,8 +138,7 @@ export const GET: RequestHandler = async ({
 				throw new Error('Invalid JWT token');
 			}
 		} catch (error) {
-			console.error('Authentication error:', error);
-			return json({ error: 'Authentication failed' }, { status: 401 });
+			userId = null
 		}
 	}
 	const lyntId = url.searchParams.get('id');
@@ -176,34 +171,6 @@ export const GET: RequestHandler = async ({
 		return json({ error: 'Failed to fetch lynt' }, { status: 500 });
 	}
 };
-
-async function fetchReferencedLynts(userId: string, parentId: string | null): Promise<any[]> {
-	const referencedLynts: any[] = [];
-
-	async function fetchParent(currentParentId: string) {
-		const obj = lyntObj(userId);
-
-		const [parent] = await db
-			.select(obj)
-			.from(lynts)
-			.leftJoin(users, eq(lynts.user_id, users.id))
-			.where(and(eq(lynts.id, currentParentId), eq(lynts.reposted, false)))
-			.limit(1);
-
-		if (parent) {
-			referencedLynts.unshift(parent); // Add to the beginning of the array
-			if (parent.parentId) {
-				await fetchParent(parent.parentId);
-			}
-		}
-	}
-
-	if (parentId) {
-		await fetchParent(parentId);
-	}
-
-	return referencedLynts;
-}
 
 export const DELETE: RequestHandler = async ({
 	request,

@@ -122,7 +122,7 @@
 								on:click={handleSubmit}
 								disabled={!nickname || !username}
 							>
-								Let's go!
+								Continue
 							</Button>
 						</AlertDialog.Trigger>
 						<AlertDialog.Content>

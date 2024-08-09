@@ -6,12 +6,11 @@
 	import LoadingSpinner from './LoadingSpinner.svelte';
 	import Auth from './Auth.svelte';
 	import AccountCreator from './AccountCreator.svelte';
-	import { page } from '$app/stores';
 	import MainPage from './MainPage.svelte';
 	import { cdnUrl } from './stores';
 	
 	import Cookies from 'js-cookie';
-	import { Cookie } from 'lucide-svelte';
+	import type { PageData } from './$types';
 
 	let authenticated: boolean = false;
 	let loading: boolean = true;
@@ -76,7 +75,14 @@
 		checkAuthAndProfileStatus();
 	});
 
-	$: lyntOpened = $page.url.searchParams.get('id');
+	export let data: PageData;
+	console.log(data);
+
+	function getStats() {
+		if (!data.lynt) return '💬 0   🔁 0   ❤️ 0   👁️ 0';
+
+		return `💬 ${data.lynt.commentCount.toLocaleString()}   🔁 ${data.lynt.repostCount.toLocaleString()}   ❤️ ${data.lynt.likeCount.toLocaleString()}   👁️ ${data.lynt.views.toLocaleString()}`;
+	}
 </script>
 
 <ModeWatcher defaultMode={'light'} />
@@ -89,5 +95,38 @@
 {:else if noAccount}
 	<AccountCreator />
 {:else}
-	<MainPage {...userData} {lyntOpened} />
+	<MainPage {...userData} lyntOpened={data.lyntOpened} />
 {/if}
+
+<svelte:head>
+	{#if data.lynt}
+		<meta
+			property="og:title"
+			content="{data.lynt.username} (@{data.lynt.handle}) on Lyntr with {data.lynt.iq} IQ"
+		/>
+		<meta property="og:site_name" content={getStats()} />
+
+		<meta content="#eae7db" data-react-helmet="true" name="theme-color" />
+		<meta name="twitter:card" content="summary_large_image" />
+
+		<meta property="og:type" content="website" />
+		<meta property="og:image" content="https://cdn.lyntr.com/lyntr/{data.lynt.id}.webp" />
+		<meta property="og:url" content="https://lyntr.com/?id={data.lynt.id}" />
+
+		{#if data.lynt.parentUserHandle === null}
+			<meta property="og:description" content={data.lynt.content} />
+		{:else}
+			<meta
+				property="og:description"
+				content="{data.lynt.content}
+				
+				Quoting {data.lynt.parentUserUsername} (@{data.lynt
+					.parentUserHandle}) with {data.lynt.parentUserIq} IQ
+				
+				{data.lynt.parentContent}"
+			/>
+		{/if}
+
+		<meta name="description" content="Lyntr is a micro-blogging social media with an IQ test." />
+	{/if}
+</svelte:head>

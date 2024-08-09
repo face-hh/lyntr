@@ -23,6 +23,7 @@
 	import { goto } from '$app/navigation';
 	import TopTab from './TopTab.svelte';
 	import DivInput from './DivInput.svelte';
+	import type { FeedItem } from './stores';
 
 	export let username: string;
 	export let handle: string;
@@ -41,40 +42,6 @@
 	currentPage.subscribe((value) => {
 		page = value;
 	});
-	interface FeedItem {
-		id: string;
-		content: string;
-		userId: string;
-		createdAt: number;
-		views: number;
-		reposted: boolean;
-		likeCount: number;
-		likedByFollowed: boolean;
-
-		repostCount: number;
-		commentCount: number;
-		likedByUser: boolean;
-		repostedByUser: boolean;
-		handle: string;
-		userCreatedAt: number;
-		username: string;
-		iq: number;
-		bio: string;
-		verified: boolean;
-		has_image: boolean;
-
-		parentId: string | null;
-		parentContent: string | null;
-		parentUserHandle: string | null;
-		parentUserUsername: string | null;
-		parentUserVerified: boolean | null;
-		parentHasImage: boolean | null;
-		parentUserBio: string | null;
-		parentUserIq: number | null;
-		parentUserId: string | null;
-		parentCreatedAt: number | null;
-		parentUserCreatedAt: number | null;
-	}
 
 	let feed: FeedItem[] = [];
 	let comments: FeedItem[] = [];
@@ -471,31 +438,6 @@
 	{#if page === 'home'}
 		{#if selectedLynt}
 			<title>{selectedLynt.username} on Lyntr: "{selectedLynt.content}"</title>
-			<meta
-				property="og:title"
-				content="{selectedLynt.username} (@{selectedLynt.handle}) on Lyntr with {selectedLynt.iq} IQ"
-			/>
-			<meta property="og:site_name" content={getStats()} />
-			
-			<meta content="#eae7db" data-react-helmet="true" name="theme-color" />
-			<meta name="twitter:card" content="summary_large_image">
-
-			<meta property="og:type" content="website" />
-			{#if selectedLynt.has_image}
-				<meta property="og:image" content="https://cdn.lyntr.com/lyntr/{selectedLynt.id}.webp" />
-			{/if}
-			<meta property="og:url" content="https://lyntr.com/?id={selectedLynt.id}" />
-
-			{#if selectedLynt.parentId}
-				<meta property="og:description" content={selectedLynt.content} />
-			{:else}
-				<meta
-					property="og:description"
-					content="{selectedLynt.content}\nQuoting {selectedLynt.parentUserUsername} (@{selectedLynt.parentUserHandle}) with {selectedLynt.parentUserIq} IQ\n{selectedLynt.parentContent}"
-				/>
-			{/if}
-
-			<meta name="description" content="Lyntr is a micro-blogging social media with an IQ test." />
 		{:else}
 			<title>Lyntr</title>
 		{/if}
