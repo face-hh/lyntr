@@ -103,7 +103,7 @@
 	}
 	
 	function handleCopy() {
-		toast('Link copied to clipboard!');
+		toast('Lynt contents copied to clipboard!');
 		navigator.clipboard.writeText(content)
 	}
 
