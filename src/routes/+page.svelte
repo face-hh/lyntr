@@ -108,9 +108,7 @@
 		<meta name="twitter:card" content="summary_large_image" />
 
 		<meta property="og:type" content="website" />
-		{#if data.lynt.has_image}
-			<meta property="og:image" content="https://cdn.lyntr.com/lyntr/{data.lynt.id}.webp" />
-		{/if}
+		<meta property="og:image" content="https://cdn.lyntr.com/lyntr/{data.lynt.id}.webp" />
 		<meta property="og:url" content="https://lyntr.com/?id={data.lynt.id}" />
 
 		{#if data.lynt.parentUserHandle === null}
