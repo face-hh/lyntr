@@ -11,7 +11,7 @@ import { lyntObj, uploadCompressed } from '../util';
 import { minioClient } from '@/server/minio';
 
 import { sensitiveRatelimit } from '@/server/ratelimit';
-import { moderate } from '@/moderation';
+import { isImageNsfw, moderate, NSFW_ERROR } from '@/moderation';
 
 export const POST: RequestHandler = async ({
 	request,
@@ -75,6 +75,10 @@ export const POST: RequestHandler = async ({
 		if (imageFile) {
 			const buffer = await imageFile.arrayBuffer();
 			const inputBuffer = Buffer.from(buffer);
+
+			if (await isImageNsfw(inputBuffer)) {
+                                 return NSFW_ERROR;
+                        }
 	
 			await uploadCompressed(inputBuffer, uniqueLyntId, minioClient);
 			lyntValues.has_image = true;
