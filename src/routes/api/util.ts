@@ -176,3 +176,31 @@ export async function deleteLynt(lyntId: string) {
 		await trx.delete(lynts).where(eq(lynts.id, lyntId));
 	});
 }
+
+export async function fetchReferencedLynts(userId: string | null, parentId: string | null): Promise<any[]> {
+	const referencedLynts: any[] = [];
+
+	async function fetchParent(currentParentId: string) {
+		const obj = lyntObj(userId);
+
+		const [parent] = await db
+			.select(obj)
+			.from(lynts)
+			.leftJoin(users, eq(lynts.user_id, users.id))
+			.where(and(eq(lynts.id, currentParentId), eq(lynts.reposted, false)))
+			.limit(1);
+
+		if (parent) {
+			referencedLynts.unshift(parent); // Add to the beginning of the array
+			if (parent.parentId) {
+				await fetchParent(parent.parentId);
+			}
+		}
+	}
+
+	if (parentId) {
+		await fetchParent(parentId);
+	}
+
+	return referencedLynts;
+}

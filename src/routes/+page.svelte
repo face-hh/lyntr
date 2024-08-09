@@ -6,10 +6,9 @@
 	import LoadingSpinner from './LoadingSpinner.svelte';
 	import Auth from './Auth.svelte';
 	import AccountCreator from './AccountCreator.svelte';
-	import { page } from '$app/stores';
 	import MainPage from './MainPage.svelte';
 	import Cookies from 'js-cookie';
-	import type { FeedItem } from './stores';
+	import type { PageData } from './$types';
 
 	let authenticated: boolean = false;
 	let loading: boolean = true;
@@ -74,26 +73,14 @@
 		checkAuthAndProfileStatus();
 	});
 
-	$: lyntOpened = $page.url.searchParams.get('id');
+	export let data: PageData;
+	console.log(data);
 
-	let selectedLynt: FeedItem | null;
-
-	async function getLynt(lyntOpened: string) {
-		const response = await fetch('api/lynt?id=' + lyntOpened, { method: 'GET' });
-
-		const res = await response.json();
-
-		return res as FeedItem;
-	}
 	function getStats() {
-		if (!selectedLynt) return '💬 0   🔁 0   ❤️ 0   👁️ 0';
+		if (!data.lynt) return '💬 0   🔁 0   ❤️ 0   👁️ 0';
 
-		return `💬 ${selectedLynt.commentCount.toLocaleString()}   🔁 ${selectedLynt.repostCount.toLocaleString()}   ❤️ ${selectedLynt.likeCount.toLocaleString()}   👁️ ${selectedLynt.views.toLocaleString()}`;
+		return `💬 ${data.lynt.commentCount.toLocaleString()}   🔁 ${data.lynt.repostCount.toLocaleString()}   ❤️ ${data.lynt.likeCount.toLocaleString()}   👁️ ${data.lynt.views.toLocaleString()}`;
 	}
-
-	onMount(async () => {
-		if(lyntOpened) selectedLynt = await getLynt(lyntOpened);
-	});
 </script>
 
 <ModeWatcher defaultMode={'light'} />
@@ -106,14 +93,14 @@
 {:else if noAccount}
 	<AccountCreator />
 {:else}
-	<MainPage {...userData} {lyntOpened} />
+	<MainPage {...userData} lyntOpened={data.lyntOpened} />
 {/if}
 
 <svelte:head>
-	{#if selectedLynt}
+	{#if data.lynt}
 		<meta
 			property="og:title"
-			content="{selectedLynt.username} (@{selectedLynt.handle}) on Lyntr with {selectedLynt.iq} IQ"
+			content="{data.lynt.username} (@{data.lynt.handle}) on Lyntr with {data.lynt.iq} IQ"
 		/>
 		<meta property="og:site_name" content={getStats()} />
 
@@ -121,17 +108,18 @@
 		<meta name="twitter:card" content="summary_large_image" />
 
 		<meta property="og:type" content="website" />
-		{#if selectedLynt.has_image}
-			<meta property="og:image" content="https://cdn.lyntr.com/lyntr/{selectedLynt.id}.webp" />
+		{#if data.lynt.has_image}
+			<meta property="og:image" content="https://cdn.lyntr.com/lyntr/{data.lynt.id}.webp" />
 		{/if}
-		<meta property="og:url" content="https://lyntr.com/?id={selectedLynt.id}" />
+		<meta property="og:url" content="https://lyntr.com/?id={data.lynt.id}" />
 
-		{#if selectedLynt.parentUserHandle === null}
-			<meta property="og:description" content={selectedLynt.content} />
+		{#if data.lynt.parentUserHandle === null}
+			<meta property="og:description" content={data.lynt.content} />
 		{:else}
 			<meta
 				property="og:description"
-				content="{selectedLynt.content}\nQuoting {selectedLynt.parentUserUsername} (@{selectedLynt.parentUserHandle}) with {selectedLynt.parentUserIq} IQ\n{selectedLynt.parentContent}"
+				content="{data.lynt.content}\nQuoting {data.lynt.parentUserUsername} (@{data.lynt
+					.parentUserHandle}) with {data.lynt.parentUserIq} IQ\n{data.lynt.parentContent}"
 			/>
 		{/if}
 

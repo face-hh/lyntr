@@ -2,9 +2,8 @@ import { json } from '@sveltejs/kit';
 import type { Cookies, RequestHandler } from '@sveltejs/kit';
 import { verifyAuthJWT } from '@/server/jwt';
 import { db } from '@/server/db';
-import { lynts, likes, notifications, history, users } from '@/server/schema';
-import { eq, sql, and, or, inArray } from 'drizzle-orm';
-import sanitizeHtml from 'sanitize-html';
+import { lynts, users } from '@/server/schema';
+import { eq, sql } from 'drizzle-orm';
 import { Snowflake } from 'nodejs-snowflake';
 import sharp from 'sharp';
 import { minioClient } from '@/server/minio';
@@ -12,6 +11,7 @@ import { deleteLynt, lyntObj } from '../util';
 import { sendMessage } from '@/sse';
 import { isImageNsfw, moderate, NSFW_ERROR } from '@/moderation';
 import { sensitiveRatelimit } from '@/server/ratelimit';
+import { fetchReferencedLynts } from "../util"
 
 export const POST: RequestHandler = async ({
 	request,
@@ -188,34 +188,6 @@ export const GET: RequestHandler = async ({
 		return json({ error: 'Failed to fetch lynt' }, { status: 500 });
 	}
 };
-
-async function fetchReferencedLynts(userId: string | null, parentId: string | null): Promise<any[]> {
-	const referencedLynts: any[] = [];
-
-	async function fetchParent(currentParentId: string) {
-		const obj = lyntObj(userId);
-
-		const [parent] = await db
-			.select(obj)
-			.from(lynts)
-			.leftJoin(users, eq(lynts.user_id, users.id))
-			.where(and(eq(lynts.id, currentParentId), eq(lynts.reposted, false)))
-			.limit(1);
-
-		if (parent) {
-			referencedLynts.unshift(parent); // Add to the beginning of the array
-			if (parent.parentId) {
-				await fetchParent(parent.parentId);
-			}
-		}
-	}
-
-	if (parentId) {
-		await fetchParent(parentId);
-	}
-
-	return referencedLynts;
-}
 
 export const DELETE: RequestHandler = async ({
 	request,
