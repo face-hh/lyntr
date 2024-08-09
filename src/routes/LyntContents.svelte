@@ -2,20 +2,15 @@
 	import * as Tooltip from '@/components/ui/tooltip';
 	import { Label } from '@/components/ui/label';
 	import * as HoverCard from '@/components/ui/hover-card/index.js';
-	import * as AlertDialog from '@/components/ui/alert-dialog';
 	import Avatar from './Avatar.svelte';
 	import { mode } from 'mode-watcher';
 	import { cdnUrl } from './stores';
 
 	import CalendarDays from 'lucide-svelte/icons/calendar-days';
 	import * as Popover from '@/components/ui/popover';
-	import { Ellipsis, Trash, Copy } from 'lucide-svelte';
+	import { Copy, Ellipsis, Trash } from 'lucide-svelte';
 	import { toast } from 'svelte-sonner';
 	import Report from './Report.svelte';
-	import DOMPurify from 'dompurify';
-	import { page } from '$app/stores';
-	import { Button } from '@/components/ui/button';
-	import { onMount } from 'svelte';
 
 	function getTimeElapsed(date: Date | string) {
 		if (typeof date === 'string') date = new Date(date);
@@ -68,7 +63,7 @@
 	export let verified;
 	export let handle: string;
 	export let createdAt;
-	export let content: string | null;
+	export let content: string;
 	export let iq;
 	export let bio: string | null;
 	export let smaller = false;
@@ -77,10 +72,6 @@
 	export let isAuthor: boolean;
 	export let has_image: boolean | null;
 	export let postId: string;
-
-	content = content!;
-	let clickingExternalLink = false;
-	let externalLink: URL | null = null;
 
 	const formattedDate = formatDateTooltip(createdAt);
 
@@ -94,11 +85,6 @@
 		} else {
 			toast(`Unknown error occured while deleting: ${response.status} | ${response.statusText}`);
 		}
-	}
-
-	function handleCopy() {
-		toast('Link copied to clipboard!');
-		navigator.clipboard.writeText(content);
 	}
 
 	function truncateContentFunc(
@@ -115,35 +101,13 @@
 			needsReadMore: true
 		};
 	}
+	
+	function handleCopy() {
+		toast('Link copied to clipboard!');
+		navigator.clipboard.writeText(content)
+	}
 
 	$: ({ truncated, needsReadMore } = truncateContentFunc(content));
-
-	let processedContent = '';
-
-	$: {
-		const linkRegex = /(https?:\/\/\S+)/g;
-		const linkedContent = content.replace(
-			linkRegex,
-			(url) => `<a href="${url}" data-external-link>${url}</a>`
-		);
-		processedContent = DOMPurify.sanitize(linkedContent, {
-			ALLOWED_TAGS: ['a'],
-			ALLOWED_ATTR: ['href', 'data-external-link']
-		});
-	}
-
-	function handleClick(event: MouseEvent) {
-		const target = event.target as HTMLAnchorElement;
-		if (target.matches('a[data-external-link]')) {
-			event.preventDefault();
-			handleExternalLink(target.href);
-		}
-	}
-
-	function handleExternalLink(url: string) {
-		externalLink = new URL(url);
-		clickingExternalLink = true;
-	}
 </script>
 
 <div class={`${$$props.class} flex items-start gap-2`}>
@@ -151,43 +115,6 @@
 		<a href="/@{handle}" class="inline-block max-h-[40px] min-w-[40px]">
 			<Avatar size={10} src={cdnUrl(userId, 'small')} alt="A profile picture." />
 		</a>
-	{/if}
-
-	{#if clickingExternalLink}
-		<AlertDialog.Root bind:open={clickingExternalLink}>
-			<AlertDialog.Content>
-				<AlertDialog.Header>
-					<AlertDialog.Title class="mb-2 select-none text-2xl font-bold">
-						Leaving Lyntr
-					</AlertDialog.Title>
-					<AlertDialog.Description class="flex select-none flex-col gap-2">
-						<span>This link leads to an external website.</span>
-						<span class="break-all rounded-md border-[1px] border-solid border-primary p-2">
-							{externalLink}
-						</span>
-					</AlertDialog.Description>
-				</AlertDialog.Header>
-				<AlertDialog.Footer>
-					<Button
-						variant="outline"
-						on:click={() => {
-							clickingExternalLink = false;
-						}}
-					>
-						Return to Lyntr
-					</Button>
-					<Button
-						on:click={() => {
-							if (!externalLink) return console.error('externalLink is null');
-							window.open(externalLink);
-							externalLink = null;
-						}}
-					>
-						Open
-					</Button>
-				</AlertDialog.Footer>
-			</AlertDialog.Content>
-		</AlertDialog.Root>
 	{/if}
 
 	<div class="flex w-full flex-col text-left">
@@ -288,13 +215,6 @@
 						</button>
 					</Popover.Trigger>
 					<Popover.Content class="flex w-auto flex-col rounded-lg p-2 shadow-lg">
-						<button
-							on:click={handleCopy}
-							class="flex items-center gap-3 rounded-lg p-3 text-sm hover:bg-lynt-foreground"
-						>
-							<Copy class="h-5 w-5 text-muted-foreground" />
-							<span>Copy</span>
-						</button>
 						{#if isAuthor}
 							<button
 								on:click={handleDelete}
@@ -304,6 +224,14 @@
 								<span>Delete</span>
 							</button>
 						{:else}
+							<button
+								on:click={handleCopy}
+								class="flex items-center gap-3 rounded-lg p-3 text-sm hover:bg-lynt-foreground"
+							>
+								<Copy class="h-5 w-5 text-muted-foreground" />
+								<span>Copy</span>
+							</button>
+
 							<Report {userId} lyntId={postId} />
 						{/if}
 					</Popover.Content>
@@ -311,9 +239,7 @@
 			</div>
 		</div>
 
-		<span class="max-w-[490px] whitespace-pre-wrap break-words text-lg" on:click={handleClick}>
-			{@html processedContent}
-		</span>
+		<span class="max-w-[490px] whitespace-pre-wrap break-words text-lg">{truncated}</span>
 
 		{#if needsReadMore}
 			<span class="mt-2 text-sm text-muted-foreground hover:underline">Click to Read more...</span>
