@@ -391,7 +391,7 @@
 			{/if}
 			<meta property="og:url" content="https://lyntr.com/?id={selectedLynt.id}" />
 
-			{#if selectedLynt.parentId}
+			{#if selectedLynt.parentUserHandle === null}
 				<meta property="og:description" content={selectedLynt.content} />
 			{:else}
 				<meta
