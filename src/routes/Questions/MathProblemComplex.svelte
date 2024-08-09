@@ -18,7 +18,75 @@
 </script>
 
 <div class="flex justify-center">
-	<img src="math.png" alt="Math problem" />
+	<math xmlns="http://www.w3.org/1998/Math/MathML">
+		<mrow>
+			<msup>
+				<mfenced>
+					<mrow>
+						<munderover>
+							<mo>∑</mo>
+							<mrow>
+								<mi>k</mi>
+								<mo>=</mo>
+								<mn>0</mn>
+							</mrow>
+							<mo>∞</mo>
+						</munderover>
+						<msup>
+							<mfrac>
+								<mn>6</mn>
+								<mn>7</mn>
+							</mfrac>
+							<mi>k</mi>
+						</msup>
+					</mrow>
+				</mfenced>
+				<mn>3</mn>
+			</msup>
+			<mo>+</mo>
+			<mfenced>
+				<mrow>
+					<mfenced>
+						<mrow>
+							<munderover>
+								<mo>∑</mo>
+								<mrow>
+									<mi>k</mi>
+									<mo>=</mo>
+									<mn>0</mn>
+								</mrow>
+								<mo>∞</mo>
+							</munderover>
+							<msup>
+								<mfrac>
+									<mn>7</mn>
+									<mn>8</mn>
+								</mfrac>
+								<mi>k</mi>
+							</msup>
+						</mrow>
+					</mfenced>
+					<mo>+</mo>
+					<munderover>
+						<mo>∑</mo>
+						<mrow>
+							<mi>k</mi>
+							<mo>=</mo>
+							<mn>0</mn>
+						</mrow>
+						<mo>∞</mo>
+					</munderover>
+					<msup>
+						<mfrac>
+							<mn>3</mn>
+							<mn>4</mn>
+						</mfrac>
+						<mi>k</mi>
+					</msup>
+				</mrow>
+			</mfenced>
+		</mrow>
+	</math>
 </div>
 
 <div class="flex w-full max-w-sm flex-col gap-1.5">
