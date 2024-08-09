@@ -238,6 +238,12 @@
 		const text = event.clipboardData?.getData('text/plain') || '';
 		document.execCommand('insertText', false, text);
 	}
+
+	function getStats(){
+		if(!selectedLynt) return "💬 0   🔁 0   ❤️ 0   👁️ 0"
+
+		return `💬 ${selectedLynt.commentCount.toLocaleString()}   🔁 ${selectedLynt.repostCount.toLocaleString()}   ❤️ ${selectedLynt.likeCount.toLocaleString()}   👁️ ${selectedLynt.views.toLocaleString()}`
+	}
 </script>
 
 <div class="flex w-full justify-center">
@@ -381,11 +387,11 @@
 			<meta property="og:url" content="https://lyntr.com/?id={selectedLynt.id}" />
 
 			{#if selectedLynt.parentId}
-				<meta property="og:description" content={selectedLynt.content} />
+				<meta property="og:description" content="{getStats()}\n{selectedLynt.content}" />
 			{:else}
 				<meta
 					property="og:description"
-					content="💬 {selectedLynt.commentCount.toLocaleString()}   🔁 {selectedLynt.repostCount.toLocaleString()}   ❤️ {selectedLynt.likeCount.toLocaleString()}   👁️ {selectedLynt.views.toLocaleString()}\n{selectedLynt.content}\nQuoting {selectedLynt.parentUserUsername} (@{selectedLynt.parentUserHandle}) with {selectedLynt.parentUserIq} IQ\n{selectedLynt.parentContent}"
+					content="{getStats()}\n{selectedLynt.content}\nQuoting {selectedLynt.parentUserUsername} (@{selectedLynt.parentUserHandle}) with {selectedLynt.parentUserIq} IQ\n{selectedLynt.parentContent}"
 				/>
 			{/if}
 
