@@ -12,7 +12,10 @@
 	import { Ellipsis, Trash, Copy } from 'lucide-svelte';
 	import { toast } from 'svelte-sonner';
 	import Report from './Report.svelte';
+
 	import { createEventDispatcher } from 'svelte';
+
+
 	import DOMPurify from 'dompurify';
 	import { page } from '$app/stores';
 	import { Button } from '@/components/ui/button';
@@ -82,7 +85,10 @@
 	export let isAuthor: boolean;
 	export let has_image: boolean | null;
 	export let postId: string;
+
 	export let reposted = false;
+
+
 	let contentElement: HTMLSpanElement | null = null;
 	content = content!;
 	let clickingExternalLink = false;
@@ -358,7 +364,13 @@
 			{/if}
 		</div>
 
+
 		<span bind:this={contentElement} class="{smaller || reposted ? "max-w-[250px]" : ""} md:max-w-[490px] whitespace-pre-wrap text-pretty break-words text-lg overflow-x-hidden">{truncated}</span>
+
+	
+
+
+
 
 		{#if needsReadMore}
 			<span class="mt-2 text-sm text-muted-foreground hover:underline">Click to Read more...</span>
@@ -366,5 +378,7 @@
 	</div>
 </div>
 {#if has_image}
-		<img class="avatar max-h-[600px] mt-2 object-contain" src={cdnUrl(postId)} alt="ok" />
+
+	<img class="avatar mt-2 max-h-[600px] object-contain" src={cdnUrl(postId)} alt="ok" />
+
 {/if}

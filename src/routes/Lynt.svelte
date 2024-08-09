@@ -263,6 +263,7 @@
 	}
 </script>
 
+
 <Sheet.Root bind:open={shareSheetOpen}>
 	<Sheet.Trigger />
 	<Sheet.Content side="bottom" class="md:!inset-x-auto md:inset-y-0 md:left-0 md:h-full md:!w-1/3 md:border-r md:border-t-none flex flex-col gap-2 justify-between">
@@ -350,7 +351,11 @@
 
 			{#if reposted && parentId}
 				<div on:click|stopPropagation={() => openLynt(parentId)}>
+
 					<div class="rounded-lg border-2 border-primary p-4 drop-shadow max-w-full overflow-x-hidden">
+
+					
+
 						{#if parentUserHandle}
 							<!-- reposted lynt -->
 							<LyntContents

@@ -183,14 +183,22 @@
 						<Avatar size={40} src={avatar} alt={profile.username} border={true} />
 						<div class="flex flex-col gap-2">
 							<div class="inline-flex items-center gap-2">
+
 								<Label class="text-2xl font-bold text-primary break-all">{profile.username}</Label>
+
+
+
 								{#if profile.verified}
 									<Tooltip.Root>
 										<Tooltip.Trigger>
 											<div class="flex h-full w-7 items-center">
 												<img
 													class="h-7 w-7"
+
 													src={$mode !== 'light' ? '/white_mode_verified.png' : '/verified.png'}
+
+													
+
 													alt="This user is verified."
 												/>
 											</div>
@@ -201,7 +209,10 @@
 									</Tooltip.Root>
 								{/if}
 							</div>
+
 							<p class="text-xl text-muted-foreground break-all">@{profile.handle}</p>
+							
+
 							<div class="w-24 w-full">
 								{#if isSelf}
 									<ProfileSettings
@@ -210,6 +221,7 @@
 										bio={profile.bio}
 									/>
 								{:else}
+
 									<div class="flex flex-row gap-2">
 										<Button class="w-full" on:click={toggleFollow}>
 											{isFollowing ? 'Unfollow' : 'Follow'}
@@ -229,6 +241,11 @@
 											</Button>
 										{/if}
 									</div>
+
+							
+									
+
+
 								{/if}
 							</div>
 							{#if isFollowedBy}
@@ -329,4 +346,8 @@
 	{:else}
 		<title>Profile not found | Lyntr</title>
 	{/if}
+
+
+
 </svelte:head>
+
