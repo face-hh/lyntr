@@ -114,6 +114,7 @@
 		parentUserCreatedAt: number | null;
 	};
 	export let myId: string;
+	export let myHandle: string;
 	export let isSelf: boolean = false;
 	export let loading: boolean = true;
 
@@ -407,7 +408,7 @@
 {:else if isSelf}
 	<span>You can't private message with your self</span>
 {:else}
-	<div class="relative flex h-full w-full flex-row gap-1">
+	<div class="relative flex h-full w-full flex-row gap-1 mr-1">
 		<div
 			class="hidden {!profile
 				? '!flex w-full'
@@ -470,6 +471,7 @@
 					<div class="w-full">
 						<Search
 							userId={myId}
+							{myHandle}
 							handleLyntClick={(id) => {
 								referencedLyntId = id;
 								referenceMenu = false;
@@ -512,7 +514,7 @@
 									</Tooltip.Root>
 								{/if}
 								<span class="w-full max-w-full overflow-hidden truncate text-ellipsis text-lg"
-									><Badge>{profile.iq}</Badge></span
+									><Badge class="text-sm">{profile.iq}</Badge></span
 								>
 							</div>
 							<!--							<span class="text-sm text-muted-foreground">@{profile.handle}</span>-->
@@ -524,7 +526,7 @@
 				>
 					{#if unreadTop && (friendsList[friendsList.findIndex((friend) => friend.id === profile.id)]?.unread || 0) > 0}
 						<div
-							class="absolute inset-x-0 top-0 z-30 flex justify-center bg-secondary/70 p-1"
+							class="absolute inset-x-0 top-0 z-30 flex justify-center bg-secondary/70 p-1 w-full"
 							transition:fly={{
 								delay: 0,
 								duration: 300,
@@ -568,41 +570,44 @@
 					<MoveDown/>
 				</Button>-->
 				</div>
+				<div class="w-fit flex flex-col">
 				<div
-					class="h-72 w-full rounded-t-lg bg-input p-2"
+					class="relative max-h-72 w-ful rounded-t-lg bg-input p-2 flex flex-row justify-center"
 					class:hidden={!imagePreview}
 					class:rounded-b-lg={!referencedLyntId}
 				>
-					<div
-						class="relative h-full w-full bg-contain bg-center bg-no-repeat"
-						style:background-image={`url(${imagePreview})`}
-					>
+					<img
+						class="h-auto  w-auto object-contain max-w-[90%]"
+						src={imagePreview}
+					/>
 						<Button
 							variant="ghost"
-							class="absolute right-2 top-0 h-16 w-16"
+							class="w-8 h-8 p-0 aspect-square absolute top-0 right-2"
 							on:click={() => {
 								imagePreview = null;
 								fileinput.value = '';
 								image = null;
 							}}><X /></Button
 						>
-					</div>
 				</div>
 				<div
-					class="relative h-72 w-full overflow-x-hidden overflow-y-scroll rounded-b-lg bg-input p-1"
+					class="relative max-h-64 w-full overflow-x-hidden overflow-y-scroll rounded-b-lg bg-input p-2 flex flex-row"
 					class:hidden={!referencedLyntId}
 					class:rounded-t-lg={!image}
 				>
+<div class="max-w-[600px] overflow-x-hidden">
 					{#if referencedLyntId && referencedLynt}
-						<Lynt {...referencedLynt} {handleLyntClick} {myId} />
+						<Lynt {...referencedLynt} lyntClick={handleLyntClick} {myId} />
 					{/if}
+</div>
 					<Button
 						variant="ghost"
-						class="absolute right-2 top-0 h-16 w-16"
+						class="absolute top-0 right-2 w-8 h-8 p-0"
 						on:click={() => {
 							referencedLyntId = null;
 						}}><X /></Button
 					>
+				</div>
 				</div>
 				<div
 					class="mb-1 mt-2 flex max-h-32 flex-row items-center justify-center gap-1 rounded-xl bg-secondary p-1 text-secondary-foreground"

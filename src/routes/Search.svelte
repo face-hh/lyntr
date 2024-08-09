@@ -20,7 +20,8 @@
 	let hasSearched = false;
 
 	export let handleLyntClick;
-	export let userId;
+	export let userId: string;
+	export let myHandle: string;
 	export let hideTitle = false;
 	export let small = false;
 
@@ -75,6 +76,10 @@
 			class="mr-2 flex-grow"
 		/>
 		<Button on:click={performSearch}>Search</Button>
+		<Button on:click={() => {
+			searchQuery = "from:@" + myHandle;
+			performSearch();
+		}} class="ml-2">You</Button>
 	</div>
 	<div class="w-full flex-grow overflow-hidden">
 		<div class="h-full overflow-y-auto overflow-x-hidden">

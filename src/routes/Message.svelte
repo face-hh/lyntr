@@ -8,6 +8,7 @@
 	import { Button } from "$lib/components/ui/button";
 	import { Copy } from 'lucide-svelte';
 	import Lynt from './Lynt.svelte';
+	import { EllipsisVertical } from 'lucide-svelte';
 
 	import dayjs from 'dayjs';
 	import utc from 'dayjs/plugin/utc';
@@ -44,13 +45,25 @@
 	</div>
 {/if}
 
-<div class="mx-1 flex flex-col {message.sender.id === myId ? 'items-end' : ''} pt-2">
+<div class="group mr-1 w-fit flex {message.sender.id === myId ? 'ml-auto flex-row' : 'flex-row-reverse'} pt-2">
+<div class="hidden group-has-[:hover]:flex items-center pr-2">
 <Popover.Root bind:open={open}>
-	<Popover.Trigger>
+	<Popover.Trigger class="px-1">
+		<EllipsisVertical size={16} />
+	</Popover.Trigger>
+	<Popover.Content class="flex flex-col gap-1 w-64" align="start" overlap={true} side="top">
+		<span class="text-sm text-muted-foreground">{dayjs.utc(message.created_at).tz().fromNow()}</span>
+		<div class="bg-secondary w-full h-[1px]"></div>
+		<Button variant="ghost" class="flex justify-between gap-1" on:click={() => {
+			navigator.clipboard.writeText(message.content);
+			open = false;
+		}}>Copy <Copy size={20} /></Button>
+	</Popover.Content>
+</Popover.Root>
+</div>
 	<div
-		class="mt-1 flex w-fit max-w-full flex-row gap-2 rounded-3xl px-3 py-2 {message.sender.id ===
-		myId
-			? 'bg-input/70'
+		class="mt-2 w-fit flex max-w-[350px] md:max-w-screen-72 lg:max-w-md flex-row gap-2 rounded-3xl px-3 py-2 {message.sender.id === myId
+			? 'bg-primary/80'
 			: 'bg-input'}"
 	>
 		<!--<Avatar src={cdnUrl(message.sender.id, 'big')} alt={message.sender.username} border={true} />-->
@@ -59,7 +72,9 @@
 			<!--<div class="text-elipsis flex flex-row gap-1 overflow-hidden truncate text-sm">
 				<span class="font-bold">{message.sender.username}</span>
 			</div>-->
-			<span class="whitespace-pre-wrap break-word text-left">{message.content}</span>
+			<span class="whitespace-pre-wrap break-all text-left {message.sender.id === myId
+				? 'text-primary-foreground'
+				: ''}">{message.content}</span>
 			{#if message.image}
 				<img
 					src={cdnUrl(message.image)}
@@ -76,14 +91,4 @@
 
 		<!--<Badge class="h-6">{message.sender.iq}</Badge>-->
 	</div>
-	</Popover.Trigger>
-	<Popover.Content class="flex flex-col gap-1 w-64" align="start" overlap={true} side="top">
-		<span class="text-sm text-muted-foreground">{dayjs.utc(message.created_at).tz().fromNow()}</span>
-		<div class="bg-secondary w-full h-[1px]"></div>
-		<Button variant="ghost" class="flex justify-between gap-1" on:click={() => {
-			navigator.clipboard.writeText(message.content);
-			open = false;
-		}}>Copy <Copy size={20} /></Button>
-	</Popover.Content>
-</Popover.Root>
 </div>

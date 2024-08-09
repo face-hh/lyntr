@@ -28,13 +28,12 @@
 	
 	function interfere(event: KeyboardEvent) {
 		
-		if (event.key === 'Enter') {
+		if (event.key === 'Enter' && event.shiftKey) {
+			event.preventDefault();
+			dispatch('submit', {});
+		} else if (event.key === 'Enter') {
 			event.preventDefault();
 			document.execCommand('insertText', false, '\n');
-		}
-
-		if (event.key === 'Enter' && event.shiftKey) {
-			dispatch('submit', {});
 		}
 	}
 
