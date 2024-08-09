@@ -9,7 +9,7 @@
 
 	import CalendarDays from 'lucide-svelte/icons/calendar-days';
 	import * as Popover from '@/components/ui/popover';
-	import { Ellipsis, Trash } from 'lucide-svelte';
+	import { Ellipsis, Trash, Copy } from 'lucide-svelte';
 	import { toast } from 'svelte-sonner';
 	import Report from './Report.svelte';
 	import DOMPurify from 'dompurify';
@@ -94,6 +94,11 @@
 		} else {
 			toast(`Unknown error occured while deleting: ${response.status} | ${response.statusText}`);
 		}
+	}
+
+	function handleCopy() {
+		toast('Link copied to clipboard!');
+		navigator.clipboard.writeText(content)
 	}
 
 	function truncateContentFunc(
@@ -317,6 +322,13 @@
 						</button>
 					</Popover.Trigger>
 					<Popover.Content class="flex w-auto flex-col rounded-lg p-2 shadow-lg">
+						<button
+							on:click={handleCopy}
+							class="flex items-center gap-3 rounded-lg p-3 text-sm hover:bg-lynt-foreground"
+						>
+							<Copy class="h-5 w-5 text-muted-foreground" />
+							<span>Copy</span>
+						</button>
 						{#if isAuthor}
 							<button
 								on:click={handleDelete}
@@ -326,8 +338,7 @@
 								<span>Delete</span>
 							</button>
 						{:else}
-							<Report profile={true} {userId} lyntId={postId} />
-							<Report profile={false} {userId} lyntId={postId} />
+							<Report {userId} lyntId={postId} />
 						{/if}
 					</Popover.Content>
 				</Popover.Root>
