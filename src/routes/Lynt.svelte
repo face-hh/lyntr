@@ -329,7 +329,7 @@
 			<Avatar size={10} src={cdnUrl(userId, 'small')} alt="A profile picture." />
 		</a>
 
-		<div class="flex w-full max-w-[530px] flex-col gap-2">
+		<div class="flex w-full max-w-[530px] flex-col gap-2 min-w-0">
 			<!-- Lynt that actually gets displayed. Main lynt -->
 			<LyntContents
 				{truncateContent}
@@ -352,7 +352,7 @@
 			{#if reposted && parentId}
 				<div on:click|stopPropagation={() => openLynt(parentId)}>
 
-					<div class="rounded-lg border-2 border-primary p-4 drop-shadow max-w-full overflow-x-hidden">
+					<div class="rounded-lg border-2 border-primary p-4 drop-shadow max-w-full overflow-x-hidden max-w-[350px]">
 
 					
 

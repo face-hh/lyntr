@@ -108,11 +108,6 @@
 		}
 	}
 
-	function handleCopy() {
-		toast('Content copied to clipboard!');
-		navigator.clipboard.writeText(content)
-	}
-
 	function truncateContentFunc(
 		content: string,
 		maxLines: number = 5
@@ -151,7 +146,7 @@
 						rel="noreferrer noopener"
 						class="truncate {smaller
 							? 'max-w-[30%]'
-							: 'max-w-[60%]'} rounded-sm text-xl font-bold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-black"
+							: 'max-w-[30%] md:max-w-[50%]'} rounded-sm text-xl font-bold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-black"
 						href="/@{handle}"
 					>
 						{username}
@@ -226,7 +221,7 @@
 				<Label class="text-muted-foreground">•</Label>
 				<Tooltip.Root>
 					<Tooltip.Trigger>
-						<Label class="cursor-pointer text-lg text-muted-foreground hover:underline "
+						<Label class="cursor-pointer text-lg text-muted-foreground hover:underline"
 							>{getTimeElapsed(createdAt)}</Label
 						>
 					</Tooltip.Trigger>
@@ -277,5 +272,5 @@
 	</div>
 </div>
 {#if has_image}
-	<img class="avatar mt-2 max-h-[600px] object-contain overflow-hidden max-w-[90%]" src={cdnUrl(postId)} alt="ok" />
+	<img class="avatar mt-2 max-h-[600px] max-w-[85%] object-contain overflow-hidden" src={cdnUrl(postId)} alt="ok" />
 {/if}
