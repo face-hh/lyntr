@@ -138,14 +138,10 @@ export const GET: RequestHandler = async ({
 	request: Request;
 	cookies: Cookies;
 }) => {
-	let userId: string;
+	let userId: string | null;
 
 	const authCookie = cookies.get('_TOKEN__DO_NOT_SHARE');
 	const admin = request.headers.get('Authorization');
-
-	if (!authCookie && !admin) {
-		return json({ error: 'Missing authentication' }, { status: 401 });
-	}
 
 	if (admin === process.env.ADMIN_KEY && process.env.SUDO_USER_ID) {
 		userId = process.env.SUDO_USER_ID;
@@ -159,8 +155,7 @@ export const GET: RequestHandler = async ({
 				throw new Error('Invalid JWT token');
 			}
 		} catch (error) {
-			console.error('Authentication error:', error);
-			return json({ error: 'Authentication failed' }, { status: 401 });
+			userId = null
 		}
 	}
 	const lyntId = url.searchParams.get('id');
@@ -194,7 +189,7 @@ export const GET: RequestHandler = async ({
 	}
 };
 
-async function fetchReferencedLynts(userId: string, parentId: string | null): Promise<any[]> {
+async function fetchReferencedLynts(userId: string | null, parentId: string | null): Promise<any[]> {
 	const referencedLynts: any[] = [];
 
 	async function fetchParent(currentParentId: string) {

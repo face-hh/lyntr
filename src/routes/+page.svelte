@@ -9,7 +9,7 @@
 	import { page } from '$app/stores';
 	import MainPage from './MainPage.svelte';
 	import Cookies from 'js-cookie';
-	import { Cookie } from 'lucide-svelte';
+	import type { FeedItem } from './stores';
 
 	let authenticated: boolean = false;
 	let loading: boolean = true;
@@ -75,6 +75,25 @@
 	});
 
 	$: lyntOpened = $page.url.searchParams.get('id');
+
+	let selectedLynt: FeedItem | null;
+
+	async function getLynt(lyntOpened: string) {
+		const response = await fetch('api/lynt?id=' + lyntOpened, { method: 'GET' });
+
+		const res = await response.json();
+
+		return res as FeedItem;
+	}
+	function getStats() {
+		if (!selectedLynt) return '💬 0   🔁 0   ❤️ 0   👁️ 0';
+
+		return `💬 ${selectedLynt.commentCount.toLocaleString()}   🔁 ${selectedLynt.repostCount.toLocaleString()}   ❤️ ${selectedLynt.likeCount.toLocaleString()}   👁️ ${selectedLynt.views.toLocaleString()}`;
+	}
+
+	onMount(async () => {
+		if(lyntOpened) selectedLynt = await getLynt(lyntOpened);
+	});
 </script>
 
 <ModeWatcher defaultMode={'light'} />
@@ -89,3 +108,33 @@
 {:else}
 	<MainPage {...userData} {lyntOpened} />
 {/if}
+
+<svelte:head>
+	{#if selectedLynt}
+		<meta
+			property="og:title"
+			content="{selectedLynt.username} (@{selectedLynt.handle}) on Lyntr with {selectedLynt.iq} IQ"
+		/>
+		<meta property="og:site_name" content={getStats()} />
+
+		<meta content="#eae7db" data-react-helmet="true" name="theme-color" />
+		<meta name="twitter:card" content="summary_large_image" />
+
+		<meta property="og:type" content="website" />
+		{#if selectedLynt.has_image}
+			<meta property="og:image" content="https://cdn.lyntr.com/lyntr/{selectedLynt.id}.webp" />
+		{/if}
+		<meta property="og:url" content="https://lyntr.com/?id={selectedLynt.id}" />
+
+		{#if selectedLynt.parentUserHandle === null}
+			<meta property="og:description" content={selectedLynt.content} />
+		{:else}
+			<meta
+				property="og:description"
+				content="{selectedLynt.content}\nQuoting {selectedLynt.parentUserUsername} (@{selectedLynt.parentUserHandle}) with {selectedLynt.parentUserIq} IQ\n{selectedLynt.parentContent}"
+			/>
+		{/if}
+
+		<meta name="description" content="Lyntr is a micro-blogging social media with an IQ test." />
+	{/if}
+</svelte:head>

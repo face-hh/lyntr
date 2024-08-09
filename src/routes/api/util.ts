@@ -3,8 +3,8 @@ import { lynts, likes, followers, users, notifications, history } from '@/server
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import sharp from 'sharp';
 
-export const lyntObj = (userId: string) => {
-	return {
+export const lyntObj = (userId: string | null) => {
+	let payload = {
 		id: lynts.id,
 		content: lynts.content,
 		userId: lynts.user_id,
@@ -112,6 +112,8 @@ export const lyntObj = (userId: string) => {
         where parent.id = ${lynts.parent}
     )`.as('parent_created_at')
 	};
+
+	return payload
 };
 
 export async function uploadAvatar(inputBuffer: Buffer, fileName: string, minioClient: any) {
