@@ -105,9 +105,9 @@
 			if (scrollTop + clientHeight >= scrollHeight - 5 && !loadingBottomFeed) {
 				loadingBottomFeed = true;
 
-				fetchFeed(true);
-
-				loadingBottomFeed = false;
+				fetchFeed(true).then(() => {
+					loadingBottomFeed = false;
+				});
 			}
 		}
 	}
@@ -230,7 +230,7 @@
 	});
 
 	async function renderLyntAtTop(lyntId: string) {
-		const lynt = await getLynt(lyntId)
+		const lynt = await getLynt(lyntId);
 		feed = [lynt].concat(feed);
 	}
 	function handlePaste(event: ClipboardEvent) {
@@ -365,3 +365,13 @@
 		</div>
 	</div>
 </div>
+
+<svelte:head>
+	{#if page === 'home'}
+		{#if selectedLynt}
+			<title>{selectedLynt.username} on Lyntr: "{selectedLynt.content}"</title>
+		{:else}
+			<title>Lyntr</title>
+		{/if}
+	{/if}
+</svelte:head>
