@@ -365,3 +365,13 @@
 		</div>
 	</div>
 </div>
+
+<svelte:head>
+	{#if page === 'home'}
+		{#if selectedLynt}
+			<title>{selectedLynt.username} on Lyntr: "{selectedLynt.content}"</title>
+		{:else}
+			<title>Lyntr</title>
+		{/if}
+	{/if}
+</svelte:head>
