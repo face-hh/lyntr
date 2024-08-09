@@ -1,5 +1,5 @@
 <img style="width: 128px; height: 128px" src="static/logo.png" /><h1 style="font-size: 48px"><a href="https://lyntr.com">Lyntr.com</a> - the micro-blogging social media with an IQ test</h1>
-[Privacy Policy](https://lyntr.com/privacy) | [Terms of Service](https://lyntr.com/tos) | [License](https://github.com/face-hh/lyntr/blob/master/LICENSE.md) | [YouTube video](https://youtube.com/)
+[Privacy Policy](https://lyntr.com/privacy) | [Terms of Service](https://lyntr.com/tos) | [License](https://github.com/face-hh/lyntr/blob/master/LICENSE.md) | [YouTube video](https://youtu.be/-D2L3gHqcUA)
 
 # Images
 Dark mode - Lyntr
