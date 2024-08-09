@@ -16,7 +16,6 @@
 	let isSubmitting = false;
 	let submitError = '';
 
-	export let profile: boolean;
 	export let userId: string;
 	export let lyntId: string;
 
@@ -75,12 +74,12 @@
 			class="flex items-center gap-3 rounded-lg p-3 text-sm hover:bg-lynt-foreground"
 		>
 			<Flag class="h-5 w-5 text-muted-foreground" />
-			<span>Report {profile ? 'profile' : 'lynt'}</span>
+			<span>Report</span>
 		</button>
 	</Dialog.Trigger>
 	<Dialog.Content class="sm:max-w-[425px]">
 		<Dialog.Header>
-			<Dialog.Title>Report {profile ? 'profile' : 'lynt'}.</Dialog.Title>
+			<Dialog.Title>Report.</Dialog.Title>
 			<Dialog.Description>
 				By submitting this report, you confirm that the reported content does not belong on Lyntr.
 				Abuse of this system will result in the suspension of your account.
