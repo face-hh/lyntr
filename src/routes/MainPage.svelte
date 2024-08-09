@@ -116,9 +116,9 @@
 			if (scrollTop + clientHeight >= scrollHeight - 5 && !loadingBottomFeed) {
 				loadingBottomFeed = true;
 
-				fetchFeed(true);
-
-				loadingBottomFeed = false;
+				fetchFeed(true).then(() => {
+					loadingBottomFeed = false;
+				});
 			}
 		}
 	}
@@ -280,7 +280,7 @@
 	});
 
 	async function renderLyntAtTop(lyntId: string) {
-		const lynt = await getLynt(lyntId)
+		const lynt = await getLynt(lyntId);
 		feed = [lynt].concat(feed);
 	}
 
