@@ -1,13 +1,12 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 
-import { verifyAuthJWT, deleteJWT, createAuthJWT } from '@/server/jwt';
 import { db } from '@/server/db';
 import { users, lynts } from '@/server/schema';
 import { eq } from 'drizzle-orm';
 import { deleteLynt } from '../util';
 
-export const POST: RequestHandler = async ({ request, cookies }) => {
+export const POST: RequestHandler = async ({ request }) => {
 	const admin = request.headers.get('Authorization');
 	if (admin !== process.env.ADMIN_KEY) {
 		return json({ status: 404 });
@@ -46,14 +45,9 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
             }
         }, 0);
 
-		const token = cookies.get('authToken');
-		if (token) {
-			await deleteJWT(token);
-		}
-
 		return json(
 			{
-				message: 'User banned successfully and token revoked'
+				message: 'User banned successfully.'
 			},
 			{ status: 200 }
 		);

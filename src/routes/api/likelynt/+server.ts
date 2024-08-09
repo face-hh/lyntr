@@ -5,6 +5,7 @@ import { db } from '@/server/db';
 import { lynts, likes } from '@/server/schema';
 import { eq, and } from 'drizzle-orm';
 import { createNotification } from '@/server/notifications';
+import { normalRatelimit } from '@/server/ratelimit';
 
 // POST endpoint to like a lynt
 export const POST: RequestHandler = async ({
@@ -40,6 +41,11 @@ export const POST: RequestHandler = async ({
 
 	if (!lyntId || typeof lyntId !== 'string') {
 		return json({ error: 'Invalid lynt ID' }, { status: 400 });
+	}
+
+	const { success } = await normalRatelimit.limit(userId);
+	if (!success) {
+		return json({ error: 'You are being ratelimited.' }, { status: 429 });
 	}
 
 	try {

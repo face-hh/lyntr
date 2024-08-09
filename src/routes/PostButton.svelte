@@ -49,6 +49,8 @@
 			opened = false;
 			toast('Your lynt has been published!');
 		} else {
+			if (response.status == 429)
+				return toast('Woah, slow down! You are being ratelimited. Please try again in a bit.');
 			toast(`Something happened! Error: ${response.status} | ${response.statusText}`);
 		}
 	}

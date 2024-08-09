@@ -10,6 +10,7 @@ config({ path: '.env' });
 
 export type JWTPayload = {
 	userId: string;
+	timestamp: number;
 };
 
 export const createAuthJWT = async (data: JWTPayload) => {
@@ -43,6 +44,8 @@ export const verifyAuthJWT = async (token: string) => {
 		if (user[0].banned) {
 			throw error(403, 'You are banned.');
 		}
+
+		
 
 		return payload as JWTPayload;
 	} catch (error) {

@@ -8,7 +8,7 @@
 
 	import CalendarDays from 'lucide-svelte/icons/calendar-days';
 	import * as Popover from '@/components/ui/popover';
-	import { Ellipsis, Trash } from 'lucide-svelte';
+	import { Copy, Ellipsis, Trash } from 'lucide-svelte';
 	import { toast } from 'svelte-sonner';
 	import Report from './Report.svelte';
 	import DOMPurify from 'dompurify';
@@ -33,27 +33,27 @@
 		return `${seconds}s`;
 	}
 	function formatDate(date) {
-    	if (typeof date === 'string') date = new Date(date);
+		if (typeof date === 'string') date = new Date(date);
 
-    	const options = {
-        	year: 'numeric',
-        	month: 'long'
-    	};
-    	return date.toLocaleDateString(undefined, options);
+		const options = {
+			year: 'numeric',
+			month: 'long'
+		};
+		return date.toLocaleDateString(undefined, options);
 	}
 
 	function formatDateTooltip(date) {
-    	date = new Date(date);
-    	
+		date = new Date(date);
+
 		const options = {
-        	hour: '2-digit',
-        	minute: '2-digit',
-        	month: 'short',
-        	day: 'numeric',
-        	year: 'numeric'
+			hour: '2-digit',
+			minute: '2-digit',
+			month: 'short',
+			day: 'numeric',
+			year: 'numeric'
 		};
-		
-    	return date.toLocaleString(undefined, options);
+
+		return date.toLocaleString(undefined, options);
 	}
 
 	let popoverOpened = false;
@@ -103,6 +103,11 @@
 			truncated: lines.slice(0, maxLines).join('\n'),
 			needsReadMore: true
 		};
+	}
+	
+	function handleCopy() {
+		toast('Lynt contents copied to clipboard!');
+		navigator.clipboard.writeText(content)
 	}
 
 	$: ({ truncated, needsReadMore } = truncateContentFunc(content));
@@ -235,8 +240,15 @@
 								<span>Delete</span>
 							</button>
 						{:else}
-							<Report profile={true} {userId} lyntId={postId} />
-							<Report profile={false} {userId} lyntId={postId} />
+							<button
+								on:click={handleCopy}
+								class="flex items-center gap-3 rounded-lg p-3 text-sm hover:bg-lynt-foreground"
+							>
+								<Copy class="h-5 w-5 text-muted-foreground" />
+								<span>Copy</span>
+							</button>
+
+							<Report {userId} lyntId={postId} />
 						{/if}
 					</Popover.Content>
 				</Popover.Root>
@@ -251,5 +263,5 @@
 	</div>
 </div>
 {#if has_image}
-		<img class="avatar max-h-[600px] mt-2 object-contain" src={cdnUrl(postId)} alt="ok" />
+	<img class="avatar mt-2 max-h-[600px] object-contain" src={cdnUrl(postId)} alt="ok" />
 {/if}

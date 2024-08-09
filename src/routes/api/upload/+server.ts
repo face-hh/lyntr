@@ -6,10 +6,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { config } from 'dotenv';
 import { uploadAvatar } from '../util';
 import { isImageNsfw, NSFW_ERROR } from '@/moderation';
+import { sensitiveRatelimit } from '@/server/ratelimit';
 
 config();
-
-const ratelimits = new Map();
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	const authCookie = cookies.get('_TOKEN__DO_NOT_SHARE');
@@ -25,14 +24,10 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			throw new Error('Invalid JWT token');
 		}
 		const { userId } = jwtPayload;
-		const ratelimit = ratelimits.get(userId);
+		const { success } = await sensitiveRatelimit.limit(userId);
 
-		if (!ratelimit) {
-			ratelimits.set(userId, Date.now());
-		} else if (Math.round((Date.now() - ratelimit) / 1000) < 5) {
+		if (!success) {
 			return json({ error: 'You are ratelimited.' }, { status: 429 });
-		} else {
-			ratelimits.delete(userId);
 		}
 
 		const formData = await request.formData();

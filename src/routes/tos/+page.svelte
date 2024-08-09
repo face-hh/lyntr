@@ -84,11 +84,15 @@
 					<p>You agree not to engage in any of the following activities:</p>
 					<ul class="list-disc space-y-2 pl-5">
 						<li>Violating any laws or regulations</li>
-						<li>Impersonating other users or entities</li>
+						<li>
+							Impersonating other users or entities; doing so may result in a reset of your handle,
+							or in a ban if the person or entity you are impersonating contacts us.
+						</li>
 						<li>Interfering with or disrupting the service</li>
 						<li>Collecting user information without consent</li>
 						<li>Posting spam or engaging in abusive behavior</li>
 						<li>Using the service for any unauthorized commercial purposes</li>
+						<li>Posting or sharing any NSFW (Not Safe For Work) content</li>
 					</ul>
 				</AccordionContent>
 			</AccordionItem>
@@ -106,7 +110,18 @@
 			</AccordionItem>
 
 			<AccordionItem value="item-7">
-				<AccordionTrigger>7. Termination</AccordionTrigger>
+				<AccordionTrigger>7. Use of Lyntr Name in Projects</AccordionTrigger>
+				<AccordionContent>
+					<p>
+						If you use the Lyntr name in any extensions, projects, or related materials, you must
+						<strong>clearly and prominently disclose</strong> that you are not affiliated with FaceDev
+						or Lyntr. This disclosure should be visible and unambiguous to avoid any confusion.
+					</p>
+				</AccordionContent>
+			</AccordionItem>
+
+			<AccordionItem value="item-8">
+				<AccordionTrigger>8. Termination</AccordionTrigger>
 				<AccordionContent>
 					<p>
 						We may terminate or suspend your account and access to the service immediately, without
@@ -116,8 +131,8 @@
 				</AccordionContent>
 			</AccordionItem>
 
-			<AccordionItem value="item-8">
-				<AccordionTrigger>8. Disclaimer of Warranties</AccordionTrigger>
+			<AccordionItem value="item-9">
+				<AccordionTrigger>9. Disclaimer of Warranties</AccordionTrigger>
 				<AccordionContent>
 					<p>
 						Lyntr is provided "as is" and "as available" without any warranties of any kind, either
@@ -127,8 +142,8 @@
 				</AccordionContent>
 			</AccordionItem>
 
-			<AccordionItem value="item-9">
-				<AccordionTrigger>9. Limitation of Liability</AccordionTrigger>
+			<AccordionItem value="item-10">
+				<AccordionTrigger>10. Limitation of Liability</AccordionTrigger>
 				<AccordionContent>
 					<p>
 						In no event shall FaceDev, its directors, employees, partners, agents, suppliers, or
@@ -139,8 +154,8 @@
 				</AccordionContent>
 			</AccordionItem>
 
-			<AccordionItem value="item-10">
-				<AccordionTrigger>10. Changes to Terms</AccordionTrigger>
+			<AccordionItem value="item-11">
+				<AccordionTrigger>11. Changes to Terms</AccordionTrigger>
 				<AccordionContent>
 					<p>
 						We reserve the right to modify or replace these Terms at any time. If a revision is
@@ -151,7 +166,7 @@
 			</AccordionItem>
 
 			<AccordionItem value="item-12">
-				<AccordionTrigger>11. Contact Us</AccordionTrigger>
+				<AccordionTrigger>12. Contact Us</AccordionTrigger>
 				<AccordionContent>
 					<p>
 						If you have any questions about these Terms, please contact us at
