@@ -53,7 +53,7 @@
 
 	function handleInput() {
 		hasSearched = false;
-		searchResults = [];
+		searchResults.results = [];
 	}
 </script>
 
