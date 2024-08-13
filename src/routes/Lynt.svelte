@@ -76,6 +76,8 @@
 		});
 
 		if (response.status !== 200) {
+			if (response.status == 429)
+				return toast('Woah, slow down! You are being ratelimited. Please try again in a bit.');
 			toast(
 				`Oh no! Something went wrong while liking the lynt. Error: ${response.status} | ${response.statusText}`
 			);
@@ -93,6 +95,8 @@
 		});
 
 		if (response.status !== 200) {
+			if (response.status == 429)
+				return toast('Woah, slow down! You are being ratelimited. Please try again in a bit.');
 			toast(
 				`Oh no! Something went wrong while liking the lynt. Error: ${response.status} | ${response.statusText}`
 			);
@@ -160,15 +164,15 @@
 	}
 </script>
 
-<button on:click|stopPropagation={() => openLynt(id)} class="mb-2 w-full text-left">
+<div on:click|stopPropagation={() => openLynt(id)} class="mb-2 w-full text-left">
 	<div
-		class="flex w-full gap-3 rounded-xl bg-lynt-foreground p-3 transition-colors hover:bg-border"
+		class="flex w-full gap-3 overflow-hidden rounded-xl bg-lynt-foreground p-3 transition-colors hover:bg-border"
 	>
 		<a href="/@{handle}" class="inline-block max-h-[40px] min-w-[40px]">
 			<Avatar size={10} src={cdnUrl(userId, 'small')} alt="A profile picture." />
 		</a>
 
-		<div class="flex w-full max-w-[530px] flex-col gap-2 overflow-hidden">
+		<div class="flex w-full max-w-[530px] flex-col gap-2">
 			<!-- Lynt that actually gets displayed. Main lynt -->
 			<LyntContents
 				{truncateContent}
@@ -187,7 +191,7 @@
 			/>
 
 			{#if reposted && parentId}
-				<button on:click|stopPropagation={() => openLynt(parentId)}>
+				<div on:click|stopPropagation={() => openLynt(parentId)}>
 					<div class="rounded-lg border-2 border-primary p-4 drop-shadow">
 						{#if parentUserHandle}
 							<!-- reposted lynt -->
@@ -209,7 +213,7 @@
 							/>
 						{/if}
 					</div>
-				</button>
+				</div>
 			{/if}
 			<div class="mt-2 flex items-center justify-between gap-2 mb-1">
 				<div class="flex items-center gap-2">
@@ -312,7 +316,7 @@
 			</div>
 		</div>
 	</div>
-</button>
+</div>
 {#if connect}
 	<div class="relative left-6 h-4 w-0.5 bg-border" />
 {:else}

@@ -78,3 +78,11 @@
 		</div>
 	</div>
 </div>
+
+<svelte:head>
+	{#if hasSearched}
+		<title>Searching for "{searchQuery}" | Lyntr</title>
+	{:else}
+		<title>Search | Lyntr</title>
+	{/if}
+</svelte:head>

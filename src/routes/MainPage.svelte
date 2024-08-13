@@ -21,6 +21,7 @@
 	import ProfilePage from './ProfilePage.svelte';
 	import { goto } from '$app/navigation';
 	import TopTab from './TopTab.svelte';
+	import type { FeedItem } from './stores';
 
 	export let username: string;
 	export let handle: string;
@@ -37,40 +38,6 @@
 	currentPage.subscribe((value) => {
 		page = value;
 	});
-	interface FeedItem {
-		id: string;
-		content: string;
-		userId: string;
-		createdAt: number;
-		views: number;
-		reposted: boolean;
-		likeCount: number;
-		likedByFollowed: boolean;
-
-		repostCount: number;
-		commentCount: number;
-		likedByUser: boolean;
-		repostedByUser: boolean;
-		handle: string;
-		userCreatedAt: number;
-		username: string;
-		iq: number;
-		bio: string;
-		verified: boolean;
-		has_image: boolean;
-
-		parentId: string | null;
-		parentContent: string | null;
-		parentUserHandle: string | null;
-		parentUserUsername: string | null;
-		parentUserVerified: boolean | null;
-		parentHasImage: boolean | null;
-		parentUserBio: string | null;
-		parentUserIq: number | null;
-		parentUserId: string | null;
-		parentCreatedAt: number | null;
-		parentUserCreatedAt: number | null;
-	}
 
 	let feed: FeedItem[] = [];
 	let comments: FeedItem[] = [];
@@ -88,9 +55,8 @@
 		if (currentTab === tabs[2]) {
 			const eventSource = new EventSource('/api/sse');
 			eventSource.onmessage = async (event) => {
-				const newLyntId = JSON.parse(event.data);
-
-				await renderLyntAtTop(newLyntId);
+				// Render the entire lynt data to not fetch the lynt each time
+				await renderLyntAtTop(JSON.parse(event.data));
 			};
 		}
 	}
@@ -106,9 +72,9 @@
 			if (scrollTop + clientHeight >= scrollHeight - 5 && !loadingBottomFeed) {
 				loadingBottomFeed = true;
 
-				fetchFeed(true);
-
-				loadingBottomFeed = false;
+				fetchFeed(true).then(() => {
+					loadingBottomFeed = false;
+				});
 			}
 		}
 	}
@@ -203,6 +169,8 @@
 		comment = '';
 
 		if (response.status !== 201) {
+			if (response.status == 429)
+				return toast('Woah, slow down! You are being ratelimited. Please try again in a bit.');
 			toast(
 				`Something went wrong while commenting on this lynt. Error: ${response.status} | ${response.statusText}`
 			);
@@ -229,8 +197,8 @@
 	});
 
 	async function renderLyntAtTop(lyntId: string) {
-		const lyntData = await getLynt(lyntId);
-		feed = [lyntData].concat(feed);
+		const lynt = await getLynt(lyntId);
+		feed = [lynt].concat(feed);
 	}
 	function handlePaste(event: ClipboardEvent) {
 		event.preventDefault();
@@ -273,7 +241,11 @@
 						<Notifications {handleLyntClick} />
 					{:else if page.startsWith('profile')}
 						{#key page}
-							<ProfilePage myId={id} profileHandle={page.replace('profile', '')} {handleLyntClick} />
+							<ProfilePage
+								myId={id}
+								profileHandle={page.replace('profile', '')}
+								{handleLyntClick}
+							/>
 						{/key}
 					{:else if page === 'home'}
 						<div class="min-w-1/3 mt-5 flex h-full flex-col md:px-1">
@@ -360,3 +332,13 @@
 		</div>
 	</div>
 </div>
+
+<svelte:head>
+	{#if page === 'home'}
+		{#if selectedLynt}
+			<title>{selectedLynt.username} on Lyntr: "{selectedLynt.content}"</title>
+		{:else}
+			<title>Lyntr</title>
+		{/if}
+	{/if}
+</svelte:head>

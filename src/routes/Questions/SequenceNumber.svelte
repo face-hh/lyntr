@@ -1,7 +1,5 @@
 <script lang="ts">
 	import type { Writable } from 'svelte/store';
-	import * as RadioGroup from '$lib/components/ui/radio-group/index.js';
-	import { Label } from '@/components/ui/label';
 	import { Input } from '@/components/ui/input';
 
 	export let isButtonDisabled: Writable<boolean>;
