@@ -31,7 +31,7 @@
 				method: 'GET',
 				credentials: 'include'
 			});
-			console.log(response.status);
+
 			if (response.status === 200) {
 				const res = await response.json();
 				userData = {
@@ -69,8 +69,8 @@
 
 {#if loading}
 	<LoadingSpinner />
-	<!-- {:else if !authenticated}
-	<Auth /> -->
+{:else if !authenticated}
+	<Auth />
 {:else if noAccount}
 	<AccountCreator />
 {:else}

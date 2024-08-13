@@ -8,8 +8,8 @@ import sanitizeHtml from 'sanitize-html';
 import { Snowflake } from 'nodejs-snowflake';
 import { createNotification } from '@/server/notifications';
 import { lyntObj } from '../util';
-
-const ratelimits = new Map();
+import { sensitiveRatelimit } from '@/server/ratelimit';
+import { moderate } from '@/moderation';
 
 export const POST: RequestHandler = async ({
 	request,
@@ -38,14 +38,9 @@ export const POST: RequestHandler = async ({
 		console.error('Authentication error:', error);
 		return json({ error: 'Authentication failed' }, { status: 401 });
 	}
-	const ratelimit = ratelimits.get(userId);
-
-	if (!ratelimit) {
-		ratelimits.set(userId, Date.now());
-	} else if (Math.round((Date.now() - ratelimit) / 1000) < 5) {
-		return json({ error: 'You are ratelimited.' }, { status: 429 });
-	} else {
-		ratelimits.delete(userId);
+	const { success } = await sensitiveRatelimit.limit(userId);
+	if (!success) {
+		return json({ error: 'You are being ratelimited.' }, { status: 429 });
 	}
 
 	const body = await request.json();
@@ -81,7 +76,9 @@ export const POST: RequestHandler = async ({
 			return json({ error: 'Invalid reposted lynt ID' }, { status: 400 });
 		}
 
-		let newId = (await db.insert(lynts).values(lyntValues).returning())[0].id || null;
+		let newId = (await db.insert(lynts).values(lyntValues).returning())[0].id;
+		await moderate(content, newId, userId);
+
 		let [newLynt] = await db
 			.select(lyntObj(userId))
 			.from(lynts)

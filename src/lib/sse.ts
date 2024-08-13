@@ -8,7 +8,7 @@ export function removeConnection(controller: ReadableStreamDefaultController) {
   connections.delete(controller);
 }
 
-export function sendMessage(message: string) {
+export function sendMessage(message: any) {
   connections.forEach(controller => {
     try {
       controller.enqueue(`data: ${JSON.stringify(message)}\n\n`);
