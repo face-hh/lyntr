@@ -1,19 +1,90 @@
 {
-    "name": "",
-    "short_name": "",
-    "icons": [
-        {
-            "src": "/android-chrome-192x192.png",
-            "sizes": "192x192",
-            "type": "image/png"
-        },
-        {
-            "src": "/android-chrome-512x512.png",
-            "sizes": "512x512",
-            "type": "image/png"
-        }
-    ],
-    "theme_color": "#ffffff",
-    "background_color": "#ffffff",
-    "display": "standalone"
+	"name": "Lyntr: Social Media with an IQ test",
+	"short_name": "Lyntr",
+	"description": "A social media platform with an IQ test. See if you can beat other people in IQ.",
+	"icons": [
+		{
+			"src": "/logo.svg",
+			"type": "image/svg+xml",
+			"sizes": "150x150"
+		},
+		{
+			"src": "/android-chrome-192x192.png",
+			"sizes": "192x192",
+			"type": "image/png"
+		},
+		{
+			"src": "/android-chrome-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png"
+		}
+	],
+	"screenshots": [
+		{
+			"src": "/screenshots/banner_mobile.png",
+			"type": "image/png",
+			"sizes": "412x883",
+			"form_factor": "narrow"
+		},
+		{
+			"src": "/screenshots/banner_mobile_white.png",
+			"type": "image/png",
+			"sizes": "412x883",
+			"form_factor": "narrow"
+		},
+		{
+			"src": "/screenshots/banner.png",
+			"type": "image/png",
+			"sizes": "1400x963",
+			"form_factor": "wide"
+		},
+		{
+			"src": "/screenshots/banner_white.png",
+			"type": "image/png",
+			"sizes": "1400x963",
+			"form_factor": "wide"
+		}
+	],
+	"shortcuts": [
+		{
+			"name": "My feed",
+			"short_name": "Feed",
+			"description": "Check out what's new and trending on your feed.",
+			"url": "/?utm_source=pwa&utm_shortcut=true",
+			"icons": [
+				{
+					"src": "/icons/feed.svg",
+					"sizes": ""
+				}
+			]
+		},
+		{
+			"name": "What's new?",
+			"short_name": "Notifications",
+			"description": "See what happened while you were away.",
+			"url": "/notifications?utm_source=pwa&utm_shortcut=true",
+			"icons": [
+				{
+					"src": "/icons/notification.svg",
+					"sizes": ""
+				}
+			]
+		},
+		{
+			"name": "My profile",
+			"short_name": "Profile",
+			"description": "See your profile and edit your profile settings.",
+			"url": "/my_profile?utm_source=pwa&utm_shortcut=true",
+			"icons": [
+				{
+					"src": "/icons/profile.svg",
+					"sizes": ""
+				}
+			]
+		}
+	],
+	"theme_color": "#0C0A09",
+	"background_color": "#0C0A09",
+	"start_url": "/?utm_source=pwa",
+	"display": "standalone"
 }
