@@ -38,12 +38,12 @@
 			console.error('Failed to fetch notifications');
 		}
 
-		const response2 = await fetch('/api/notifications/unread');
+		/*const response2 = await fetch('/api/notifications/unread');
 		if (response2.ok) {
 			$unreadMessages = (await response2.json()).count;
 		} else {
 			console.error('Failed to fetch unread messages');
-		}
+		}*/
 	});
 
 	function formatTimeAgo(dateString: string) {
@@ -101,7 +101,7 @@
 	}
 
 	async function markRead() {
-		const response = await fetch('api/notifications', { method: 'PATCH' });
+		const response = await fetch('/api/notifications', { method: 'PATCH' });
 
 		if (response.status !== 200) {
 			toast(
@@ -111,7 +111,7 @@
 		}
 
 		reactiveNotifications = reactiveNotifications.map((notif) => ({ ...notif, read: true }));
-		$unreadMessages = 0;
+		unreadMessages.set(-1);
 	}
 </script>
 
@@ -127,7 +127,7 @@
 		<Card.Description>Your latest 50 notifications</Card.Description>
 	  </Card.Header>
 	  <Card.Content>
-		<ScrollArea class="h-[70vh] w-full rounded-md">
+		<ScrollArea class="h-[60dvh] w-full rounded-md">
 		  <div class="pr-4">
 					<!-- Add right padding for scrollbar -->
 					{#if notifications.length === 0}
@@ -137,9 +137,19 @@
 					  {#each reactiveNotifications as notification (notification.id)}
 						<li class="w-full">
 									<button
-										on:click={() => {
+										on:click={async () => {
 											if (notification.lyntId) {
 												handleLyntClick(notification.lyntId);
+												const id = notification.id;
+												const i = reactiveNotifications.findIndex((x) => x.id == id);
+												if (!reactiveNotifications[i].read) {
+													reactiveNotifications[i].read = true;
+													unreadMessages.set($unreadMessages - 1);
+													if ((await fetch('/api/notifications/' + id + '/read')).status !== 200) {
+														reactiveNotifications[i].read = false;
+														unreadMessages.set($unreadMessages + 1);
+													}
+												}
 											}
 										}}
 										class="flex w-full items-start space-x-4 rounded-lg bg-lynt-foreground p-4 text-left transition-colors"

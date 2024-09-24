@@ -1,4 +1,4 @@
-import { boolean, date, pgTable, serial, timestamp, varchar, integer, type AnyPgColumn, primaryKey, text, uuid, uniqueIndex } from 'drizzle-orm/pg-core';
+import { boolean, date, pgTable, bigserial, timestamp, varchar, integer, type AnyPgColumn, primaryKey, text, uuid, uniqueIndex, index } from 'drizzle-orm/pg-core';
 import { drizzle } from 'drizzle-orm/node-postgres';
 
 export const users = pgTable('users', {
@@ -25,6 +25,21 @@ export const lynts = pgTable('lynts', {
     created_at: timestamp('created_at').defaultNow(),
     reposted: boolean('reposted').default(false),
     parent: text('parent').references((): AnyPgColumn => lynts.id)
+});
+
+export const messages = pgTable('messages', {
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    sender_id: text('sender_id').references(() => users.id),
+    receiver_id: text('receiver_id').references(() => users.id),
+    content: text('content').notNull(),
+    image: text('image'),
+    referencedLyntId: text('referenced_lynt_id').references(() => lynts.id),
+    read: boolean('read').default(false),
+    created_at: timestamp('created_at').defaultNow()
+}, (table) => {
+   return {
+     created_atIdx: index("created_at_idx").on(table.created_at),
+   };
 });
 
 export const followers = pgTable('followers', {

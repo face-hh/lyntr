@@ -1,11 +1,17 @@
 <script lang="ts">
 	import { cdnUrl } from './stores';
 	import { Separator } from '@/components/ui/separator';
+	import { page } from '$app/stores';
 
-	import { BarChart2, Heart, ImageUp, MessageCircle, Repeat2, Share2 } from 'lucide-svelte';
+	import { BarChart2, Heart, ImageUp, MessageCircle, Repeat2, Share2, Copy } from 'lucide-svelte';
 	import * as Dialog from '@/components/ui/dialog/index';
 	import * as Form from '@/components/ui/form/index';
+	import { Button } from '$lib/components/ui/button';
+	import * as Sheet from '$lib/components/ui/sheet';
 
+	import VirtualScroll from 'svelte-virtual-scroll-list';
+
+	import LoadingSpinner from './LoadingSpinner.svelte';
 	import Avatar from './Avatar.svelte';
 	import OutlineButton from './OutlineButton.svelte';
 	import { toast } from 'svelte-sonner';
@@ -62,8 +68,10 @@
 	export let parentCreatedAt: number | null;
 	export let parentUserCreatedAt: number | null;
 	export let connect = false;
+	export let small = false;
 
 	let openDialog = false;
+	let shareSheetOpen = false;
 	let lynt = '';
 
 	async function handleRepost() {
@@ -109,10 +117,51 @@
 	let copied = false;
 	let timeoutId: ReturnType<typeof setTimeout>;
 
-	function handleShare() {
-		const url = `${window.location.origin}?id=${id}`;
-		toast('Link copied to clipboard!');
+	const url = `${$page.url.origin}?id=${id}`;
+	const shareData = {
+		title: 'Share Lynt',
+		text:
+			'Found on Lyntr!\r\n' +
+			(content.length > 30
+				? content.substring(0, 40) + '...' + (has_image ? '\r\nSee the image on Lyntr' : '')
+				: content) +
+			'\r\n',
+		url
+	};
 
+	let friendsList: {
+		id: string;
+		username: string;
+		handle: string;
+		verified: boolean;
+		iq: number;
+		unread: number;
+	}[] = [];
+	let friendListLoaded = false;
+	let friendListPage = 1;
+	let friendEnd = false;
+	let loadingNextFriends = true;
+	let sending = false;
+
+	async function handleShare() {
+		shareSheetOpen = true;
+		if (!friendListLoaded) {
+			await appendFriends();
+			friendListLoaded = true;
+		}
+	}
+
+	async function openShare() {
+		shareSheetOpen = false;
+		if (navigator.share && (!navigator.canShare || navigator.canShare(shareData))) {
+			try {
+				await navigator.share(shareData);
+			} catch (e) {}
+		}
+	}
+
+	function copyClick() {
+		shareSheetOpen = false;
 		navigator.clipboard
 			.writeText(url)
 			.then(() => {
@@ -125,7 +174,9 @@
 			.catch((err) => {
 				console.error('Failed to copy: ', err);
 			});
+		toast('Link copied to clipboard!');
 	}
+
 	let image: File | null = null;
 	let imagePreview: string | null = null;
 	let fileinput: HTMLInputElement;
@@ -141,6 +192,7 @@
 			};
 		}
 	};
+
 	async function handlePost() {
 		const formData = new FormData();
 		formData.append('content', lynt);
@@ -162,7 +214,112 @@
 			toast(`Something happened! Error: ${response.status} | ${response.statusText}`);
 		}
 	}
+
+	async function appendFriends() {
+		if (friendEnd) return;
+
+		loadingNextFriends = true;
+		try {
+			const response = await fetch(`/api/me/friends?page=${friendListPage}`);
+
+			if (response.status === 200) {
+				let { friends, isLast } = await response.json();
+				friendEnd = isLast;
+				friendsList = [...friendsList, ...friends];
+			} else {
+				toast('Failed to load more friends: ' + response.status);
+				friendEnd = true;
+			}
+		} catch (error) {
+			toast('Failed to load more friends: ');
+			friendEnd = true;
+		}
+		loadingNextFriends = false;
+	
+	}
+
+	async function sendTo(other_id: string) {
+		if (sending) return;
+
+		sending = true;
+		const formData = new FormData();
+		formData.append('other_id', other_id);
+		formData.append('lynt', id);
+
+		try {
+                        const response = await fetch('/api/messages/post', {
+                                method: 'POST',
+                                body: formData
+                        });
+
+                        if (response.status !== 200) {
+                                toast((await response.json()).error);
+                        }
+                } catch (error) {
+                        toast('error: ' + error);
+                }
+		sending = false;
+		shareSheetOpen = false;
+	}
 </script>
+
+
+<Sheet.Root bind:open={shareSheetOpen}>
+	<Sheet.Trigger />
+	<Sheet.Content side="bottom" class="md:!inset-x-auto md:inset-y-0 md:left-0 md:h-full md:!w-1/3 md:border-r md:border-t-none flex flex-col gap-2 justify-between">
+		<div class="flex flex-col gap-2 max-h-1/3 mt-2">
+		<Sheet.Header>
+			<Sheet.Title>{shareData.title}</Sheet.Title>
+		</Sheet.Header>
+			{#if !friendListLoaded}
+				<LoadingSpinner />
+			{:else if friendsList.length > 0}
+				<VirtualScroll
+					data={friendsList}
+					key="id"
+					let:data={friend}
+					on:bottom={async () => {
+						// load next page of friends
+						if (loadingNextFriends) return;
+						friendListPage += 1;
+						await appendFriends();
+					}}
+				>
+					<button
+						class="flex w-72 flex-row items-center rounded-full bg-secondary p-1.5 mx-auto mb-1"
+						on:click={async () => {
+							await sendTo(friend.id);
+						}}
+					>
+						<div class="flex flex-row gap-1 justify-between w-full">
+							<Avatar src={cdnUrl(friend.id, 'big')} alt={friend.username} border={true} />
+							<div class="text-elipsis overflow-hiddentruncate flex w-full flex-col gap-1 text-sm">
+								<span class="font-bold">{friend.username}</span>
+
+								<span class="text-muted-foreground">@{friend.handle}</span>
+							</div>
+						</div>
+					</button>
+				</VirtualScroll>
+			{:else}
+				<span>No Friends</span>
+			{/if}
+
+		</div>
+		<Sheet.Footer>
+			<div class="flex flex-row gap-2 justify-center w-full">
+				<Button variant="ghost" on:click={copyClick} class="flex flex-row gap-2">
+					<Copy />
+					Copy
+				</Button>
+				<Button variant="ghost" on:click={openShare} class="flex flex-row gap-2">
+					<Share2 />
+					Other
+				</Button>
+			</div>
+		</Sheet.Footer>
+	</Sheet.Content>
+</Sheet.Root>
 
 <div on:click|stopPropagation={() => openLynt(id)} class="mb-2 w-full text-left">
 	<div
@@ -172,7 +329,7 @@
 			<Avatar size={10} src={cdnUrl(userId, 'small')} alt="A profile picture." />
 		</a>
 
-		<div class="flex w-full max-w-[530px] flex-col gap-2">
+		<div class="flex w-full max-w-[530px] flex-col gap-2 min-w-0">
 			<!-- Lynt that actually gets displayed. Main lynt -->
 			<LyntContents
 				{truncateContent}
@@ -188,11 +345,17 @@
 				{content}
 				{iq}
 				{userCreatedAt}
+				smaller={small}
+				on:delete
 			/>
 
 			{#if reposted && parentId}
 				<div on:click|stopPropagation={() => openLynt(parentId)}>
-					<div class="rounded-lg border-2 border-primary p-4 drop-shadow">
+
+					<div class="rounded-lg border-2 border-primary p-4 drop-shadow max-w-full overflow-x-hidden max-w-[350px]">
+
+					
+
 						{#if parentUserHandle}
 							<!-- reposted lynt -->
 							<LyntContents
@@ -209,13 +372,16 @@
 								createdAt={parentCreatedAt}
 								iq={parentUserIq}
 								userCreatedAt={parentUserCreatedAt}
+								smaller={small}
+								{reposted}
 								includeAvatar={true}
+								on:delete
 							/>
 						{/if}
 					</div>
 				</div>
 			{/if}
-			<div class="mt-2 flex items-center justify-between gap-2 mb-1">
+			<div class="mb-1 mt-2 flex items-center justify-between gap-2">
 				<div class="flex items-center gap-2">
 					<OutlineButton
 						icon={MessageCircle}
@@ -284,6 +450,7 @@
 											{userCreatedAt}
 											includeAvatar={true}
 											smaller={true}
+											on:delete
 										/>
 									</div>
 								</div>

@@ -1,3 +1,5 @@
+# Moved to [NeoLyntr](https://github.com/NeoLyntr/NeoLyntr)
+
 <img style="width: 128px; height: 128px" src="static/logo.png" /><h1 style="font-size: 48px"><a href="https://lyntr.com">Lyntr.com</a> - the micro-blogging social media with an IQ test</h1>
 [Privacy Policy](https://lyntr.com/privacy) | [Terms of Service](https://lyntr.com/tos) | [License](https://github.com/face-hh/lyntr/blob/master/LICENSE.md) | [YouTube video](https://youtu.be/-D2L3gHqcUA)
 
@@ -10,12 +12,17 @@ Light mode - Lyntr
 
 ![Lyntr.com - white](github-assets/banner_white.png)
 
+# Issues
+PLEASE before you make a issue read all the open and closed issues, use the search make sure a similar issue hasn't been posted by someone else before you make a new issue!
+
+If you have anything to add to a issue you can do so. Anymore information about a particular issue will be helpful!
+
 # Self-host
 First, we need to setup the `.env` file with the right secrets.
 - Rename `.env.example` to `.env`
 
-## Supabase
-Firstly we have to setup the database. Head to https://supabase.com and **create an account.**
+## Database
+Firstly we have to setup the database we are going to use supabase here but you should be able to use any postgres database. Head to https://supabase.com and **create an account.**
 
 ![New project](github-assets/supabase1.png)
 
@@ -33,15 +40,8 @@ Then click **Create new project**. It will take a few minutes, so in the meantim
 ![New project - 3](github-assets/supabase3.png)
 On this page we can see the **Project API keys** and **Project configuration** sections.
 
-- Copy the `anon public` secret and put it in your `.env`:
-```python
-PUBLIC_SUPABASE_ANON_KEY="ey........................"
-```
-- Copy the `Project Configuration` > `URL`:
-```python
-PUBLIC_SUPABASE_URL="https://.....supabase.co"
-```
 - Copy the `Project Configuration` > `JWT Secret`:
+- You could also generate one with password sites or `node -e "console.log(require('crypto').randomBytes(32).toString(hex));"`
 ```python
 JWT_SECRET="..........x............x........."
 ```
@@ -56,13 +56,6 @@ DATABASE_URL="postgresql://postgres.USERNAME:PASSWORD/options"
 If you clicked `Copy` on the Connect page, you should already have the `USERNAME`. Simply replace `PASSWORD` with the one you put at:
 > For the **database password**, you could generate a random password or input yours. **Make sure to save it.**
 
-Now simply split the `DATABASE_URL` components:
-```python
-DB_HOST="LOCATION.pooler.supabase.com" # Change "LOCATION"
-DB_USER="postgres.USERNAME" # Change "USERNAME"
-DB_PASSWORD="PASSWORD" # Change "PASSWORD"
-DB_NAME="postgres" # Can be left like this
-```
 ![New project - 6](github-assets/supabase6.png)
 
 Now run the following:
@@ -72,9 +65,20 @@ npx drizzle-kit migrate
 npx drizzle-kit push
 ```
 
-And follow [this guide on how to enable the Discord auth in Supabase](https://supabase.com/docs/guides/auth/social-login/auth-discord), until the code part. It should look something like this.
-![image](https://github.com/user-attachments/assets/a8bd3043-3cae-4d46-b42c-0a576bcf59f5)
+## Discord
+Now that the database is set up you will need to create a application on the [Discord Developer Portal](https://discord.com/developers/docs/intro)
 
+You can then copy the client id and client secrets into the corresponding lines of your env:
+```python
+PUBLIC_DISCORD_CLIENT_ID=""
+DISCORD_CLIENT_SECRET=""
+```
+
+## Ratelimits
+For ratelimits we use [upstash redis](https://upstash.com/).
+
+Create a redis and then copy these values into your env.
+![upstash redis](github-assets/redis.png)
 
 ## MinIO
 We need Min.io for images. This and the next step can be omitted if you don't need *Image support* / *reporting*.

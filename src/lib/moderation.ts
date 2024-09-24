@@ -6,6 +6,7 @@ import { lynts, users } from './server/schema';
 import { eq } from 'drizzle-orm';
 import { config } from 'dotenv';
 import { deleteLynt } from '../routes/api/util';
+import sharp from 'sharp';
 
 config({ path: '.env' });
 
@@ -24,8 +25,14 @@ tf.enableProdMode();
 const model = await nsfw.load();
 
 export async function isImageNsfw(image: Buffer) {
-	const tfImage = (await tf.node.decodeImage(image, 3)) as Tensor3D;
+	const { data, info } = await sharp(image)
+		.removeAlpha()
+		.raw()
+		.toBuffer({ resolveWithObject: true });
+	const tfImage = tf.tensor3d(new Int32Array(data), [info.height, info.width, 3], "int32");
 	const predictions = await model.classify(tfImage);
+	tfImage.dispose();
+
 	for (const prediction of predictions) {
 		if (
 			prediction.probability > PREDICTION_TRESHOLD &&

@@ -7,7 +7,7 @@ import { eq, sql } from 'drizzle-orm';
 import { Snowflake } from 'nodejs-snowflake';
 import sharp from 'sharp';
 import { minioClient } from '@/server/minio';
-import { deleteLynt, lyntObj } from '../util';
+import { deleteLynt, lyntObj, uploadCompressed } from '../util';
 import { sendMessage } from '@/sse';
 import { isImageNsfw, moderate, NSFW_ERROR } from '@/moderation';
 import { sensitiveRatelimit } from '@/server/ratelimit';
@@ -51,9 +51,11 @@ export const POST: RequestHandler = async ({
 	const imageFile = formData.get('image') as File | null;
 	const reposted = formData.get('reposted') as string;
 
+	const hasImageOrRepost = imageFile != null || reposted != null;
+	
 	if (!content) content = '';
 
-	if (content.length > 280) {
+	if (content.length > 280 || (content.trim() == '' && !hasImageOrRepost)) {
 		return json({ error: 'Invalid content' }, { status: 400 });
 	}
 
@@ -94,33 +96,14 @@ export const POST: RequestHandler = async ({
 				return NSFW_ERROR;
 			}
 
-			const resizedBuffer = await sharp(inputBuffer, {
-				animated: true
-			})
-				.rotate()
-				.webp({ quality: 70 })
-				.withMetadata()
-				.toBuffer();
-
-			const fileName = `${uniqueLyntId}.webp`;
-
-			await minioClient.putObject(
-				process.env.S3_BUCKET_NAME!,
-				fileName,
-				resizedBuffer,
-				resizedBuffer.length,
-				{
-					'Content-Type': 'image/webp'
-				}
-			);
-
+			await uploadCompressed(inputBuffer, uniqueLyntId, minioClient);
 			lyntValues.has_image = true;
 		}
 
 		const [newLynt] = await db.insert(lynts).values(lyntValues).returning();
 		await moderate(content, newLynt.id, userId);
 
-		sendMessage(uniqueLyntId);
+		sendMessage({ type: 'lynt_add', data: uniqueLyntId });
 
 		return json(newLynt, { status: 201 });
 	} catch (error) {

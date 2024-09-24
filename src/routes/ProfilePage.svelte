@@ -13,8 +13,9 @@
 	import ProfileButton from './ProfileButton.svelte';
 	import * as Tooltip from '@/components/ui/tooltip';
 	import { mode } from 'mode-watcher';
-	import { cdnUrl } from './stores';
+	import { cdnUrl, currentPage } from './stores';
 	import TopTab from './TopTab.svelte';
+	import { goto } from '$app/navigation';
 
 	export let profileHandle: string;
 	export let handleLyntClick;
@@ -82,7 +83,7 @@
 			);
 
 			if (response.status === 200) {
-				userLynts = await response.json();
+				userLynts = (await response.json()).lynts;
 			} else {
 				toast(`Failed to load user lynts. Error: ${response.status}`);
 			}
@@ -182,14 +183,22 @@
 						<Avatar size={40} src={avatar} alt={profile.username} border={true} />
 						<div class="flex flex-col gap-2">
 							<div class="inline-flex items-center gap-2">
-								<Label class="text-2xl font-bold text-primary">{profile.username}</Label>
+
+								<Label class="text-2xl font-bold text-primary break-all">{profile.username}</Label>
+
+
+
 								{#if profile.verified}
 									<Tooltip.Root>
 										<Tooltip.Trigger>
 											<div class="flex h-full w-7 items-center">
 												<img
 													class="h-7 w-7"
-													src={$mode !== 'light' ? 'white_mode_verified.png' : 'verified.png'}
+
+													src={$mode !== 'light' ? '/white_mode_verified.png' : '/verified.png'}
+
+													
+
 													alt="This user is verified."
 												/>
 											</div>
@@ -200,7 +209,10 @@
 									</Tooltip.Root>
 								{/if}
 							</div>
-							<p class="text-xl text-muted-foreground">@{profile.handle}</p>
+
+							<p class="text-xl text-muted-foreground break-all">@{profile.handle}</p>
+							
+
 							<div class="w-24 w-full">
 								{#if isSelf}
 									<ProfileSettings
@@ -209,9 +221,31 @@
 										bio={profile.bio}
 									/>
 								{:else}
-									<Button class="w-full" on:click={toggleFollow}>
-										{isFollowing ? 'Unfollow' : 'Follow'}
-									</Button>
+
+									<div class="flex flex-row gap-2">
+										<Button class="w-full" on:click={toggleFollow}>
+											{isFollowing ? 'Unfollow' : 'Follow'}
+										</Button>
+										{#if isFollowing && isFollowedBy}
+											<Button
+												class="w-full"
+												on:click={() => {
+													currentPage.set('messages/@' + profile.handle);
+													goto('/messages/@' + profile.handle, {
+														replaceState: true,
+														noScroll: true
+													});
+												}}
+											>
+												Message
+											</Button>
+										{/if}
+									</div>
+
+							
+									
+
+
 								{/if}
 							</div>
 							{#if isFollowedBy}
@@ -285,8 +319,10 @@
 				{#if userLynts.length === 0}
 					<p>No lynts yet.</p>
 				{:else}
-					{#each userLynts.lynts as lynt}
-						<Lynt {...lynt} {myId} lyntClick={handleLyntClick} />
+					{#each userLynts as lynt}
+						<Lynt {...lynt} {myId} lyntClick={handleLyntClick} on:delete={({ detail: { id }}) => {
+							userLynts = userLynts.filter((item) => item.id !== id);
+						}} />
 					{/each}
 				{/if}
 			</div>
@@ -310,4 +346,8 @@
 	{:else}
 		<title>Profile not found | Lyntr</title>
 	{/if}
+
+
+
 </svelte:head>
+

@@ -2,8 +2,9 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { db } from '@/server/db';
 import { lynts, users, likes, followers } from '@/server/schema';
-import { sql, and, eq, ilike, desc } from 'drizzle-orm';
+import { sql, and, or, eq, ilike, desc } from 'drizzle-orm';
 import { verifyAuthJWT } from '@/server/jwt';
+import { lyntObj } from '../util';
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
 	const query = url.searchParams.get('q');
@@ -26,102 +27,66 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 
 		const userId = jwtPayload.userId;
 
-		const searchResults = await db
-			.select({
-				id: lynts.id,
-				content: lynts.content,
-				userId: lynts.user_id,
-				createdAt: lynts.created_at,
-				views: lynts.views,
-				reposted: lynts.reposted,
-				parentId: lynts.parent,
-				likeCount: sql<number>`count(distinct ${likes.user_id})`,
-				likedByFollowed: sql<boolean>`exists(
-                    select 1 from ${followers}
-                    where ${followers.user_id} = ${userId}
-                    and ${followers.follower_id} = ${lynts.user_id}
-                )`,
-				repostCount: sql<number>`(
-                    select count(*) from ${lynts} as reposts
-                    where reposts.parent = ${lynts.id} and reposts.reposted = true
-                )`,
-				commentCount: sql<number>`(
-                    select count(*) from ${lynts} as comments
-                    where comments.parent = ${lynts.id} and comments.reposted = false
-                )`,
-				likedByUser: sql<boolean>`exists(
-                    select 1 from ${likes}
-                    where ${likes.lynt_id} = ${lynts.id}
-                    and ${likes.user_id} = ${userId}
-                )`,
-				repostedByUser: sql<boolean>`exists(
-                    select 1 from ${lynts} as reposts
-                    where reposts.parent = ${lynts.id}
-                    and reposts.reposted = true
-                    and reposts.user_id = ${userId}
-                )`,
-				handle: users.handle,
-				userCreatedAt: users.created_at,
-				username: users.username,
-				iq: users.iq,
-				verified: users.verified,
-				parentContent: sql<string>`(
-                    select content from ${lynts} as parent
-                    where parent.id = ${lynts.parent}
-                )`,
-				parentUserHandle: sql<string>`(
-                    select handle from ${users} as parent_user
-                    where parent_user.id = (
-                        select user_id from ${lynts} as parent
-                        where parent.id = ${lynts.parent}
-                    )
-                )`,
-				parentUserCreatedAt: sql<string>`(
-                    select created_at from ${users} as parent_user
-                    where parent_user.id = (
-                        select user_id from ${lynts} as parent
-                        where parent.id = ${lynts.parent}
-                    )
-                )`,
-				parentUserUsername: sql<string>`(
-                    select username from ${users} as parent_user
-                    where parent_user.id = (
-                        select user_id from ${lynts} as parent
-                        where parent.id = ${lynts.parent}
-                    )
-                )`,
-				parentUserVerified: sql<boolean>`(
-                    select verified from ${users} as parent_user
-                    where parent_user.id = (
-                        select user_id from ${lynts} as parent
-                        where parent.id = ${lynts.parent}
-                    )
-                )`,
-				parentUserIq: sql<number>`(
-                    select iq from ${users} as parent_user
-                    where parent_user.id = (
-                        select user_id from ${lynts} as parent
-                        where parent.id = ${lynts.parent}
-                    )
-                )`,
-				parentCreatedAt: sql<string>`(
-                    select created_at from ${lynts} as parent
-                    where parent.id = ${lynts.parent}
-                )`
-			})
-			.from(lynts)
-			.leftJoin(likes, eq(likes.lynt_id, lynts.id))
-			.leftJoin(users, eq(lynts.user_id, users.id))
-			.where(ilike(lynts.content, `%${query}%`))
-			.groupBy(lynts.id, users.id)
-			.orderBy(desc(lynts.created_at))
-			.limit(50)
-			.execute();
+		let cleanedQuery = query
+			.replace(/from:@([^ ]+)/g, '')
+			.replace(/type:([^ ]+)/g, '')
+			.trim();
 
-		// Increment view counts in the background
-		incrementViewCounts(searchResults.map((result) => result.id));
+		let results: any[] = [];
+                const typeMatch = query.match(/type:([^ ]+)/);
 
-		return json(searchResults, { status: 200 });
+		if (typeMatch && typeMatch[1] === 'users') {
+			let whereClause = or(
+				ilike(users.username, `%${cleanedQuery}%`),
+				ilike(users.handle, `%${cleanedQuery}%`),
+			);
+
+
+			results = await db
+				.select({
+					id: users.id,
+					username: users.username,
+					handle: users.handle,
+					bio: users.bio,
+					iq: users.iq,
+					verified: users.verified,
+					created_at: users.created_at,
+				})
+				.from(users)
+				.where(whereClause)
+				.orderBy(desc(users.iq))
+				.limit(50)
+				.execute();
+                } else {
+			let whereClause = ilike(lynts.content, `%${cleanedQuery}%`);
+
+			const match = query.match(/from:@([^ ]+)/);
+			if (match) {
+				whereClause = and(
+					eq(users.handle, match[1].replace(/^@/, '')),
+					whereClause
+				);
+			}
+
+			results = await db
+				.select(lyntObj(userId))
+				.from(lynts)
+				.leftJoin(likes, eq(likes.lynt_id, lynts.id))
+				.leftJoin(users, eq(lynts.user_id, users.id))
+				.where(whereClause)
+				.groupBy(lynts.id, users.id)
+				.orderBy(desc(lynts.created_at))
+				.limit(50)
+				.execute();
+
+			// Increment view counts in the background
+			incrementViewCounts(results.map((result) => result.id));
+		}
+
+		return json({
+			results,
+			type: typeMatch && typeMatch[1] === 'users' ? 'users' : 'lynts'
+		}, { status: 200 });
 	} catch (error) {
 		console.error('Error performing search:', error);
 		return json({ error: 'Failed to perform search' }, { status: 500 });

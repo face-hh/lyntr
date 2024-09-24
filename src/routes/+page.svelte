@@ -7,6 +7,8 @@
 	import Auth from './Auth.svelte';
 	import AccountCreator from './AccountCreator.svelte';
 	import MainPage from './MainPage.svelte';
+	import { cdnUrl } from './stores';
+	
 	import Cookies from 'js-cookie';
 	import type { PageData } from './$types';
 

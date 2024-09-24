@@ -70,7 +70,7 @@
 		<div class="flex items-start space-x-3">
 			<Avatar
 				size={40}
-				src={cdnUrl(userId, 'small')}
+				src={cdnUrl(userId, 'big')}
 				alt="Your profile picture."
 				border={true}
 				editable={true}
@@ -80,12 +80,12 @@
 			<div class="flex flex-grow flex-col gap-2">
 				<div class="flex w-full max-w-sm flex-col gap-1.5">
 					<Label for="email">Username</Label>
-					<Input type="email" id="email" placeholder="Username" bind:value={username} />
+					<Input type="text" id="email" placeholder="Username" bind:value={username} />
 				</div>
 
 				<div class="flex w-full max-w-sm flex-col gap-1.5">
 					<Label for="email">About me</Label>
-					<Input type="email" id="email" placeholder="About me..." bind:value={bio} />
+					<Input type="text" id="email" placeholder="About me..." bind:value={bio} />
 				</div>
 			</div>
 		</div>

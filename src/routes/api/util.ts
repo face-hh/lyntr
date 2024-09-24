@@ -116,12 +116,33 @@ export const lyntObj = (userId: string | null) => {
 	return payload
 };
 
+export async function uploadCompressed(inputBuffer: Buffer, id: string, minioClient: any) {
+	const resizedBuffer = await sharp(inputBuffer, {
+		animated: true
+        })
+		.rotate()
+                .webp({ quality: 70 })
+                .withMetadata()
+                .toBuffer();
+
+        const fileName = `${id}.webp`;
+        await minioClient.putObject(
+		process.env.S3_BUCKET_NAME!,
+		fileName,
+		resizedBuffer,
+		resizedBuffer.length,
+		{
+		        'Content-Type': 'image/webp'
+                }
+        );
+}
+
 export async function uploadAvatar(inputBuffer: Buffer, fileName: string, minioClient: any) {
 	const buffer_small = await sharp(inputBuffer).resize(40, 40).webp().toBuffer();
 
 	const buffer_medium = await sharp(inputBuffer).resize(50, 50).webp().toBuffer();
 
-	const buffer_big = await sharp(inputBuffer).resize(160, 160).webp().toBuffer();
+	const buffer_big = await sharp(inputBuffer, { animated: true }).resize(160, 160).webp().toBuffer();
 
 	const shits = [
 		{ filename: fileName + '_small.webp', buffer: buffer_small },

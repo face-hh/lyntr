@@ -34,28 +34,3 @@ export const GET: RequestHandler = async ({ cookies }) => {
 		return json({ error: 'Failed to fetch notifications' }, { status: 500 });
 	}
 };
-
-export const PATCH: RequestHandler = async ({ cookies }) => {
-	const authCookie = cookies.get('_TOKEN__DO_NOT_SHARE');
-
-	if (!authCookie) {
-		return json({ error: 'Missing authentication' }, { status: 401 });
-	}
-
-	try {
-		const jwtPayload = await verifyAuthJWT(authCookie);
-
-		if (!jwtPayload.userId) {
-			throw new Error('Invalid JWT token');
-		}
-
-		const userId = jwtPayload.userId;
-
-		await db.update(notifications).set({ read: true }).where(eq(notifications.userId, userId));
-
-		return json({ message: 'All notifications marked as read' }, { status: 200 });
-	} catch (error) {
-		console.error('Error updating notifications:', error);
-		return json({ error: 'Failed to update notifications' }, { status: 500 });
-	}
-};

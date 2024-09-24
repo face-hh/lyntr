@@ -14,6 +14,7 @@
 
 	let lynt = '';
 	let opened = false;
+	let postDisabled = true;
 
 	let image: File | null = null;
 	let imagePreview: string | null = null;
@@ -28,10 +29,17 @@
 			reader.onload = (e) => {
 				imagePreview = e.target?.result as string;
 			};
+
+			postDisabled = false;
 		}
 	};
 
 	async function handlePost() {
+		if (lynt.trim() == '' && image == null) {
+			toast("Cannot post an empty lynt.");
+			return;
+		}
+
 		const formData = new FormData();
 
 		formData.append('content', lynt);
@@ -40,18 +48,32 @@
 			formData.append('image', image, image.name);
 		}
 
-		const response = await fetch('api/lynt', {
+	        postDisabled = true;
+		const response = await fetch('/api/lynt', {
 			method: 'POST',
 			body: formData
 		});
 
 		if (response.status === 201) {
 			opened = false;
+                        lynt = '';
+                        imagePreview = null;
+                        fileinput.value = "";
+                        image = null;
 			toast('Your lynt has been published!');
 		} else {
 			if (response.status == 429)
 				return toast('Woah, slow down! You are being ratelimited. Please try again in a bit.');
 			toast(`Something happened! Error: ${response.status} | ${response.statusText}`);
+		}
+		postDisabled = false;
+	}
+
+	function checkPostButton() {
+		if (lynt.trim() == '' && image == null) {
+			postDisabled = true;
+		} else {
+			postDisabled = false;
 		}
 	}
 </script>
@@ -59,7 +81,7 @@
 <Dialog.Root bind:open={opened}>
 	<Dialog.Trigger
 		class={`${buttonVariants({ variant: 'default' })} w-full ${className}`}
-		on:click={() => (opened = true)}><slot>Post</slot></Dialog.Trigger
+		on:click={() => { opened = true; checkPostButton(); }}><slot>Post</slot></Dialog.Trigger
 	>
 	<Dialog.Content class="sm:max-w-[500px]">
 		<div class="flex items-start space-x-3">
@@ -67,7 +89,7 @@
 
 			<div class="flex h-full flex-grow flex-col gap-2">
 				<div class="max-h-[600px] overflow-y-auto">
-					<DivInput bind:lynt />
+					<DivInput bind:lynt on:input={checkPostButton}/>
 
 					{#if imagePreview}
 						<img class="max-h-[600px] w-full object-contain" src={imagePreview} alt="Preview" />
@@ -92,7 +114,9 @@
 		</div>
 
 		<div class="flex justify-end">
-			<Form.Button on:click={handlePost}>Post</Form.Button>
+			<Form.Button on:click={handlePost} disabled={postDisabled}>
+				Post
+			</Form.Button>
 		</div>
 	</Dialog.Content>
 </Dialog.Root>

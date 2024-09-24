@@ -28,7 +28,7 @@
 <div class="flex h-dvh">
 	<div class="m-auto flex flex-col items-center gap-2">
 		<div class="inline-flex items-center gap-2">
-			<img src="logo.svg" alt="Lyntr" class="pointer-events-none h-40 w-40 select-none" />
+			<img src="/logo.svg" alt="Lyntr" class="pointer-events-none h-40 w-40 select-none" />
 			<Label class="select-none text-8xl">Lyntr.</Label>
 		</div>
 

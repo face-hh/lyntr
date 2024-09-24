@@ -15,6 +15,13 @@
       "when": 1722220455698,
       "tag": "0001_overrated_deadpool",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1722730351277,
+      "tag": "0002_goofy_prism",
+      "breakpoints": true
     }
   ]
 }

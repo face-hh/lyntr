@@ -3,10 +3,10 @@ import { lynts, likes, users } from '@/server/schema';
 import { desc, and, eq, exists, or, isNull } from 'drizzle-orm';
 import { lyntObj } from '../util';
 
-export async function likedFeed(userId: string) {
+export async function likedFeed(userId: string, myId: string) {
 	const feed = await db
 		.select({
-			...lyntObj(userId),
+			...lyntObj(myId),
 			likedAt: likes.liked_at
 		})
 		.from(likes)

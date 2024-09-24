@@ -11,6 +11,12 @@
 	import { Copy, Ellipsis, Trash } from 'lucide-svelte';
 	import { toast } from 'svelte-sonner';
 	import Report from './Report.svelte';
+	import { createEventDispatcher } from 'svelte';
+
+
+	import DOMPurify from 'dompurify';
+	import { page } from '$app/stores';
+	import { Button } from '@/components/ui/button';
 
 	function getTimeElapsed(date: Date | string) {
 		if (typeof date === 'string') date = new Date(date);
@@ -56,6 +62,11 @@
 	}
 
 	let popoverOpened = false;
+        const dispatcher = createEventDispatcher<{
+		delete: {
+			id: string
+		}
+	}>();
 
 	export let truncateContent: boolean = false;
 	export let username;
@@ -73,6 +84,14 @@
 	export let has_image: boolean | null;
 	export let postId: string;
 
+	export let reposted = false;
+
+
+	let contentElement: HTMLSpanElement | null = null;
+	content = content!;
+	let clickingExternalLink = false;
+	let externalLink: URL | null = null;
+
 	const formattedDate = formatDateTooltip(createdAt);
 
 	async function handleDelete() {
@@ -80,6 +99,8 @@
 
 		if (response.status === 200) {
 			toast(`Your post has been permanently deleted.`);
+			dispatcher('delete', { id: postId });
+			popoverOpened = false;
 		} else if (response.status === 403) {
 			toast(`Missing access - frontend may be desynchronised.`);
 		} else {
@@ -118,14 +139,14 @@
 	{/if}
 
 	<div class="flex w-full flex-col text-left">
-		<div class="flex w-full items-center justify-between gap-1 {smaller ? 'max-w-[300px]' : ''}">
+		<div class="flex w-full items-center justify-between gap-1">
 			<div class="flex flex-grow items-center gap-1 overflow-hidden">
 				<HoverCard.Root>
 					<HoverCard.Trigger
 						rel="noreferrer noopener"
 						class="truncate {smaller
 							? 'max-w-[30%]'
-							: 'max-w-[60%]'} rounded-sm text-xl font-bold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-black"
+							: 'max-w-[30%] md:max-w-[50%]'} rounded-sm text-xl font-bold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-black"
 						href="/@{handle}"
 					>
 						{username}
@@ -155,7 +176,7 @@
 							<div class="flex h-full w-7 justify-center">
 								<img
 									class="h-7 w-7"
-									src={$mode !== 'light' ? 'white_mode_verified.png' : 'verified.png'}
+									src={$mode !== 'light' ? '/white_mode_verified.png' : '/verified.png'}
 									alt="This user is verified."
 								/>
 							</div>
@@ -169,10 +190,11 @@
 					class="py-0.25 flex select-none items-center rounded-xl border border-transparent bg-primary px-1.5 text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
 					>{iq}</span
 				>
+				{#if !smaller}
 				<HoverCard.Root>
 					<HoverCard.Trigger
 						rel="noreferrer noopener"
-						class="overflow-hidden text-clip rounded-sm text-lg text-muted-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-black"
+						class="overflow-hidden text-clip rounded-sm text-lg text-muted-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-black {reposted ? "hidden md:block" : ""}"
 						href="/@{handle}"
 					>
 						@{handle}
@@ -195,10 +217,11 @@
 						</div>
 					</HoverCard.Content>
 				</HoverCard.Root>
+				{/if}
 				<Label class="text-muted-foreground">•</Label>
 				<Tooltip.Root>
 					<Tooltip.Trigger>
-						<Label class="cursor-pointer text-lg text-muted-foreground hover:underline "
+						<Label class="cursor-pointer text-lg text-muted-foreground hover:underline"
 							>{getTimeElapsed(createdAt)}</Label
 						>
 					</Tooltip.Trigger>
@@ -207,6 +230,7 @@
 					</Tooltip.Content>
 				</Tooltip.Root>
 			</div>
+			{#if !reposted}
 			<div class="flex-shrink-0">
 				<Popover.Root bind:open={popoverOpened}>
 					<Popover.Trigger asChild let:builder>
@@ -237,9 +261,10 @@
 					</Popover.Content>
 				</Popover.Root>
 			</div>
+			{/if}
 		</div>
 
-		<span class="max-w-[490px] whitespace-pre-wrap break-words text-lg">{truncated}</span>
+		<span class="{smaller || reposted ? "max-w-[250px]" : ""} md:max-w-[490px] whitespace-pre-wrap text-pretty break-words text-lg overflow-x-hidden">{truncated}</span>
 
 		{#if needsReadMore}
 			<span class="mt-2 text-sm text-muted-foreground hover:underline">Click to Read more...</span>
@@ -247,5 +272,5 @@
 	</div>
 </div>
 {#if has_image}
-	<img class="avatar mt-2 max-h-[600px] object-contain" src={cdnUrl(postId)} alt="ok" />
+	<img class="avatar mt-2 max-h-[600px] max-w-[85%] object-contain overflow-hidden" src={cdnUrl(postId)} alt="ok" />
 {/if}

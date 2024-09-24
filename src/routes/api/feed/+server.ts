@@ -69,7 +69,7 @@ export const GET: RequestHandler = async ({ request, cookies, url }) => {
 				return json({ error: 'User not found' }, { status: 404 });
 			}
 			if (type === 'Liked') {
-				result = await likedFeed(user.id);
+				result = await likedFeed(user.id, userId);
 			} else {
 				result = await handleFeed(user.id, userId);
 			}
